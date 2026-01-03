@@ -241,20 +241,3 @@ input:-webkit-autofill:active {
     letter-spacing: 0.5px;
     margin-top: auto;
 }
-.blinking-hint {
-    font-size: 0.9rem;
-    color: var(--text-main);
-    margin-top: 1rem;
-    font-weight: 500;
-    animation: blink-soft 2s infinite;
-    background: rgba(99, 102, 241, 0.1);
-    padding: 0.5rem 1rem;
-    border-radius: 20px;
-    display: inline-block;
-    border: 1px solid var(--accent-glow);
-}
-
-@keyframes blink-soft {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.6; transform: scale(0.98); }
-}

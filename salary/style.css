@@ -1,0 +1,456 @@
+:root {
+    --primary: #10b981;
+    --primary-hover: #059669;
+    --bg-color: #0f172a;
+    --card-bg: rgba(30, 41, 59, 0.7);
+    --text-main: #f8fafc;
+    --text-muted: #94a3b8;
+    --accent-gradient: linear-gradient(135deg, #10b981 0%, #3b82f6 100%);
+    --sec-gradient: linear-gradient(135deg, #ef4444 0%, #f97316 100%);
+    --font-family: 'Outfit', sans-serif;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body {
+    font-family: var(--font-family);
+    background-color: var(--bg-color);
+    background-image:
+        radial-gradient(at 0% 0%, rgba(16, 185, 129, 0.1) 0, transparent 50%),
+        radial-gradient(at 100% 0%, rgba(59, 130, 246, 0.1) 0, transparent 50%);
+    color: var(--text-main);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    padding: 1rem;
+}
+
+.container {
+    max-width: 900px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+/* Header */
+header {
+    margin-bottom: 0.75rem;
+    text-align: center;
+}
+
+.header-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    position: relative;
+}
+
+.home-icon {
+    position: absolute;
+    left: 0;
+    text-decoration: none;
+    font-size: 1.5rem;
+}
+
+.header-text h1 {
+    font-size: 1.8rem;
+    font-weight: 700;
+}
+
+.header-text p {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+/* Summary Dashboard - Compact */
+.summary-cards {
+    display: grid;
+    grid-template-columns: 1.5fr 2fr;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+}
+
+.summary-card {
+    background: var(--card-bg);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 1rem;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+/* Main Prominent Card */
+.main-summary {
+    grid-column: 1;
+    background: radial-gradient(circle at top right, rgba(255, 255, 255, 0.05), transparent);
+}
+
+.main-summary .value {
+    font-size: 2.5rem;
+    font-weight: 800;
+}
+
+.summary-details {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+}
+
+.summary-card .label {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.summary-card .value {
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.gross-card .value {
+    color: #3b82f6;
+    /* Blue for Gross */
+}
+
+.deduct-card .value {
+    color: #ef4444;
+    /* Red for Deduct */
+}
+
+.net-salary-card .value {
+    color: #10b981;
+    /* Green for Net */
+}
+
+/* Grid Layout */
+.salary-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+}
+
+.salary-section {
+    background: var(--card-bg);
+    backdrop-filter: blur(12px);
+    border-radius: 1rem;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.section-header {
+    padding: 0.6rem;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.earnings-header {
+    border-bottom: 2px solid #10b981;
+}
+
+.deductions-header {
+    border-bottom: 2px solid #ef4444;
+}
+
+.section-header h2 {
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+.input-group {
+    padding: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.input-field {
+    display: grid;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.25rem 0;
+    position: relative;
+}
+
+.earnings .input-field {
+    grid-template-columns: 120px 85px 1fr;
+}
+
+.deductions .input-field {
+    grid-template-columns: 120px 1fr;
+}
+
+.input-field label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+}
+
+.input-field label::before {
+    content: "■";
+    font-size: 0.5rem;
+    margin-right: 8px;
+    opacity: 0.6;
+}
+
+.earnings label::before {
+    color: #10b981;
+}
+
+.deductions label::before {
+    color: #ef4444;
+}
+
+.input-with-result {
+    display: contents;
+}
+
+input {
+    background: rgba(15, 23, 42, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 0.5rem;
+    padding: 0.4rem 0.6rem;
+    color: white;
+    font-family: inherit;
+    font-size: 0.9rem;
+    font-weight: 600;
+    outline: none;
+    text-align: right;
+    min-width: 0;
+}
+
+input:focus {
+    border-color: var(--primary);
+}
+
+.calculated-value {
+    font-family: monospace;
+    font-size: 0.9rem;
+    color: var(--primary);
+    font-weight: 700;
+    text-align: right;
+}
+
+.deductions .calculated-value {
+    color: #ef4444;
+}
+
+/* Ensure Basic Pay input takes available space if no result span exists */
+.earnings .input-field:not(:has(.calculated-value)) input {
+    grid-column: 2 / span 2;
+    max-width: none;
+}
+
+/* Section Summary Styles */
+.section-summary {
+    padding: 0.6rem 0.75rem;
+    background: rgba(0, 0, 0, 0.2);
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.gross-summary-row {
+    border-bottom: 3px solid #10b981;
+}
+
+.deduction-summary-row {
+    border-bottom: 3px solid #ef4444;
+}
+
+.section-summary label {
+    color: var(--text-main);
+    font-size: 0.85rem;
+    font-weight: 700;
+}
+
+.total-val {
+    font-size: 1.1rem;
+    font-weight: 800;
+}
+
+.gross-summary-row .total-val {
+    color: #10b981;
+}
+
+.deduction-summary-row .total-val {
+    color: #ef4444;
+}
+
+.highlight-net {
+    margin-top: 0.25rem;
+    padding-top: 0.4rem !important;
+    border-top: 1px dashed rgba(255, 255, 255, 0.2);
+}
+
+.highlight-net label {
+    color: #3b82f6;
+}
+
+.highlight-net .total-val {
+    color: #3b82f6;
+    font-size: 1.2rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .container {
+        max-width: 100%;
+        padding: 0;
+    }
+
+    header {
+        margin-bottom: 0.5rem;
+    }
+
+    .header-text h1 {
+        font-size: 1.4rem;
+    }
+
+    .summary-cards {
+        grid-template-columns: 1.2fr 2fr;
+        gap: 0.4rem;
+    }
+
+    .main-summary .value {
+        font-size: 1.5rem !important;
+    }
+
+    .summary-details {
+        gap: 0.4rem;
+    }
+
+    .summary-card {
+        padding: 0.5rem;
+        border-radius: 0.75rem;
+    }
+
+    .summary-card .label {
+        font-size: 0.65rem;
+        margin-bottom: 0.1rem;
+    }
+
+    .summary-card .value {
+        font-size: 1rem;
+    }
+
+    .salary-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        padding: 0.2rem;
+    }
+
+    .salary-section {
+        border-radius: 0.75rem;
+    }
+
+    .section-header {
+        padding: 0.2rem;
+    }
+
+    .summary-cards {
+        margin-bottom: 0.5rem;
+    }
+
+    .input-group {
+        padding: 0.4rem;
+        gap: 0.25rem;
+    }
+
+    .earnings .input-field {
+        grid-template-columns: 75px 50px 1fr;
+        gap: 0.2rem;
+    }
+
+    .deductions .input-field {
+        grid-template-columns: 85px 1fr;
+        gap: 0.2rem;
+    }
+
+    .input-field label {
+        font-size: 0.72rem;
+        letter-spacing: -0.2px;
+    }
+
+    input {
+        padding: 0.3rem 0.25rem;
+        font-size: 0.8rem;
+    }
+
+    .calculated-value {
+        font-size: 0.78rem;
+        min-width: 0;
+        text-align: right;
+    }
+
+    .total-val {
+        font-size: 0.95rem;
+    }
+}
+
+.disclaimer {
+    text-align: center;
+    font-size: 0.75rem;
+    color: #ef4444;
+    /* Red color */
+    margin-top: 1.5rem;
+    font-weight: 600;
+    animation: blink 1.5s infinite;
+}
+
+@keyframes blink {
+    0% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.3;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
+
+footer {
+    text-align: center;
+    margin-top: 0.5rem;
+    padding: 0.5rem;
+    font-size: 0.7rem;
+    color: var(--text-muted);
+}
+/* FORCE INPUT VISIBILITY FIX */
+input, select, textarea {
+    background-color: #1e293b !important;
+    color: #ffffff !important;
+    caret-color: white !important;
+}
+
+input:focus, select:focus, textarea:focus {
+    background-color: #334155 !important;
+    color: #ffffff !important;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2) !important;
+}
+
+/* Chrome/Android Autofill Fix */
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus, 
+input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 30px #1e293b inset !important;
+    -webkit-text-fill-color: white !important;
+}
