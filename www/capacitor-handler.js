@@ -1,61 +1,49 @@
 (function () {
-    // Listen for the native back button event
-    document.addEventListener('backbutton', function (e) {
-        e.preventDefault();
-        handleBack();
-    }, false);
+    /**
+     * Capacitor Hardware Back Button Handler
+     * 
+     * Behavior:
+     * 1. On Sub-pages (Salary, EMI, etc.): Back button goes to Home (or previous history).
+     * 2. On Home page: Back button EXITS the app.
+     * 
+     * This prevents the app from closing unexpectedly when trying to navigate back to the menu.
+     */
 
-    async function handleBack() {
-        // If we are on the main portal page
-        const isHomePage = window.location.pathname.endsWith('index.html') &&
-            !window.location.pathname.includes('/salary/') &&
-            !window.location.pathname.includes('/emi/') &&
-            !window.location.pathname.includes('/pay-revision/') &&
-            !window.location.pathname.includes('/dcrg/') &&
-            !window.location.pathname.includes('/housing/') &&
-            !window.location.pathname.includes('/sip/') &&
-            !window.location.pathname.includes('/calculator/');
-
-        const path = window.location.pathname;
-        const isRoot = path === '/' || path.endsWith('/index.html') && !(path.split('/').length > 3);
-
-        // Simple check: if we can go back in browser history, do it
-        if (window.history.length > 1) {
-            window.history.back();
-        } else {
-            // If no history, and we are not on root, go to root
-            if (!isRoot) {
-                window.location.href = '../index.html';
-            } else {
-                // If on root and no history, try to exit app if Capacitor is available
-                if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.App) {
-                    window.Capacitor.Plugins.App.exitApp();
-                }
-            }
-        }
-    }
-
-    // Capacitor App Plugin Listener
+    // Only initialize if Capacitor is available (running as an app)
     if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.App) {
         const App = window.Capacitor.Plugins.App;
-        App.addListener('backButton', ({ canGoBack }) => {
-            if (canGoBack) {
-                window.history.back();
-            } else {
-                // If we are in a sub-directory, go to root index.html
-                const currentPath = window.location.pathname;
-                if (currentPath.includes('/salary/') ||
-                    currentPath.includes('/emi/') ||
-                    currentPath.includes('/pay-revision/') ||
-                    currentPath.includes('/dcrg/') ||
-                    currentPath.includes('/housing/') ||
-                    currentPath.includes('/sip/') ||
-                    currentPath.includes('/calculator/')) {
-                    window.location.href = '../index.html';
+
+        App.addListener('backButton', (data) => {
+            const currentPath = window.location.pathname;
+
+            // Check if we are currently inside a sub-app directory
+            const subAppFolders = [
+                '/salary/',
+                '/emi/',
+                '/pay-revision/',
+                '/dcrg/',
+                '/housing/',
+                '/sip/',
+                '/calculator/'
+            ];
+
+            const isSubPage = subAppFolders.some(folder => currentPath.includes(folder));
+
+            if (isSubPage) {
+                // Sub-page behavior: Go back to the previous page or Home
+                if (data.canGoBack) {
+                    window.history.back();
                 } else {
-                    App.exitApp();
+                    // If no history within the app webview, force-return to the main portal
+                    window.location.href = '../index.html';
                 }
+            } else {
+                // Home page behavior: Exit the app
+                // This matches the behavior of standard Android apps
+                App.exitApp();
             }
         });
+
+        console.log('Nithara: Capacitor back button handler initialized.');
     }
 })();
