@@ -12,6 +12,21 @@ document.addEventListener('DOMContentLoaded', () => {
     // Display elements
     const pensionAmountDisplay = document.getElementById('pensionAmount');
     const drAmountDisplay = document.getElementById('drAmount');
+
+    // Fetch and populate Pay Stages
+    fetch('../data/pay_stages.json')
+        .then(response => response.json())
+        .then(data => {
+            const dataList = document.getElementById('pay-stages');
+            if (dataList && data.payStages) {
+                data.payStages.forEach(stage => {
+                    const option = document.createElement('option');
+                    option.value = stage;
+                    dataList.appendChild(option);
+                });
+            }
+        })
+        .catch(err => console.error('Error loading pay stages:', err));
     const totalMonthlyPensionDisplay = document.getElementById('totalMonthlyPension');
     const commutationAmountDisplay = document.getElementById('commutationAmount');
     const balancePensionDisplay = document.getElementById('balancePension');

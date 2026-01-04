@@ -1,6 +1,21 @@
 document.addEventListener('DOMContentLoaded', () => {
     const inputs = document.querySelectorAll('input');
 
+    // Fetch and populate Pay Stages
+    fetch('../data/pay_stages.json')
+        .then(response => response.json())
+        .then(data => {
+            const dataList = document.getElementById('pay-stages');
+            if (dataList && data.payStages) {
+                data.payStages.forEach(stage => {
+                    const option = document.createElement('option');
+                    option.value = stage;
+                    dataList.appendChild(option);
+                });
+            }
+        })
+        .catch(err => console.error('Error loading pay stages:', err));
+
     // Earnings Inputs
     const basicPay = document.getElementById('basic-pay');
     const daPerc = document.getElementById('da-perc');

@@ -20,30 +20,41 @@
 
         // Add custom listener
         App.addListener('backButton', function (data) {
+            // Check if canGoBack is available (mostly for Android)
+            if (data && data.canGoBack) {
+                window.history.back();
+                return;
+            }
+
             const path = window.location.pathname;
 
             // Define sub-app directories (folder names)
-            const subApps = [
-                'salary',
-                'emi',
-                'pay-revision',
-                'dcrg',
-                'housing',
-                'sip',
-                'calculator'
-            ];
+            // Note: We check if path *ends with* typical home page markers to rule out "Home"
 
-            // Check if we are currently in a sub-app
-            // look for '/salary/' explicitly to avoid partial matches
-            const isSubPage = subApps.some(folder => path.includes('/' + folder + '/'));
+            // Logic:
+            // If we are deep inside a folder structure, we go UP (../) or to root.
+            // If we are at root ('/', '/index.html', '/nithara/', '/nithara/index.html'), we EXIT.
 
-            if (isSubPage) {
-                // CASE 1: In a Sub-App -> Navigate BACK to Home
-                // Use 'replace' to modify history, effectively stepping back up
-                window.location.replace('../index.html');
+            const isHomePage =
+                path.endsWith('/nithara/') ||
+                path.endsWith('/nithara/index.html') ||
+                path === '/' ||
+                path === '/index.html' ||
+                // Handling local file system paths often used in dev/debug APKs
+                path.endsWith('/www/index.html');
+
+            if (!isHomePage) {
+                // CASE 1: NOT at Home -> Navigate one level UP
+                // We use history.back() if possible, or force replace to parent
+                if (document.referrer && document.referrer.indexOf(window.location.host) !== -1) {
+                    window.history.back();
+                } else {
+                    // Fallback: Force go to root/home
+                    window.location.replace('../index.html');
+                }
 
             } else {
-                // CASE 2: At Home (or unknown root) -> EXIT App
+                // CASE 2: At Home -> EXIT App
                 // Try Capacitor exit method first
                 try {
                     App.exitApp();

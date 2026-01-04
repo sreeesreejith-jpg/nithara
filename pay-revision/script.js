@@ -12,6 +12,21 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById(id).addEventListener('input', calculate);
     });
 
+    // Fetch and populate Pay Stages
+    fetch('../data/pay_stages.json')
+        .then(response => response.json())
+        .then(data => {
+            const dataList = document.getElementById('pay-stages');
+            if (dataList && data.payStages) {
+                data.payStages.forEach(stage => {
+                    const option = document.createElement('option');
+                    option.value = stage;
+                    dataList.appendChild(option);
+                });
+            }
+        })
+        .catch(err => console.error('Error loading pay stages:', err));
+
     function calculate() {
         const bp = parseFloat(document.getElementById('basic-pay-in').value) || 0;
 
