@@ -1,7 +1,6 @@
 (function () {
     /**
      * Capacitor Hardware Back Button Handler
-     * Robust approach used by most mobile web apps.
      */
     function setupBackButton() {
         const App = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.App;
@@ -15,33 +14,18 @@
             App.removeAllListeners();
         }
 
-        function forceExit() {
-            try {
-                if (App && App.exitApp) App.exitApp();
-            } catch (e) { }
-            try {
-                if (App && App.minimizeApp) App.minimizeApp();
-            } catch (e) { }
-            try {
-                if (navigator.app && navigator.app.exitApp) navigator.app.exitApp();
-            } catch (e) { }
-            window.close();
-            document.body.innerHTML = "<div style='background:#0f172a; height:100vh; width:100vw; display:flex; align-items:center; justify-content:center; color:white; font-family:sans-serif;'><h1>Closing...</h1></div>";
-        }
-
         App.addListener('backButton', function () {
             const path = window.location.pathname;
 
-            // List of sub-app identifiers
+            // Sub-apps checks
             const subApps = ['/salary/', '/pay-revision/', '/dcrg/', '/emi/', '/sip/', '/housing/', '/calculator/'];
             const isSubApp = subApps.some(app => path.includes(app));
 
             if (!isSubApp) {
-                // CASE 1: At Portal/Home -> EXIT
-                forceExit();
+                // If on Home page, Exit
+                if (App.exitApp) App.exitApp();
             } else {
-                // CASE 2: Inside a sub-app -> GO BACK
-                // If there's history, use it. If not (app opened here), go to Portal.
+                // If in sub-app, Go Back
                 if (window.history.length > 1) {
                     window.history.back();
                 } else {

@@ -19,7 +19,6 @@
             });
         }
     </script>
-    <script src="capacitor.js"></script>
     <script src="capacitor-handler.js"></script>
 </head>
 
@@ -96,43 +95,9 @@
             </div>
         </main>
     </div>
-    <div class="exit-container">
-        <button id="exit-btn" class="exit-button" title="Exit App">
-            <span class="exit-icon">✕</span> Exit App
-        </button>
-    </div>
-
     <div class="footer-email">
         email: sreee.sreejith@gmail.com
     </div>
-
-    <script>
-        function forceExit() {
-            const App = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.App;
-
-            // Priority 1: Exit App
-            try {
-                if (App && App.exitApp) App.exitApp();
-            } catch (e) { }
-
-            // Priority 2: Minimize (Fallback)
-            try {
-                if (App && App.minimizeApp) App.minimizeApp();
-            } catch (e) { }
-
-            // Priority 3: Legacy Exit
-            try {
-                if (navigator.app && navigator.app.exitApp) navigator.app.exitApp();
-            } catch (e) { }
-
-            // Priority 4: Window Close
-            window.close();
-
-            // Visual State Only (No redirect to avoid "Open With" box)
-            document.body.innerHTML = "<div style='background:#0f172a; height:100vh; width:100vw; display:flex; align-items:center; justify-content:center; color:white; font-family:sans-serif;'><h1>Closing...</h1></div>";
-        }
-        document.getElementById('exit-btn').addEventListener('click', forceExit);
-    </script>
 </body>
 
 </html>
