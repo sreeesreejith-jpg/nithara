@@ -20,58 +20,33 @@
 
         // Add custom listener
         App.addListener('backButton', function (data) {
-            // Check if canGoBack is available (mostly for Android)
-            if (data && data.canGoBack) {
-                window.history.back();
-                return;
-            }
-
             const path = window.location.pathname;
 
-            // Define sub-app directories (folder names)
-            // Note: We check if path *ends with* typical home page markers to rule out "Home"
-
-            // Logic:
-            // If we are deep inside a folder structure, we go UP (../) or to root.
-            // If we are at root ('/', '/index.html', '/nithara/', '/nithara/index.html'), we EXIT.
-
+            // Define what constitutes the "Home Page"
+            // Adjust this based on your actual deployment URL structure
+            // e.g. /nithara/index.html or / or /index.html
             const isHomePage =
                 path.endsWith('/nithara/') ||
-                path.endsWith('/nithara/index.html') ||
-                path === '/' ||
-                path === '/index.html' ||
-                path.includes('index.html') && !path.includes('pay-revision') && !path.includes('salary') && !path.includes('dcrg') && !path.includes('emi') && !path.includes('sip') && !path.includes('housing') && !path.includes('calculator') ||
-                // Handling local file system paths often used in dev/debug APKs
-                path.endsWith('/www/index.html');
+                path.endsWith('/index.html') && (
+                    path.endsWith('/nithara/index.html') ||
+                    path === '/index.html' ||
+                    path === '/' ||
+                    // Ensure we don't accidentally match sub-app index.html files
+                    (!path.includes('/salary/') &&
+                        !path.includes('/emi/') &&
+                        !path.includes('/dcrg/') &&
+                        !path.includes('/pay-revision/') &&
+                        !path.includes('/sip/') &&
+                        !path.includes('/housing/') &&
+                        !path.includes('/calculator/'))
+                );
 
-            if (!isHomePage) {
-                // CASE 1: NOT at Home -> Navigate one level UP
-                // We use history.back() if possible, or force replace to parent
-                if (document.referrer && document.referrer.indexOf(window.location.host) !== -1) {
-                    window.history.back();
-                } else {
-                    // Fallback: Force go to root/home
-                    window.location.replace('../index.html');
-                }
-
+            if (isHomePage) {
+                // If at home, EXIT the app
+                App.exitApp();
             } else {
-                // CASE 2: At Home -> MINIMIZE App (Native behavior)
-                try {
-                    if (App.minimizeApp) {
-                        App.minimizeApp();
-                    } else {
-                        App.exitApp();
-                    }
-                } catch (e) {
-                    console.error("Back button exit/minimize failed:", e);
-                }
-
-                // Fallback for older WebView interfaces or if Capacitor fails
-                if (navigator.app && navigator.app.exitApp) {
-                    navigator.app.exitApp();
-                } else if (navigator.device && navigator.device.exitApp) {
-                    navigator.device.exitApp();
-                }
+                // If anywhere else, go back in history
+                window.history.back();
             }
         });
     }
