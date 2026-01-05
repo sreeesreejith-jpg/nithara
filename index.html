@@ -106,15 +106,17 @@
     </div>
 
     <script>
-        document.getElementById('exit-btn').addEventListener('click', () => {
+        function forceExit() {
             const App = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.App;
             if (App && App.exitApp) {
                 App.exitApp();
+            } else if (navigator.app && navigator.app.exitApp) {
+                navigator.app.exitApp();
             } else {
-                console.log("Exit App not available (Browser mode)");
-                alert("Exit button clicked (App would close on Mobile)");
+                window.close();
             }
-        });
+        }
+        document.getElementById('exit-btn').addEventListener('click', forceExit);
     </script>
 </body>
 

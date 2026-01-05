@@ -48,7 +48,7 @@ document.addEventListener('DOMContentLoaded', () => {
         basicPay.value = val;
         basicPay.dataset.lastValid = val;
         dropdown.classList.remove('show');
-        basicPay.dispatchEvent(new Event('input')); // Trigger calc
+        calculate(); // Call calculation directly
     }
 
     function showDropdown() {

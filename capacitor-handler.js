@@ -15,6 +15,16 @@
             App.removeAllListeners();
         }
 
+        function forceExit() {
+            if (App && App.exitApp) {
+                App.exitApp();
+            } else if (navigator.app && navigator.app.exitApp) {
+                navigator.app.exitApp();
+            } else {
+                window.close();
+            }
+        }
+
         App.addListener('backButton', function () {
             const path = window.location.pathname;
 
@@ -24,7 +34,7 @@
 
             if (!isSubApp) {
                 // CASE 1: At Portal/Home -> EXIT
-                App.exitApp();
+                forceExit();
             } else {
                 // CASE 2: Inside a sub-app -> GO BACK
                 // If there's history, use it. If not (app opened here), go to Portal.
