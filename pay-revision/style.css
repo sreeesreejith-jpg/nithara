@@ -175,6 +175,31 @@ header {
     box-shadow: 0 0 15px rgba(59, 130, 246, 0.2);
 }
 
+.revised-bp-row {
+    margin-top: 1rem;
+    padding-top: 0.75rem;
+    border-top: 1px dashed rgba(255, 255, 255, 0.1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.revised-bp-row .label {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.revised-bp-row .value {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: var(--primary);
+    text-shadow: 0 0 15px rgba(59, 130, 246, 0.3);
+}
+
 /* Grid Layout */
 .revision-grid {
     display: grid;

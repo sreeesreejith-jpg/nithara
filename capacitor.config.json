@@ -4,7 +4,9 @@
   "webDir": "www",
   "server": {
     "url": "https://sreeesreejith-jpg.github.io/nithara/",
-    "allowNavigation": ["sreeesreejith-jpg.github.io"],
+    "allowNavigation": [
+      "sreeesreejith-jpg.github.io"
+    ],
     "cleartext": true
   }
 }
