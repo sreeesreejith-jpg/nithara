@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const basicPayInput = document.getElementById('basicPay');
     const daPercentageInput = document.getElementById('daPercentage');
     const serviceYearsInput = document.getElementById('serviceYears');
+    const retirementAgeInput = document.getElementById('retirementAge');
     const avgEmolumentsInput = document.getElementById('avgEmoluments');
 
     // Display elements
@@ -26,6 +27,24 @@ document.addEventListener('DOMContentLoaded', () => {
         126500, 129300, 132100, 134900, 137700, 140500, 143600, 146700, 149800,
         153200, 156600, 160000, 163400, 166800
     ];
+
+    // Global variable to store commutation factors
+    let commutationFactors = {
+        "17": 19.2, "18": 19.11, "19": 19.01, "20": 18.91,
+        "21": 18.81, "22": 18.7, "23": 18.59, "24": 18.47, "25": 18.34,
+        "26": 18.21, "27": 18.07, "28": 17.93, "29": 17.78, "30": 17.62,
+        "31": 17.46, "32": 17.29, "33": 17.11, "34": 16.92, "35": 16.72,
+        "36": 16.52, "37": 16.31, "38": 16.09, "39": 15.87, "40": 15.64,
+        "41": 15.4, "42": 15.15, "43": 14.9, "44": 14.64, "45": 14.37,
+        "46": 14.1, "47": 13.82, "48": 13.54, "49": 13.25, "50": 12.95,
+        "51": 12.66, "52": 12.35, "53": 12.05, "54": 11.73, "55": 11.42,
+        "56": 11.1, "57": 10.78, "58": 10.46, "59": 10.13, "60": 9.81,
+        "61": 9.48, "62": 9.15, "63": 8.82, "64": 8.5, "65": 8.17,
+        "66": 7.85, "67": 7.53, "68": 7.22, "69": 6.91, "70": 6.6,
+        "71": 6.3, "72": 6.01, "73": 5.72, "74": 5.44, "75": 5.17,
+        "76": 4.9, "77": 4.65, "78": 4.4, "79": 4.17, "80": 3.94,
+        "81": 3.72, "82": 3.52, "83": 3.32, "84": 3.13
+    };
 
     // --- Custom Dropdown Logic ---
     const dropdown = document.getElementById('custom-dropdown');
@@ -119,6 +138,8 @@ document.addEventListener('DOMContentLoaded', () => {
         })
         .catch(err => console.log('Using embedded pay stages'));
 
+    // Commutation factors are now embedded above. Fetch removed to support local usage.
+
     const totalMonthlyPensionDisplay = document.getElementById('totalMonthlyPension');
     const commutationAmountDisplay = document.getElementById('commutationAmount');
     const balancePensionDisplay = document.getElementById('balancePension');
@@ -134,7 +155,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const dcrgHeader = document.getElementById('dcrgHeader');
     const balanceHeader = document.getElementById('balanceHeader');
 
-    const inputs = [basicPayInput, daPercentageInput, serviceYearsInput];
+    // Details elements 
+    const calcAvgEmoluments = document.getElementById('calcAvgEmoluments');
+    const calcBasicPension = document.getElementById('calcBasicPension');
+    const calcCommutation = document.getElementById('calcCommutation');
+    const calcReducedPension = document.getElementById('calcReducedPension');
+    const calcDcrg = document.getElementById('calcDcrg');
+    const dispCommFactor = document.getElementById('dispCommFactor');
+
+    const inputs = [basicPayInput, daPercentageInput, serviceYearsInput, retirementAgeInput];
 
     /**
      * Format number without commas
@@ -167,8 +196,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const pension = (avgEmoluments / 2) * pensionFactor;
 
         // 3. Pension Commutation
-        // Formula: 40% of Pension * 11.42 * 12
-        const commutationAmount = pension * 0.40 * 11.42 * 12;
+        // Formula: 40% of Pension * Factor * 12
+        const age = parseInt(retirementAgeInput.value) || 56;
+        const commFactor = commutationFactors[age] || 11.1; // Default to 11.1 (Age 56) if not found
+
+        const commutationAmount = pension * 0.40 * commFactor * 12;
         const balancePension = pension * 0.60;
         const netTotalPension = balancePension;
 
@@ -192,6 +224,14 @@ document.addEventListener('DOMContentLoaded', () => {
         if (commuteHeader) commuteHeader.textContent = displayValue(commutationAmount);
         if (dcrgHeader) dcrgHeader.textContent = displayValue(dcrg);
         if (balanceHeader) balanceHeader.textContent = displayValue(balancePension);
+
+        // Update Details List
+        if (calcAvgEmoluments) calcAvgEmoluments.textContent = formatAmount(avgEmoluments);
+        if (calcBasicPension) calcBasicPension.textContent = formatAmount(pension);
+        if (calcCommutation) calcCommutation.textContent = formatAmount(commutationAmount);
+        if (calcReducedPension) calcReducedPension.textContent = formatAmount(balancePension);
+        if (calcDcrg) calcDcrg.textContent = formatAmount(dcrg);
+        if (dispCommFactor) dispCommFactor.textContent = commFactor.toFixed(2);
     };
 
     // Attach listeners

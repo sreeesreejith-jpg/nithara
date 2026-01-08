@@ -78,6 +78,12 @@
                             <input type="number" id="daPercentage" min="0" step="1">
                         </div>
                     </div>
+                    <div class="input-group">
+                        <label for="retirementAge">Age at Retirement/VRS</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="retirementAge" value="56">
+                        </div>
+                    </div>
                     <div class="input-group full-width" style="display: none;">
                         <label for="avgEmoluments">Average Emoluments</label>
                         <div class="input-wrapper readonly">
@@ -89,6 +95,39 @@
                         <div class="input-wrapper">
                             <input type="number" id="serviceYears" min="10" max="35">
                         </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 2: Calculation Details -->
+            <section class="card" id="details-section">
+                <h2>Calculation Details</h2>
+                <div class="details-list">
+                    <div class="detail-item">
+                        <span class="detail-label">1. Average Emoluments</span>
+                        <span class="detail-value" id="calcAvgEmoluments">0</span>
+                        <small class="detail-desc">Basic Pay + DA</small>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">2. Basic Pension</span>
+                        <span class="detail-value" id="calcBasicPension">0</span>
+                        <small class="detail-desc">(Avg Emoluments / 2) × Factor</small>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">3. Commutation Amount</span>
+                        <span class="detail-value" id="calcCommutation">0</span>
+                        <small class="detail-desc">Pension × 40% × <span id="dispCommFactor"
+                                class="highlight-factor">Factor</span> × 12</small>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">4. Reduced Pension</span>
+                        <span class="detail-value" id="calcReducedPension">0</span>
+                        <small class="detail-desc">Pension - Commuted Portion</small>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">5. DCRG Amount</span>
+                        <span class="detail-value" id="calcDcrg">0</span>
+                        <small class="detail-desc">Avg Emoluments × Years/2</small>
                     </div>
                 </div>
             </section>

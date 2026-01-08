@@ -333,6 +333,66 @@ body {
 .custom-dropdown li:hover,
 .custom-dropdown li.active {
     background: rgba(59, 130, 246, 0.2);
-    /* Blue hover */
     color: white;
+}
+
+/* Calculation Details List */
+.details-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.detail-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.detail-item:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.detail-label {
+    font-size: 0.95rem;
+    color: var(--text-muted);
+}
+
+.detail-value {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+.detail-desc {
+    display: block;
+    width: 100%;
+    font-size: 0.75rem;
+    color: #475569;
+    margin-top: 4px;
+    text-align: right;
+}
+
+.detail-item {
+    flex-wrap: wrap;
+}
+
+.detail-label,
+.detail-value {
+    width: 50%;
+}
+
+.detail-value {
+    text-align: right;
+}
+
+.highlight-factor {
+    color: #4ade80;
+    /* Light Green */
+    font-weight: 700;
+    font-size: 0.9em;
+    padding: 0 4px;
 }
