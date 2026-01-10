@@ -282,6 +282,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const printBtn = document.getElementById('printBtn');
     if (printBtn) {
         printBtn.addEventListener('click', () => {
+            const originalText = printBtn.innerHTML;
+            printBtn.innerHTML = "<span>⏳</span> Preparing...";
+            printBtn.disabled = true;
+
             // Set Report Details
             const nameInput = document.getElementById('reportName');
             const printName = document.getElementById('printEmployeeName');
@@ -305,11 +309,27 @@ document.addEventListener('DOMContentLoaded', () => {
             if (checkDetails && !checkDetails.checked) document.body.classList.add('hide-details');
             if (checkSummary && !checkSummary.checked) document.body.classList.add('hide-summary');
 
-            // Print
-            window.print();
+            // Handle cleanup reliably
+            const cleanup = () => {
+                document.body.classList.remove('hide-service', 'hide-details', 'hide-summary');
+                printBtn.innerHTML = originalText;
+                printBtn.disabled = false;
+            };
 
-            // Cleanup
-            document.body.classList.remove('hide-service', 'hide-details', 'hide-summary');
+            // Modern browsers use afterprint.
+            window.addEventListener('afterprint', cleanup, { once: true });
+
+            // Small delay to ensure the UI has time to hide/show elements before print starts
+            setTimeout(() => {
+                try {
+                    window.print();
+                    // Fallback cleanup in case afterprint doesn't fire
+                    setTimeout(cleanup, 3000);
+                } catch (e) {
+                    alert("Print not supported on this browser.");
+                    cleanup();
+                }
+            }, 250);
         });
     }
 
