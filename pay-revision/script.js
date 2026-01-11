@@ -234,7 +234,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         try {
             const cap = window.Capacitor;
-            // Use a more direct check for Plugins availability
             const hasNativePlugins = !!(cap && cap.Plugins && (cap.Plugins.Filesystem || cap.Plugins.Share));
 
             if (hasNativePlugins) {
@@ -248,7 +247,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
 
-            // Fallback for Web/Desktop
             const pdfBlob = await html2pdf().set(opt).from(element).output('blob');
             cleanupAfterPDF();
             return { blob: pdfBlob, title: reportTitle, isNative: false };
@@ -260,64 +258,61 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const handleNativeSave = async (dataUri, filename) => {
         try {
-            const Plugins = window.Capacitor?.Plugins;
+            const cap = window.Capacitor;
+            const Filesystem = cap?.Plugins?.Filesystem;
+            const Share = cap?.Plugins?.Share;
 
-            // Debug: Check if Plugins object exists
-            if (!Plugins) {
-                alert("DEBUG: window.Capacitor.Plugins is UNDEFINED. Bridge failed.");
-                throw new Error("Capacitor Bridge not found.");
+            if (!Filesystem || !Share) {
+                throw new Error("Android native bridge not ready. Please restart the app.");
             }
 
-            const Filesystem = Plugins.Filesystem;
-            const Share = Plugins.Share;
-
-            if (!Filesystem) {
-                alert("DEBUG: Filesystem plugin not found in Plugins object.");
-                throw new Error("Filesystem plugin missing.");
-            }
-            if (!Share) {
-                alert("DEBUG: Share plugin not found in Plugins object.");
-                throw new Error("Share plugin missing.");
-            }
-
-            // Strip prefix for Filesystem write
+            // Clean the base64 data
             const base64Data = dataUri.split(',')[1] || dataUri;
 
-            // Write to Cache Directory
+            // Write the file to internal cache
             const fileResult = await Filesystem.writeFile({
                 path: filename,
                 data: base64Data,
                 directory: 'CACHE'
             });
 
-            // Share the file
+            // Immediately open the share sheet
             await Share.share({
-                title: 'Pay Revision Report',
-                text: 'Here is your Pay Revision Report',
+                title: 'Calculation Report',
+                text: 'Sharing my calculation report.',
                 url: fileResult.uri,
-                dialogTitle: 'Save or Share PDF'
+                dialogTitle: 'Share PDF'
             });
 
         } catch (e) {
-            console.error('Native save failed', e);
-            alert('APK Error: ' + e.message);
+            console.error('Native share failed', e);
+            alert('Error: ' + e.message);
         }
     };
 
-    const printBtn = document.getElementById('printBtn');
-    if (printBtn) {
-        printBtn.addEventListener('click', async () => {
-            const originalText = printBtn.innerHTML;
-            printBtn.innerHTML = "<span>⏳</span> Generating...";
-            printBtn.disabled = true;
+    const shareBtn = document.getElementById('shareBtn');
+    if (shareBtn) {
+        shareBtn.addEventListener('click', async () => {
+            const originalText = shareBtn.innerHTML;
+            shareBtn.innerHTML = "<span>⏳</span> Preparing PDF...";
+            shareBtn.disabled = true;
 
             try {
                 const result = await generatePDFBlob();
 
                 if (result.isNative) {
+                    // Native Share
                     await handleNativeSave(result.dataUri, `${result.title}.pdf`);
+                } else if (navigator.share) {
+                    // Browser Share (Web fall back)
+                    const file = new File([result.blob], `${result.title}.pdf`, { type: 'application/pdf' });
+                    await navigator.share({
+                        files: [file],
+                        title: 'Calculation Report',
+                        text: 'Sharing my calculation report.'
+                    });
                 } else {
-                    // Browser Fallback
+                    // Last resort: Standard download
                     const link = document.createElement('a');
                     link.href = URL.createObjectURL(result.blob);
                     link.download = `${result.title}.pdf`;
@@ -325,44 +320,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             } catch (err) {
                 console.error(err);
-                alert("PDF Generation failed. Try standard print.");
-                window.print();
-            } finally {
-                printBtn.innerHTML = originalText;
-                printBtn.disabled = false;
-            }
-        });
-    }
-
-    const shareBtn = document.getElementById('shareBtn');
-    if (shareBtn) {
-        shareBtn.addEventListener('click', async () => {
-            const originalText = shareBtn.innerHTML;
-            shareBtn.innerHTML = "<span>⏳</span> Preparing...";
-            shareBtn.disabled = true;
-
-            try {
-                const result = await generatePDFBlob();
-
-                if (result.isNative) {
-                    await handleNativeSave(result.dataUri, `${result.title}.pdf`);
-                } else if (navigator.share) {
-                    const file = new File([result.blob], `${result.title}.pdf`, { type: 'application/pdf' });
-                    await navigator.share({
-                        files: [file],
-                        title: 'Pay Revision Report',
-                        text: 'Sharing my pay revision calculation report.'
-                    });
-                } else {
-                    alert("Sharing not supported on this browser.");
-                }
-            } catch (err) {
-                console.error(err);
-                alert("Sharing failed.");
+                alert("Sharing failed. Please try again.");
             } finally {
                 shareBtn.innerHTML = originalText;
                 shareBtn.disabled = false;
             }
         });
+    }
+
+    // Removing printBtn listener as requested to avoid confusion
+    const printBtn = document.getElementById('printBtn');
+    if (printBtn) {
+        printBtn.style.display = 'none'; // Hide it entirely
     }
 });

@@ -179,16 +179,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const handleNativeSave = async (dataUri, filename) => {
         try {
-            const cap = window.Capacitor || window.capacitor;
-            const Plugins = cap?.Plugins;
+            const cap = window.Capacitor;
+            const Filesystem = cap?.Plugins?.Filesystem;
+            const Share = cap?.Plugins?.Share;
 
-            if (!Plugins) throw new Error("Capacitor Plugins not found.");
-
-            const Filesystem = Plugins.Filesystem;
-            const Share = Plugins.Share;
-
-            if (!Filesystem) throw new Error("Filesystem plugin missing.");
-            if (!Share) throw new Error("Share plugin missing.");
+            if (!Filesystem || !Share) {
+                throw new Error("Android native bridge not ready.");
+            }
 
             const base64Data = dataUri.split(',')[1] || dataUri;
 
@@ -200,50 +197,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
             await Share.share({
                 title: 'Housing Loan Report',
-                text: 'Here is your report',
+                text: 'Sharing my report.',
                 url: fileResult.uri,
-                dialogTitle: 'Save or Share PDF'
+                dialogTitle: 'Share PDF'
             });
 
         } catch (e) {
-            console.error('Native save failed', e);
-            alert('APK Error: ' + e.message);
+            console.error('Native share failed', e);
+            alert('Error: ' + e.message);
         }
     };
-
-    const printBtn = document.getElementById('printBtn');
-    if (printBtn) {
-        printBtn.addEventListener('click', async () => {
-            const originalText = printBtn.innerHTML;
-            printBtn.innerHTML = "<span>⏳</span> Generating...";
-            printBtn.disabled = true;
-
-            try {
-                const result = await generatePDFResult();
-                if (result.isNative) {
-                    await handleNativeSave(result.dataUri, `${result.title}.pdf`);
-                } else {
-                    const link = document.createElement('a');
-                    link.href = URL.createObjectURL(result.blob);
-                    link.download = `${result.title}.pdf`;
-                    link.click();
-                }
-            } catch (err) {
-                console.error(err);
-                alert("PDF Generation failed. Try standard print.");
-                window.print();
-            } finally {
-                printBtn.innerHTML = originalText;
-                printBtn.disabled = false;
-            }
-        });
-    }
 
     const shareBtn = document.getElementById('shareBtn');
     if (shareBtn) {
         shareBtn.addEventListener('click', async () => {
             const originalText = shareBtn.innerHTML;
-            shareBtn.innerHTML = "<span>⏳</span> Preparing...";
+            shareBtn.innerHTML = "<span>⏳</span> Preparing PDF...";
             shareBtn.disabled = true;
 
             try {
@@ -254,19 +223,27 @@ document.addEventListener('DOMContentLoaded', () => {
                     const file = new File([result.blob], `${result.title}.pdf`, { type: 'application/pdf' });
                     await navigator.share({
                         files: [file],
-                        title: 'Housing Loan Calculation Report',
+                        title: 'Housing Loan Report',
                         text: 'Sharing my housing loan calculation report.'
                     });
                 } else {
-                    alert("Sharing not supported on this browser.");
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(result.blob);
+                    link.download = `${result.title}.pdf`;
+                    link.click();
                 }
             } catch (err) {
                 console.error(err);
-                alert("Sharing failed.");
+                alert("Sharing failed. Try again.");
             } finally {
                 shareBtn.innerHTML = originalText;
                 shareBtn.disabled = false;
             }
         });
+    }
+
+    const printBtn = document.getElementById('printBtn');
+    if (printBtn) {
+        printBtn.style.display = 'none';
     }
 });

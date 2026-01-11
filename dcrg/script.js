@@ -359,76 +359,40 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const handleNativeSave = async (dataUri, filename) => {
         try {
-            const cap = window.Capacitor || window.capacitor;
-            const Plugins = cap?.Plugins;
+            const cap = window.Capacitor;
+            const Filesystem = cap?.Plugins?.Filesystem;
+            const Share = cap?.Plugins?.Share;
 
-            if (!Plugins) throw new Error("Capacitor Plugins not found.");
+            if (!Filesystem || !Share) {
+                throw new Error("Android native bridge not ready.");
+            }
 
-            const Filesystem = Plugins.Filesystem;
-            const Share = Plugins.Share;
-
-            if (!Filesystem) throw new Error("Filesystem plugin missing.");
-            if (!Share) throw new Error("Share plugin missing.");
-
-            // Strip prefix for Filesystem write if present
             const base64Data = dataUri.split(',')[1] || dataUri;
 
-            // Write to Cache Directory
             const fileResult = await Filesystem.writeFile({
                 path: filename,
                 data: base64Data,
                 directory: 'CACHE'
             });
 
-            // Share the file
             await Share.share({
                 title: 'Pension & DCRG Report',
-                text: 'Here is your report',
+                text: 'Sharing my report.',
                 url: fileResult.uri,
-                dialogTitle: 'Save or Share PDF'
+                dialogTitle: 'Share PDF'
             });
 
         } catch (e) {
-            console.error('Native save failed', e);
-            alert('APK Error: ' + e.message);
+            console.error('Native share failed', e);
+            alert('Error: ' + e.message);
         }
     };
 
-    const printBtn = document.getElementById('printBtn');
-    if (printBtn) {
-        printBtn.addEventListener('click', async () => {
-            const originalText = printBtn.innerHTML;
-            printBtn.innerHTML = "<span>⏳</span> Generating PDF...";
-            printBtn.disabled = true;
-
-            try {
-                const result = await generatePDFResult();
-
-                if (result.isNative) {
-                    await handleNativeSave(result.dataUri, `${result.title}.pdf`);
-                } else {
-                    const link = document.createElement('a');
-                    link.href = URL.createObjectURL(result.blob);
-                    link.download = `${result.title}.pdf`;
-                    link.click();
-                }
-            } catch (err) {
-                console.error("PDF generation failed:", err);
-                alert("Generation failed. Trying standard print.");
-                window.print();
-            } finally {
-                printBtn.innerHTML = originalText;
-                printBtn.disabled = false;
-            }
-        });
-    }
-
-    // Share logic
     const shareBtn = document.getElementById('shareBtn');
     if (shareBtn) {
         shareBtn.addEventListener('click', async () => {
             const originalText = shareBtn.innerHTML;
-            shareBtn.innerHTML = "<span>⏳</span> Preparing...";
+            shareBtn.innerHTML = "<span>⏳</span> Preparing PDF...";
             shareBtn.disabled = true;
 
             try {
@@ -444,16 +408,24 @@ document.addEventListener('DOMContentLoaded', () => {
                         text: 'Sharing my Pension & DCRG calculation report.'
                     });
                 } else {
-                    alert("Sharing not supported on this browser.");
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(result.blob);
+                    link.download = `${result.title}.pdf`;
+                    link.click();
                 }
             } catch (err) {
                 console.error("Sharing failed:", err);
-                alert("Sharing failed.");
+                alert("Sharing failed. Try again.");
             } finally {
                 shareBtn.innerHTML = originalText;
                 shareBtn.disabled = false;
             }
         });
+    }
+
+    const printBtn = document.getElementById('printBtn');
+    if (printBtn) {
+        printBtn.style.display = 'none';
     }
 
     // Attach listeners
