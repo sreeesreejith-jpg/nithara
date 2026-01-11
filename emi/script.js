@@ -231,38 +231,36 @@ const generatePDFResult = async () => {
 
 const handleNativeSave = async (dataUri, filename) => {
     try {
-        const cap = window.Capacitor;
+        const cap = window.Capacitor || window.capacitor;
         const Plugins = cap?.Plugins;
 
-        if (!Plugins) throw new Error("Android Bridge missing.");
+        if (!Plugins) throw new Error("Capacitor Plugins not found.");
 
         const Filesystem = Plugins.Filesystem;
         const Share = Plugins.Share;
 
-        if (!Filesystem || !Share) throw new Error("Plugins missing.");
+        if (!Filesystem) throw new Error("Filesystem plugin missing.");
+        if (!Share) throw new Error("Share plugin missing.");
 
         const base64Data = dataUri.split(',')[1] || dataUri;
         const fileResult = await Filesystem.writeFile({ path: filename, data: base64Data, directory: 'CACHE' });
-        await Share.share({ title: 'EMI Report', text: 'Sharing my EMI report.', url: fileResult.uri, dialogTitle: 'Share PDF' });
+        await Share.share({ title: 'EMI Report', text: 'Here is your report', url: fileResult.uri, dialogTitle: 'Save or Share PDF' });
     } catch (e) {
-        console.error('Native share failed', e);
-        alert('Error: ' + e.message);
+        console.error('Native save failed', e);
+        alert('APK Error: ' + e.message);
     }
 };
 
-const shareBtn = document.getElementById('shareBtn');
-if (shareBtn) {
-    shareBtn.addEventListener('click', async () => {
-        const originalText = shareBtn.innerHTML;
-        shareBtn.innerHTML = "<span>⏳</span> Preparing PDF...";
-        shareBtn.disabled = true;
+const printBtn = document.getElementById('printBtn');
+if (printBtn) {
+    printBtn.addEventListener('click', async () => {
+        const originalText = printBtn.innerHTML;
+        printBtn.innerHTML = "<span>⏳</span> Generating...";
+        printBtn.disabled = true;
         try {
             const result = await generatePDFResult();
             if (result.isNative) {
                 await handleNativeSave(result.dataUri, `${result.title}.pdf`);
-            } else if (navigator.share) {
-                const file = new File([result.blob], `${result.title}.pdf`, { type: 'application/pdf' });
-                await navigator.share({ files: [file], title: 'EMI Report', text: 'Sharing my EMI report.' });
             } else {
                 const link = document.createElement('a');
                 link.href = URL.createObjectURL(result.blob);
@@ -271,7 +269,34 @@ if (shareBtn) {
             }
         } catch (err) {
             console.error(err);
-            alert("Sharing failed. Try again.");
+            alert("PDF Generation failed. Try standard print.");
+            window.print();
+        } finally {
+            printBtn.innerHTML = originalText;
+            printBtn.disabled = false;
+        }
+    });
+}
+
+const shareBtn = document.getElementById('shareBtn');
+if (shareBtn) {
+    shareBtn.addEventListener('click', async () => {
+        const originalText = shareBtn.innerHTML;
+        shareBtn.innerHTML = "<span>⏳</span> Preparing...";
+        shareBtn.disabled = true;
+        try {
+            const result = await generatePDFResult();
+            if (result.isNative) {
+                await handleNativeSave(result.dataUri, `${result.title}.pdf`);
+            } else if (navigator.share) {
+                const file = new File([result.blob], `${result.title}.pdf`, { type: 'application/pdf' });
+                await navigator.share({ files: [file], title: 'EMI Calculation Report', text: 'Sharing report.' });
+            } else {
+                alert("Sharing not supported on this browser.");
+            }
+        } catch (err) {
+            console.error(err);
+            alert("Sharing failed.");
         } finally {
             shareBtn.innerHTML = originalText;
             shareBtn.disabled = false;
