@@ -452,7 +452,7 @@ body {
 
     .report-header {
         display: block !important;
-        border-bottom: 2px solid black;
+        border-bottom: 2px solid black; margin-bottom: 10px !important; padding-bottom: 5px !important; 
     }
 
     .card,
@@ -484,7 +484,7 @@ body.pdf-mode {
     background: white !important;
     color: black !important;
     width: 760px !important;
-    padding: 15px !important;
+    padding: 12px !important; 
 }
 
 body.pdf-mode * {
@@ -534,7 +534,7 @@ body.pdf-mode .report-header {
     display: block !important;
     text-align: center;
     margin-bottom: 25px;
-    border-bottom: 2px solid black;
+    border-bottom: 2px solid black; margin-bottom: 10px !important; padding-bottom: 5px !important; 
     padding-bottom: 10px;
 }
 

@@ -402,7 +402,7 @@ input:-webkit-autofill:active {
         display: block !important;
         text-align: center;
         margin-bottom: 2rem;
-        border-bottom: 2px solid black;
+        border-bottom: 2px solid black; margin-bottom: 10px !important; padding-bottom: 5px !important; 
         padding-bottom: 1rem;
     }
 
@@ -462,7 +462,7 @@ input:-webkit-autofill:active {
 
     .report-header {
         display: block !important;
-        border-bottom: 2px solid black;
+        border-bottom: 2px solid black; margin-bottom: 10px !important; padding-bottom: 5px !important; 
     }
 
     .card,
@@ -494,8 +494,8 @@ body.pdf-mode {
     background: white !important;
     background-image: none !important;
     color: black !important;
-    width: 800px !important;
-    padding: 20px !important;
+    width: 760px !important; /* Optimized A4 width */ 
+    padding: 10px !important; /* Compact view */ 
 }
 
 body.pdf-mode .container {
@@ -509,7 +509,7 @@ body.pdf-mode * {
     color: black !important;
     background-color: transparent !important;
     background-image: none !important;
-    -webkit-text-fill-color: initial !important;
+    -webkit-text-fill-color: black !important; /* Force black text */ 
     text-shadow: none !important;
     box-shadow: none !important;
     border-color: #ccc !important;
@@ -532,7 +532,7 @@ body.pdf-mode .report-header {
     display: block !important;
     text-align: center;
     margin-bottom: 30px;
-    border-bottom: 2px solid black;
+    border-bottom: 2px solid black; margin-bottom: 10px !important; padding-bottom: 5px !important; 
     padding-bottom: 15px;
 }
 
@@ -541,8 +541,8 @@ body.pdf-mode .sticky-dashboard {
     background: white !important;
     border: 1px solid black !important;
     border-radius: 8px !important;
-    margin-bottom: 15px !important;
-    padding: 15px !important;
+    margin-bottom: 8px !important; 
+    padding: 12px !important; 
     page-break-inside: avoid;
     max-width: none !important;
 }
