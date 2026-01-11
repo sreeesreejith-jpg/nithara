@@ -409,124 +409,132 @@ header p {
     }
 
     .view-toggle,
-    .back-link {
+    body {
+        background: white !important;
+        background-image: none !important;
+        color: black !important;
+    }
+
+    .home-icon,
+    .button-group,
+    .disclaimer,
+    footer,
+    .placeholder-message,
+    .custom-dropdown,
+    #shareBtn,
+    #printBtn,
+    .view-toggle,
+    .back-link,
+    .background-blobs {
         display: none !important;
+    }
+
+    .report-header {
+        display: block !important;
+        border-bottom: 2px solid black;
+    }
+
+    .summary-container,
+    .calculator-grid,
+    .card {
+        background: white !important;
+        border: 1px solid black !important;
+        break-inside: avoid;
+    }
+
+    h1,
+    h2,
+    h3,
+    .report-header h1 {
+        background: none !important;
+        -webkit-text-fill-color: black !important;
+        color: black !important;
+    }
+
+    * {
+        color: black !important;
+        background-color: transparent !important;
+        box-shadow: none !important;
+        text-shadow: none !important;
     }
 }
 
-/* Styles for pdf-mode (used by html2pdf) */
+/* Specific styles for html2pdf which uses .pdf-mode class */
 body.pdf-mode {
     background: white !important;
+    background-image: none !important;
     color: black !important;
-    display: block !important;
-    /* Force A4 width context */
-    padding: 20px 30px !important;
-    margin: 0 !important;
-    width: 760px !important;
-    position: absolute;
-    top: 0;
-    left: 0;
-    z-index: 9999;
+    width: 800px !important;
+    padding: 20px !important;
 }
 
 body.pdf-mode .container {
+    max-width: 100% !important;
     width: 100% !important;
-    max-width: none !important;
-    box-shadow: none !important;
-    border: none !important;
-    background: white !important;
     padding: 0 !important;
     margin: 0 !important;
 }
 
-body.pdf-mode .background-blobs,
+body.pdf-mode * {
+    color: black !important;
+    background-color: transparent !important;
+    background-image: none !important;
+    -webkit-text-fill-color: initial !important;
+    text-shadow: none !important;
+    box-shadow: none !important;
+    border-color: #ccc !important;
+    animation: none !important;
+}
+
 body.pdf-mode .home-icon,
-body.pdf-mode .actions,
 body.pdf-mode .button-group,
 body.pdf-mode .disclaimer,
-body.pdf-mode .footer,
-body.pdf-mode .placeholder-message {
+body.pdf-mode footer,
+body.pdf-mode .placeholder-message,
+body.pdf-mode .custom-dropdown,
+body.pdf-mode #shareBtn,
+body.pdf-mode #printBtn,
+body.pdf-mode .view-toggle,
+body.pdf-mode .back-link,
+body.pdf-mode .background-blobs,
+body.pdf-mode .donut-chart {
     display: none !important;
 }
 
 body.pdf-mode .report-header {
     display: block !important;
     text-align: center;
-    margin-bottom: 2rem;
+    margin-bottom: 30px;
     border-bottom: 2px solid black;
-    padding-bottom: 1rem;
+    padding-bottom: 15px;
 }
 
-body.pdf-mode .report-header h1 {
-    color: black !important;
-    -webkit-text-fill-color: initial !important;
-    background: none !important;
-    margin: 0;
-    font-size: 2rem;
-}
-
-body.pdf-mode .input-wrapper {
-    border-bottom: 1px solid black !important;
-    background: transparent !important;
-}
-
-body.pdf-mode .input-wrapper input {
-    color: black !important;
-    text-align: right !important;
-}
-
-body.pdf-mode .summary-container {
-    opacity: 1 !important;
-    transform: none !important;
+body.pdf-mode .summary-container,
+body.pdf-mode .calculator-grid {
     background: white !important;
     border: 1px solid black !important;
-    display: flex !important;
-    flex-direction: row !important;
-    gap: 1.5rem !important;
+    border-radius: 8px !important;
+    margin-bottom: 15px !important;
+    padding: 15px !important;
+    page-break-inside: avoid;
 }
 
-/* Force Grid Layouts */
-body.pdf-mode .calculator-grid {
-    display: grid !important;
-    grid-template-columns: 1fr 1fr !important;
-    gap: 1.25rem !important;
-}
-
-body.pdf-mode .donut-chart,
-body.pdf-mode .donut-center {
-    background: white !important;
-    border: 1px solid black;
-}
-
-body.pdf-mode .donut-segment {
-    filter: grayscale(1) contrast(2);
-}
-
-body.pdf-mode strong,
-body.pdf-mode span,
-body.pdf-mode label,
-body.pdf-mode div,
-body.pdf-mode h1,
-body.pdf-mode h2,
-body.pdf-mode h3,
-body.pdf-mode th,
-body.pdf-mode td {
-    color: black !important;
+body.pdf-mode input {
+    background: transparent !important;
+    border: none !important;
+    border-bottom: 1px dashed #666 !important;
+    text-align: right !important;
+    padding: 2px !important;
+    font-weight: bold !important;
 }
 
 body.pdf-mode table,
 body.pdf-mode th,
 body.pdf-mode td {
     border: 1px solid black !important;
-    border-collapse: collapse !important;
-    background: white !important;
+    color: black !important;
 }
 
 body.pdf-mode th {
-    background: #eee !important;
-}
-
-body.pdf-mode .view-toggle,
-body.pdf-mode .back-link {
-    display: none !important;
+    background: #f0f0f0 !important;
 }

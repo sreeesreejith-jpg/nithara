@@ -442,25 +442,78 @@ input:-webkit-autofill:active {
         border-top: 1px solid black !important;
     }
 
-    .row {
-        border-bottom: 1px solid black !important;
+    body {
+        background: white !important;
+        background-image: none !important;
+        color: black !important;
+    }
+
+    .home-icon,
+    .button-group,
+    .disclaimer,
+    footer,
+    .placeholder-message,
+    .custom-dropdown,
+    #shareBtn,
+    #printBtn,
+    .background-animate {
+        display: none !important;
+    }
+
+    .report-header {
+        display: block !important;
+        border-bottom: 2px solid black;
+    }
+
+    .card,
+    .sticky-dashboard {
+        background: white !important;
+        border: 1px solid black !important;
+        break-inside: avoid;
+    }
+
+    h1,
+    h2,
+    h3,
+    .report-header h1 {
+        background: none !important;
+        -webkit-text-fill-color: black !important;
+        color: black !important;
+    }
+
+    * {
+        color: black !important;
+        background-color: transparent !important;
+        box-shadow: none !important;
+        text-shadow: none !important;
     }
 }
 
+/* Specific styles for html2pdf which uses .pdf-mode class */
 body.pdf-mode {
     background: white !important;
+    background-image: none !important;
     color: black !important;
-    display: block !important;
-    padding: 20px 30px !important;
-    margin: 0 !important;
-    width: 760px !important;
+    width: 800px !important;
+    padding: 20px !important;
 }
 
 body.pdf-mode .container {
+    max-width: 100% !important;
     width: 100% !important;
-    max-width: none !important;
     padding: 0 !important;
     margin: 0 !important;
+}
+
+body.pdf-mode * {
+    color: black !important;
+    background-color: transparent !important;
+    background-image: none !important;
+    -webkit-text-fill-color: initial !important;
+    text-shadow: none !important;
+    box-shadow: none !important;
+    border-color: #ccc !important;
+    animation: none !important;
 }
 
 body.pdf-mode .home-icon,
@@ -468,6 +521,9 @@ body.pdf-mode .button-group,
 body.pdf-mode .disclaimer,
 body.pdf-mode footer,
 body.pdf-mode .placeholder-message,
+body.pdf-mode .custom-dropdown,
+body.pdf-mode #shareBtn,
+body.pdf-mode #printBtn,
 body.pdf-mode .background-animate {
     display: none !important;
 }
@@ -475,38 +531,31 @@ body.pdf-mode .background-animate {
 body.pdf-mode .report-header {
     display: block !important;
     text-align: center;
-    margin-bottom: 2rem;
+    margin-bottom: 30px;
     border-bottom: 2px solid black;
-    padding-bottom: 1rem;
+    padding-bottom: 15px;
 }
 
-body.pdf-mode .report-header h1 {
-    color: black !important;
-    background: none !important;
-}
-
-body.pdf-mode .card {
+body.pdf-mode .card,
+body.pdf-mode .sticky-dashboard {
     background: white !important;
-    border: 2px solid black !important;
+    border: 1px solid black !important;
+    border-radius: 8px !important;
+    margin-bottom: 15px !important;
+    padding: 15px !important;
+    page-break-inside: avoid;
+    max-width: none !important;
 }
 
 body.pdf-mode input {
     background: transparent !important;
     border: none !important;
-    color: black !important;
+    border-bottom: 1px dashed #666 !important;
     text-align: right !important;
-}
-
-body.pdf-mode .emi-red-bold,
-body.pdf-mode h3,
-body.pdf-mode label,
-body.pdf-mode span,
-body.pdf-mode div,
-body.pdf-mode h1,
-body.pdf-mode h2 {
-    color: black !important;
+    padding: 2px !important;
+    font-weight: bold !important;
 }
 
 body.pdf-mode .row {
-    border-bottom: 1px solid black !important;
+    border-bottom: 1px solid #eee !important;
 }
