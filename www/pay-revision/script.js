@@ -233,20 +233,24 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         try {
-            // Check if running in Capacitor Native Environment
             const isCapacitor = window.Capacitor && window.Capacitor.isNativePlatform();
 
             if (isCapacitor) {
-                // Generate Base64 for Capacitor
-                const pdfDataUri = await html2pdf().set(opt).from(element).output('datauristring');
-                cleanupAfterPDF();
-                return { dataUri: pdfDataUri, title: reportTitle, isNative: true };
-            } else {
-                // Generate Blob for Browser
-                const pdfBlob = await html2pdf().set(opt).from(element).output('blob');
-                cleanupAfterPDF();
-                return { blob: pdfBlob, title: reportTitle, isNative: false };
+                const Filesystem = window.Capacitor?.Plugins?.Filesystem;
+                const Share = window.Capacitor?.Plugins?.Share;
+
+                if (Filesystem && Share) {
+                    // Generate Base64 for Capacitor
+                    const pdfDataUri = await html2pdf().set(opt).from(element).output('datauristring');
+                    cleanupAfterPDF();
+                    return { dataUri: pdfDataUri, title: reportTitle, isNative: true };
+                }
             }
+
+            // Generate Blob for Browser/Desktop
+            const pdfBlob = await html2pdf().set(opt).from(element).output('blob');
+            cleanupAfterPDF();
+            return { blob: pdfBlob, title: reportTitle, isNative: false };
         } catch (err) {
             cleanupAfterPDF();
             throw err;
@@ -255,11 +259,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const handleNativeSave = async (dataUri, filename) => {
         try {
-            const Filesystem = window.Capacitor?.Plugins?.Filesystem;
-            const Share = window.Capacitor?.Plugins?.Share;
+            const Plugins = window.Capacitor?.Plugins;
+            const Filesystem = Plugins?.Filesystem;
+            const Share = Plugins?.Share;
 
-            if (!Filesystem || !Share) {
-                throw new Error("Native plugins (Filesystem/Share) not available. Ensure you are on a mobile device.");
+            if (!Filesystem) {
+                console.error('Capacitor Filesystem plugin is missing');
+                throw new Error("Filesystem plugin not available. Please rebuild the app.");
+            }
+            if (!Share) {
+                console.error('Capacitor Share plugin is missing');
+                throw new Error("Share plugin not available. Please rebuild the app.");
             }
 
             // Strip prefix for Filesystem write if present

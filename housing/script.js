@@ -154,20 +154,21 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         try {
-            // Check if running in Capacitor Native Environment
-            const isCapacitor = window.Capacitor && window.Capacitor.isNativePlatform();
+            const isNative = window.Capacitor && window.Capacitor.isNativePlatform();
+            if (isNative) {
+                const Filesystem = window.Capacitor?.Plugins?.Filesystem;
+                const Share = window.Capacitor?.Plugins?.Share;
 
-            if (isCapacitor) {
-                // Generate Base64 for Capacitor
-                const pdfDataUri = await html2pdf().set(opt).from(element).output('datauristring');
-                cleanupAfterPDF();
-                return { dataUri: pdfDataUri, title: reportTitle, isNative: true };
-            } else {
-                // Generate Blob for Browser
-                const pdfBlob = await html2pdf().set(opt).from(element).output('blob');
-                cleanupAfterPDF();
-                return { blob: pdfBlob, title: reportTitle, isNative: false };
+                if (Filesystem && Share) {
+                    const pdfDataUri = await html2pdf().set(opt).from(element).output('datauristring');
+                    cleanupAfterPDF();
+                    return { dataUri: pdfDataUri, title: reportTitle, isNative: true };
+                }
             }
+
+            const pdfBlob = await html2pdf().set(opt).from(element).output('blob');
+            cleanupAfterPDF();
+            return { blob: pdfBlob, title: reportTitle, isNative: false };
         } catch (err) {
             cleanupAfterPDF();
             throw err;
@@ -176,8 +177,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const handleNativeSave = async (dataUri, filename) => {
         try {
-            const Filesystem = window.Capacitor?.Plugins?.Filesystem;
-            const Share = window.Capacitor?.Plugins?.Share;
+            const Plugins = window.Capacitor?.Plugins;
+            const Filesystem = Plugins?.Filesystem;
+            const Share = Plugins?.Share;
+
+            if (!Filesystem) throw new Error("Filesystem plugin missing. Please rebuild.");
+            if (!Share) throw new Error("Share plugin missing. Please rebuild.");
+
             const base64Data = dataUri.split(',')[1];
 
             const fileResult = await Filesystem.writeFile({
