@@ -23,7 +23,8 @@ window.PDFHelper = {
         const safeFileName = fileName.replace(/[^a-z0-9.]/gi, '_');
 
         try {
-            if (isNative && cap.Plugins.Filesystem && cap.Plugins.Share) {
+            if (isNative && cap.Plugins && cap.Plugins.Filesystem && cap.Plugins.Share) {
+                console.log('Using Capacitor native share');
                 // 1. Convert Blob to Base64
                 const reader = new FileReader();
                 const base64Data = await new Promise((resolve, reject) => {
@@ -36,8 +37,10 @@ window.PDFHelper = {
                 const fileResult = await cap.Plugins.Filesystem.writeFile({
                     path: safeFileName,
                     data: base64Data,
-                    directory: 'CACHE' // Using CACHE so it's temporary
+                    directory: cap.Plugins.Filesystem.Directory.Cache
                 });
+
+                console.log('File saved to:', fileResult.uri);
 
                 // 3. Share using the Files API (more robust than 'url')
                 await cap.Plugins.Share.share({
@@ -46,16 +49,25 @@ window.PDFHelper = {
                 });
 
                 return { success: true, method: 'native' };
-            } else if (navigator.share) {
-                // Web Share API (Mobile Browsers)
+            } else if (navigator.share && navigator.canShare) {
+                // Check if browser supports sharing files
                 const file = new File([blob], safeFileName, { type: 'application/pdf' });
-                await navigator.share({
-                    files: [file],
-                    title: title || 'Report'
-                });
-                return { success: true, method: 'web-share' };
+
+                if (navigator.canShare({ files: [file] })) {
+                    console.log('Using Web Share API with files');
+                    await navigator.share({
+                        files: [file],
+                        title: title || 'Report'
+                    });
+                    return { success: true, method: 'web-share' };
+                } else {
+                    console.log('Web Share API does not support files, falling back to download');
+                    this.download(blob, safeFileName);
+                    return { success: true, method: 'download-fallback' };
+                }
             } else {
                 // Fallback to Download
+                console.log('No share API available, using download');
                 this.download(blob, safeFileName);
                 return { success: true, method: 'download' };
             }

@@ -325,10 +325,20 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         try {
+            console.log('Starting PDF generation for download...');
             const result = await generatePDFResult();
+            console.log('PDF generated successfully:', result);
+
+            if (!result || !result.blob) {
+                throw new Error('PDF generation failed - no blob returned');
+            }
+
+            console.log('Calling PDFHelper.download...');
             window.PDFHelper.download(result.blob, `${result.title}.pdf`);
+            console.log('Download initiated successfully');
         } catch (err) {
-            alert("Error generating PDF for download.");
+            console.error("Download error:", err);
+            alert("Error generating PDF for download: " + err.message);
         } finally {
             if (btn) {
                 btn.innerHTML = originalText;
@@ -346,13 +356,22 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         try {
+            console.log('Starting PDF generation for sharing...');
             const result = await generatePDFResult();
-            await window.PDFHelper.share(result.blob, `${result.title}.pdf`, 'Salary Report');
+            console.log('PDF generated successfully:', result);
+
+            if (!result || !result.blob) {
+                throw new Error('PDF generation failed - no blob returned');
+            }
+
+            console.log('Calling PDFHelper.share...');
+            const shareResult = await window.PDFHelper.share(result.blob, `${result.title}.pdf`, 'Salary Report');
+            console.log('Share completed:', shareResult);
         } catch (err) {
             console.error("Share error:", err);
             // Only alert if it's not an AbortError (user cancelled)
             if (err.name !== 'AbortError' && !err.toString().includes('AbortError')) {
-                alert("Sharing failed. Try 'Download PDF' instead.");
+                alert("Sharing failed: " + err.message + ". Try 'Download PDF' instead.");
             }
         } finally {
             if (btn) {
