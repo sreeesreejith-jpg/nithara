@@ -250,10 +250,6 @@ const generatePDFResult = async () => {
         doc.text("Email: sreee.sreejith@gmail.com", 14, finalY);
         doc.text("* This is a computer-generated report based on standard EMI formulas.", 14, finalY + 7);
 
-        // 5. Native Share Check
-        const cap = window.Capacitor;
-        const isNative = !!(cap && cap.Plugins && (cap.Plugins.Filesystem || cap.Plugins.Share));
-
         return { blob: doc.output('blob'), title: reportTitle };
     } catch (err) {
         console.error("Professional PDF Error:", err);
@@ -261,73 +257,56 @@ const generatePDFResult = async () => {
     }
 };
 
-const handleNativeShare = async (blob, filename) => {
+const downloadPDF = async () => {
+    const btn = document.getElementById('downloadBtn');
+    const originalText = btn?.innerHTML || "Download";
+    if (btn) {
+        btn.innerHTML = "<span>⏳</span> Saving...";
+        btn.disabled = true;
+    }
+
     try {
-        const cap = window.Capacitor;
-        const safeFilename = filename.replace(/[^a-z0-9.]/gi, '_');
-
-        const reader = new FileReader();
-        const base64Data = await new Promise((resolve, reject) => {
-            reader.onload = () => resolve(reader.result.split(',')[1]);
-            reader.onerror = reject;
-            reader.readAsDataURL(blob);
-        });
-
-        const fileResult = await cap.Plugins.Filesystem.writeFile({
-            path: safeFilename,
-            data: base64Data,
-            directory: 'CACHE'
-        });
-
-        await cap.Plugins.Share.share({
-            title: 'EMI Report',
-            url: fileResult.uri
-        });
-    } catch (e) {
-        console.error('Native share failed', e);
-        throw e;
+        const result = await generatePDFResult();
+        window.PDFHelper.download(result.blob, `${result.title}.pdf`);
+    } catch (err) {
+        alert("Error generating PDF for download.");
+    } finally {
+        if (btn) {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }
     }
 };
 
-const shareBtn = document.getElementById('shareBtn');
-if (shareBtn) {
-    shareBtn.addEventListener('click', async () => {
-        const originalText = shareBtn.innerHTML;
-        shareBtn.innerHTML = "<span>⏳</span> Generating...";
-        shareBtn.disabled = true;
-        try {
-            const result = await generatePDFResult();
-            const fileName = `${result.title}.pdf`;
-            const cap = window.Capacitor;
-            const isNative = !!(cap && cap.Plugins && cap.Plugins.Filesystem && cap.Plugins.Share);
+const sharePDF = async () => {
+    const btn = document.getElementById('shareBtn');
+    const originalText = btn?.innerHTML || "Share";
+    if (btn) {
+        btn.innerHTML = "<span>⏳</span> Sharing...";
+        btn.disabled = true;
+    }
 
-            if (isNative) {
-                await handleNativeShare(result.blob, fileName);
-            } else {
-                const file = new File([result.blob], fileName, { type: 'application/pdf' });
-                if (navigator.canShare && navigator.share && navigator.canShare({ files: [file] })) {
-                    await navigator.share({
-                        files: [file],
-                        title: 'EMI Report',
-                    });
-                } else {
-                    const url = URL.createObjectURL(result.blob);
-                    const link = document.createElement('a');
-                    link.href = url;
-                    link.download = fileName;
-                    link.click();
-                    setTimeout(() => URL.revokeObjectURL(url), 100);
-                }
-            }
-        } catch (err) {
-            console.error(err);
-            alert("Please try again.");
-        } finally {
-            shareBtn.innerHTML = originalText;
-            shareBtn.disabled = false;
+    try {
+        const result = await generatePDFResult();
+        await window.PDFHelper.share(result.blob, `${result.title}.pdf`, 'EMI Report');
+    } catch (err) {
+        console.error("Share error:", err);
+        if (err.name !== 'AbortError' && !err.toString().includes('AbortError')) {
+            alert("Sharing failed. Try 'Download PDF' instead.");
         }
-    });
-}
+    } finally {
+        if (btn) {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }
+    }
+};
+
+const downloadButton = document.getElementById('downloadBtn');
+if (downloadButton) downloadButton.addEventListener('click', downloadPDF);
+
+const shareButton = document.getElementById('shareBtn');
+if (shareButton) shareButton.addEventListener('click', sharePDF);
 
 const printBtn = document.getElementById('printBtn');
 if (printBtn) {

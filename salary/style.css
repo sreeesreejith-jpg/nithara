@@ -540,7 +540,7 @@ input[type=number] {
     margin-bottom: 10px;
 }
 
-.print-button,
+.download-button,
 .share-button {
     padding: 12px;
     border: none;
@@ -554,23 +554,20 @@ input[type=number] {
     gap: 8px;
     flex: 1;
     transition: transform 0.2s;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-.print-button {
-    background: #ffffff;
-    color: #1e293b;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+.download-button {
+    background: #4f46e5;
+    color: white;
 }
 
 .share-button {
     background: #10b981;
     color: white;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    width: 100%;
-    /* Full width */
 }
 
-.print-button:active,
+.download-button:active,
 .share-button:active {
     transform: scale(0.95);
 }

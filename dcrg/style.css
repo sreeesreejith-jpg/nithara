@@ -389,35 +389,31 @@ body {
     font-size: 0.9rem;
 }
 
-/* Print Button Styles */
-.print-button,
+.download-button,
 .share-button {
-    padding: 12px 20px;
+    padding: 12px 10px;
     border: none;
     border-radius: var(--radius-md);
-    font-size: 0.95rem;
+    font-size: 0.9rem;
     font-weight: 700;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
+    gap: 6px;
     transition: transform 0.2s, background 0.2s;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
     flex: 1;
 }
 
-.print-button {
-    background: #ffffff;
-    color: #2e1065;
+.download-button {
+    background: #4f46e5;
+    color: white;
 }
 
 .share-button {
     background: #10b981;
     color: white;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    width: 100%;
-    /* Full width */
 }
 
 .button-group {
@@ -427,7 +423,7 @@ body {
     width: 100%;
 }
 
-.print-button:active,
+.download-button:active,
 .share-button:active {
     transform: scale(0.95);
 }
