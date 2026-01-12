@@ -334,7 +334,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             console.log('Calling PDFHelper.download...');
-            window.PDFHelper.download(result.blob, `${result.title}.pdf`);
+            await await window.PDFHelper.download(result.blob, `${result.title}.pdf`);
             console.log('Download initiated successfully');
         } catch (err) {
             console.error("Download error:", err);

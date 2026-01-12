@@ -162,6 +162,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const calcBasicPension = document.getElementById('calcBasicPension');
     const calcCommutation = document.getElementById('calcCommutation');
     const calcReducedPension = document.getElementById('calcReducedPension');
+    const calcCommutablePension = document.getElementById('calcCommutablePension');
     const calcDcrg = document.getElementById('calcDcrg');
     const dispCommFactor = document.getElementById('dispCommFactor');
 
@@ -254,6 +255,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (calcBasicPension) calcBasicPension.textContent = formatAmount(pension);
         if (calcCommutation) calcCommutation.textContent = formatAmount(commutationAmount);
         if (calcReducedPension) calcReducedPension.textContent = formatAmount(balancePension);
+        if (calcCommutablePension) calcCommutablePension.textContent = formatAmount(commutablePension);
         if (calcDcrg) calcDcrg.textContent = formatAmount(dcrg);
         if (dispCommFactor) dispCommFactor.textContent = commFactor.toFixed(2);
 
@@ -313,150 +315,192 @@ document.addEventListener('DOMContentLoaded', () => {
     // Print / PDF logic
     // Print / PDF logic
     const generatePDFResult = async () => {
-        window.scrollTo(0, 0);
-        const reportTitle = prepareForPDF();
-        const element = document.querySelector('.container');
-
-        // Optimize for A4
-        const opt = {
-            margin: 10,
-            filename: `${reportTitle}.pdf`,
-            image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: {
-                scale: 2,
-                useCORS: true,
-                backgroundColor: '#ffffff',
-                logging: false,
-                scrollY: 0,
-                scrollX: 0
-            },
-            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-        };
-
         try {
-            const cap = window.Capacitor;
-            const hasNativePlugins = !!(cap && cap.Plugins && (cap.Plugins.Filesystem || cap.Plugins.Share));
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            const reportTitle = prepareForPDF();
 
-            if (hasNativePlugins) {
-                const Filesystem = cap.Plugins.Filesystem;
-                const Share = cap.Plugins.Share;
+            // 1. Header & Branding
+            doc.setFillColor(37, 99, 235); // Blue color matches theme
+            doc.rect(0, 0, 210, 45, 'F');
 
-                if (Filesystem && Share) {
-                    const pdfDataUri = await html2pdf().set(opt).from(element).output('datauristring');
-                    cleanupAfterPDF();
-                    return { dataUri: pdfDataUri, title: reportTitle, isNative: true };
-                }
+            doc.setFontSize(22);
+            doc.setTextColor(255);
+            doc.setFont("helvetica", "bold");
+            doc.text("Pension & DCRG Calculation Report", 14, 25);
+
+            doc.setFontSize(11);
+            doc.setFont("helvetica", "normal");
+            const nameInput = document.getElementById('reportName');
+            if (nameInput && nameInput.value) {
+                doc.text("Employee: " + nameInput.value, 14, 33);
             }
+            doc.text("Generated on: " + new Date().toLocaleString('en-IN'), 14, 39);
 
-            const pdfBlob = await html2pdf().set(opt).from(element).output('blob');
+            // 2. Section: Service Details
+            doc.setFontSize(14);
+            doc.setTextColor(40);
+            doc.text("1. Service Details", 14, 55);
+
+            const bp = document.getElementById('basicPay').value || "0";
+            const da = document.getElementById('daPercentage').value || "0";
+            const qs = document.getElementById('serviceYears').value || "0";
+            const age = document.getElementById('retirementAge').value || "0";
+            const aeIn = document.getElementById('avgEmoluments').value || bp;
+
+            doc.autoTable({
+                startY: 60,
+                body: [
+                    ['Basic Pay (BP)', 'Rs. ' + bp],
+                    ['DA Percentage', da + ' %'],
+                    ['Retirement Age', age + ' Years'],
+                    ['Completed Service', qs + ' Years'],
+                    ['Avg 10 Months Basic Pay', 'Rs. ' + aeIn]
+                ],
+                theme: 'striped',
+                columnStyles: { 0: { fontStyle: 'bold' }, 1: { halign: 'right' } }
+            });
+
+            // 3. Section: Computation Basis
+            doc.text("2. Computation Basis", 14, doc.lastAutoTable.finalY + 12);
+
+            const lastPay = document.getElementById('calcLastPay').textContent || "0";
+            const aeUsed = document.getElementById('calcAvgEmoluments').textContent || "0";
+            const qsUsed = document.getElementById('calcQS').textContent || "0";
+
+            doc.autoTable({
+                startY: doc.lastAutoTable.finalY + 17,
+                head: [['Component', 'Value', 'Calculation Base']],
+                body: [
+                    ['Last Basic Pay + DA', 'Rs. ' + lastPay, 'Used for DCRG'],
+                    ['Avg 10 Months BP', 'Rs. ' + aeUsed, 'Used for Pension'],
+                    ['Qualifying Service', qsUsed + ' Years', 'Max 30/33 Years']
+                ],
+                theme: 'grid',
+                headStyles: { fillColor: [75, 85, 99] },
+                columnStyles: { 1: { halign: 'right' } }
+            });
+
+            // 4. Section: Monthly Benefits
+            doc.text("3. Monthly Benefits", 14, doc.lastAutoTable.finalY + 12);
+
+            const bPension = document.getElementById('calcBasicPension').textContent || "0";
+            const rPension = document.getElementById('calcReducedPension').textContent || "0";
+            const cPension = document.getElementById('calcCommutablePension').textContent || "0";
+            const stepPen = document.getElementById('stepPension').textContent || "";
+            const stepRed = document.getElementById('stepReduced').textContent || "";
+
+            doc.autoTable({
+                startY: doc.lastAutoTable.finalY + 17,
+                head: [['Description', 'Amount', 'Formula / Step']],
+                body: [
+                    ['Full Basic Pension', 'Rs. ' + bPension, stepPen],
+                    ['Reduced Pension (60%)', 'Rs. ' + rPension, stepRed],
+                    ['Commutable Pension (40%)', 'Rs. ' + cPension, 'Portion for Lump Sum']
+                ],
+                theme: 'grid',
+                headStyles: { fillColor: [16, 185, 129] },
+                columnStyles: { 1: { halign: 'right' } }
+            });
+
+            // 5. Section: Lump Sum Benefits
+            doc.text("4. Lump Sum Benefits", 14, doc.lastAutoTable.finalY + 12);
+
+            const commute = document.getElementById('calcCommutation').textContent || "0";
+            const dcrgAmt = document.getElementById('calcDcrg').textContent || "0";
+            const stepCom = document.getElementById('stepCommutation').textContent || "";
+            const stepDcrgVal = document.getElementById('stepDcrg').textContent || "";
+            const totalLump = document.getElementById('totalBenefitsHeader').textContent || "0";
+
+            doc.autoTable({
+                startY: doc.lastAutoTable.finalY + 17,
+                head: [['Description', 'Amount', 'Formula / Step']],
+                body: [
+                    ['Pension Commutation', 'Rs. ' + commute, stepCom + ' (Commutable Portion × Factor × 12)'],
+                    ['DCRG Amount', 'Rs. ' + dcrgAmt, stepDcrgVal],
+                    ['TOTAL LUMP SUM', 'Rs. ' + totalLump, 'Commutation + DCRG']
+                ],
+                theme: 'grid',
+                headStyles: { fillColor: [37, 99, 235] },
+                columnStyles: { 1: { halign: 'right', fontStyle: 'bold' } }
+            });
+
+            // 6. Footer
+            const finalY = doc.lastAutoTable.finalY + 15;
+            doc.setFontSize(10);
+            doc.setTextColor(100);
+            doc.text("* Computed based on Kerala Government Pension Rules.", 14, finalY);
+            doc.text("Email: sreee.sreejith@gmail.com", 14, finalY + 7);
+
+            cleanupAfterPDF(); // Cleanup UI changes if any
+
+            // 7. Output Management
+            const cap = window.Capacitor;
+            const isNative = !!(cap && cap.Plugins && (cap.Plugins.Filesystem || cap.Plugins.Share));
+
             cleanupAfterPDF();
-            return { blob: pdfBlob, title: reportTitle, isNative: false };
+            return { blob: doc.output('blob'), title: reportTitle };
         } catch (err) {
             cleanupAfterPDF();
+            console.error(err);
             throw err;
         }
     };
 
-    const handleNativeSave = async (dataUri, filename) => {
+    const downloadPDF = async () => {
+        const btn = document.getElementById('downloadBtn');
+        const originalText = btn?.innerHTML || "Download";
+        if (btn) {
+            btn.innerHTML = "<span>⏳</span> Saving...";
+            btn.disabled = true;
+        }
+
         try {
-            const cap = window.Capacitor || window.capacitor;
-            const Plugins = cap?.Plugins;
-
-            if (!Plugins) throw new Error("Capacitor Plugins not found.");
-
-            const Filesystem = Plugins.Filesystem;
-            const Share = Plugins.Share;
-
-            if (!Filesystem) throw new Error("Filesystem plugin missing.");
-            if (!Share) throw new Error("Share plugin missing.");
-
-            // Strip prefix for Filesystem write if present
-            const base64Data = dataUri.split(',')[1] || dataUri;
-
-            // Write to Cache Directory
-            const fileResult = await Filesystem.writeFile({
-                path: filename,
-                data: base64Data,
-                directory: 'CACHE'
-            });
-
-            // Share the file
-            await Share.share({
-                title: 'Pension & DCRG Report',
-                text: 'Here is your report',
-                url: fileResult.uri,
-                dialogTitle: 'Save or Share PDF'
-            });
-
-        } catch (e) {
-            console.error('Native save failed', e);
-            alert('APK Error: ' + e.message);
+            const result = await generatePDFResult();
+            await await window.PDFHelper.download(result.blob, `${result.title}.pdf`);
+        } catch (err) {
+            alert("Error generating PDF for download.");
+        } finally {
+            if (btn) {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
         }
     };
 
+    const sharePDF = async () => {
+        const btn = document.getElementById('shareBtn');
+        const originalText = btn?.innerHTML || "Share";
+        if (btn) {
+            btn.innerHTML = "<span>⏳</span> Sharing...";
+            btn.disabled = true;
+        }
+
+        try {
+            const result = await generatePDFResult();
+            await window.PDFHelper.share(result.blob, `${result.title}.pdf`, 'Pension & DCRG Report');
+        } catch (err) {
+            console.error("Share error:", err);
+            if (err.name !== 'AbortError' && !err.toString().includes('AbortError')) {
+                alert("Sharing failed. Try 'Download PDF' instead.");
+            }
+        } finally {
+            if (btn) {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
+    };
+
+    const downloadButton = document.getElementById('downloadBtn');
+    if (downloadButton) downloadButton.addEventListener('click', downloadPDF);
+
+    const shareButton = document.getElementById('shareBtn');
+    if (shareButton) shareButton.addEventListener('click', sharePDF);
+
     const printBtn = document.getElementById('printBtn');
-    if (printBtn) {
-        printBtn.addEventListener('click', async () => {
-            const originalText = printBtn.innerHTML;
-            printBtn.innerHTML = "<span>⏳</span> Generating PDF...";
-            printBtn.disabled = true;
+    if (printBtn) printBtn.style.display = 'none';
 
-            try {
-                const result = await generatePDFResult();
-
-                if (result.isNative) {
-                    await handleNativeSave(result.dataUri, `${result.title}.pdf`);
-                } else {
-                    const link = document.createElement('a');
-                    link.href = URL.createObjectURL(result.blob);
-                    link.download = `${result.title}.pdf`;
-                    link.click();
-                }
-            } catch (err) {
-                console.error("PDF generation failed:", err);
-                alert("Generation failed. Trying standard print.");
-                window.print();
-            } finally {
-                printBtn.innerHTML = originalText;
-                printBtn.disabled = false;
-            }
-        });
-    }
-
-    // Share logic
-    const shareBtn = document.getElementById('shareBtn');
-    if (shareBtn) {
-        shareBtn.addEventListener('click', async () => {
-            const originalText = shareBtn.innerHTML;
-            shareBtn.innerHTML = "<span>⏳</span> Preparing...";
-            shareBtn.disabled = true;
-
-            try {
-                const result = await generatePDFResult();
-
-                if (result.isNative) {
-                    await handleNativeSave(result.dataUri, `${result.title}.pdf`);
-                } else if (navigator.share) {
-                    const file = new File([result.blob], `${result.title}.pdf`, { type: 'application/pdf' });
-                    await navigator.share({
-                        files: [file],
-                        title: 'Pension & DCRG Report',
-                        text: 'Sharing my Pension & DCRG calculation report.'
-                    });
-                } else {
-                    alert("Sharing not supported on this browser.");
-                }
-            } catch (err) {
-                console.error("Sharing failed:", err);
-                alert("Sharing failed.");
-            } finally {
-                shareBtn.innerHTML = originalText;
-                shareBtn.disabled = false;
-            }
-        });
-    }
-
-    // Attach listeners
     inputs.forEach(input => {
         input.addEventListener('input', () => {
             const source = (input.id === 'avgEmoluments') ? 'ae' : 'other';
@@ -464,6 +508,5 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Initial calculation
     calculateAll();
 });

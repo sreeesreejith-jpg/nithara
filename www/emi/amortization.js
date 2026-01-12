@@ -136,106 +136,65 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         try {
-            // Check if running in Capacitor Native Environment
-            const isCapacitor = window.Capacitor && window.Capacitor.isNativePlatform();
-
-            if (isCapacitor) {
-                // Generate Base64 for Capacitor
-                const pdfDataUri = await html2pdf().set(opt).from(element).output('datauristring');
-                cleanupAfterPDF();
-                return { dataUri: pdfDataUri, title: reportTitle, isNative: true };
-            } else {
-                // Generate Blob for Browser
-                const pdfBlob = await html2pdf().set(opt).from(element).output('blob');
-                cleanupAfterPDF();
-                return { blob: pdfBlob, title: reportTitle, isNative: false };
-            }
+            // Always generate blob for use with PDFHelper
+            const pdfBlob = await html2pdf().set(opt).from(element).output('blob');
+            cleanupAfterPDF();
+            return { blob: pdfBlob, title: reportTitle };
         } catch (err) {
             cleanupAfterPDF();
             throw err;
         }
     };
 
-    const handleNativeSave = async (dataUri, filename) => {
+    const downloadPDF = async () => {
+        const btn = document.getElementById('downloadBtn');
+        const originalText = btn?.innerHTML || "Download";
+        if (btn) {
+            btn.innerHTML = "<span>⏳</span> Saving...";
+            btn.disabled = true;
+        }
+
         try {
-            const { Filesystem } = window.Capacitor.Plugins;
-            const { Share } = window.Capacitor.Plugins;
-            const base64Data = dataUri.split(',')[1];
-
-            const fileResult = await Filesystem.writeFile({
-                path: filename,
-                data: base64Data,
-                directory: 'CACHE'
-            });
-
-            await Share.share({
-                title: 'Amortization Report',
-                text: 'Here is your report',
-                url: fileResult.uri,
-                dialogTitle: 'Save or Share PDF'
-            });
-
-        } catch (e) {
-            console.error('Native save failed', e);
-            alert('Error saving PDF: ' + e.message);
+            const result = await generatePDFResult();
+            await window.PDFHelper.download(result.blob, `${result.title}.pdf`);
+        } catch (err) {
+            console.error(err);
+            alert("Error generating PDF for download.");
+        } finally {
+            if (btn) {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
         }
     };
 
-    const printBtn = document.getElementById('printBtn');
-    if (printBtn) {
-        printBtn.addEventListener('click', async () => {
-            const originalText = printBtn.innerHTML;
-            printBtn.innerHTML = "<span>⏳</span> Generating...";
-            printBtn.disabled = true;
+    const sharePDF = async () => {
+        const btn = document.getElementById('shareBtn');
+        const originalText = btn?.innerHTML || "Share";
+        if (btn) {
+            btn.innerHTML = "<span>⏳</span> Sharing...";
+            btn.disabled = true;
+        }
 
-            try {
-                const result = await generatePDFResult();
-                if (result.isNative) {
-                    await handleNativeSave(result.dataUri, `${result.title}.pdf`);
-                } else {
-                    const link = document.createElement('a');
-                    link.href = URL.createObjectURL(result.blob);
-                    link.download = `${result.title}.pdf`;
-                    link.click();
-                }
-            } catch (err) {
-                console.error(err);
-                alert("PDF Generation failed.");
-            } finally {
-                printBtn.innerHTML = originalText;
-                printBtn.disabled = false;
+        try {
+            const result = await generatePDFResult();
+            await window.PDFHelper.share(result.blob, `${result.title}.pdf`, 'Amortization Report');
+        } catch (err) {
+            console.error("Share error:", err);
+            if (err.name !== 'AbortError' && !err.toString().includes('AbortError')) {
+                alert("Sharing failed. Try 'Download PDF' instead.");
             }
-        });
-    }
-
-    const shareBtn = document.getElementById('shareBtn');
-    if (shareBtn) {
-        shareBtn.addEventListener('click', async () => {
-            const originalText = shareBtn.innerHTML;
-            shareBtn.innerHTML = "<span>⏳</span> Preparing...";
-            shareBtn.disabled = true;
-
-            try {
-                const result = await generatePDFResult();
-                if (result.isNative) {
-                    await handleNativeSave(result.dataUri, `${result.title}.pdf`);
-                } else if (navigator.share) {
-                    const file = new File([result.blob], `${result.title}.pdf`, { type: 'application/pdf' });
-                    await navigator.share({
-                        files: [file],
-                        title: 'EMI Amortization Report',
-                        text: 'Sharing my EMI amortization report.'
-                    });
-                } else {
-                    alert("Sharing not supported on this browser.");
-                }
-            } catch (err) {
-                console.error(err);
-                alert("Sharing failed.");
-            } finally {
-                shareBtn.innerHTML = originalText;
-                shareBtn.disabled = false;
+        } finally {
+            if (btn) {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
             }
-        });
-    }
+        }
+    };
+
+    const dBtn = document.getElementById('downloadBtn');
+    if (dBtn) dBtn.addEventListener('click', downloadPDF);
+
+    const sBtn = document.getElementById('shareBtn');
+    if (sBtn) sBtn.addEventListener('click', sharePDF);
 });

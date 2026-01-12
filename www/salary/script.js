@@ -208,140 +208,187 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const generatePDFResult = async () => {
-        window.scrollTo(0, 0);
-        const reportTitle = prepareForPDF();
-        const element = document.querySelector('.container');
-
-        // Optimize for A4
-        const opt = {
-            margin: 10,
-            filename: `${reportTitle}.pdf`,
-            image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: {
-                scale: 2,
-                useCORS: true,
-                backgroundColor: '#ffffff',
-                logging: false,
-                scrollY: 0,
-                scrollX: 0
-            },
-            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-        };
-
         try {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            const reportTitle = "Salary_Report_" + new Date().getTime();
+
+            // 1. Header with styling
+            doc.setFillColor(16, 185, 129); // Green color from theme
+            doc.rect(0, 0, 210, 40, 'F');
+
+            doc.setFontSize(22);
+            doc.setTextColor(255);
+            doc.setFont("helvetica", "bold");
+            doc.text("Salary Calculation Report", 14, 25);
+
+            doc.setFontSize(10);
+            doc.setFont("helvetica", "normal");
+            doc.text("Generated on: " + new Date().toLocaleString('en-IN'), 14, 33);
+
+            // 2. Data Extraction
+            const bp = document.getElementById('basic-pay').value || "0";
+            const daP = document.getElementById('da-perc').value || "0";
+            const daV = document.getElementById('da-val').innerText || "0";
+            const hraP = document.getElementById('hra-perc').value || "0";
+            const hraV = document.getElementById('hra-val').innerText || "0";
+            const daPendP = document.getElementById('da-pending-perc').value || "0";
+            const daPendV = document.getElementById('da-pending-val').innerText || "0";
+            const otherEarn = document.getElementById('other-earnings').value || "0";
+
+            const gross = document.getElementById('gross-salary-val').innerText || "0";
+            const deduct = document.getElementById('total-deduction-val').innerText || "0";
+            const net = document.getElementById('net-salary-val').innerText || "0";
+
+            // 3. Earnings Table
+            doc.setFontSize(14);
+            doc.setTextColor(40);
+            doc.text("Earnings Details", 14, 50);
+
+            doc.autoTable({
+                startY: 55,
+                head: [['Component', 'Percentage / Info', 'Amount']],
+                body: [
+                    ['Basic Pay', '-', 'Rs. ' + bp],
+                    ['DA', daP + ' %', 'Rs. ' + daV],
+                    ['HRA', hraP + ' %', 'Rs. ' + hraV],
+                    ['DA Pending', daPendP + ' %', 'Rs. ' + daPendV],
+                    ['Other Earnings', '-', 'Rs. ' + otherEarn]
+                ],
+                theme: 'striped',
+                headStyles: { fillColor: [16, 185, 129] },
+                columnStyles: { 2: { halign: 'right' } }
+            });
+
+            // 4. Deductions data extraction for table
+            const d1 = document.getElementById('gpf-sub').value || "0";
+            const d2 = document.getElementById('gis').value || "0";
+            const d3 = document.getElementById('sli').value || "0";
+            const d4 = document.getElementById('medisep').value || "0";
+            const d5 = document.getElementById('sli-loan').value || "0";
+            const d6 = document.getElementById('other-deductions').value || "0";
+
+            doc.text("Deductions Details", 14, doc.lastAutoTable.finalY + 15);
+            doc.autoTable({
+                startY: doc.lastAutoTable.finalY + 20,
+                head: [['Component', 'Amount']],
+                body: [
+                    ['GPF Subscription', 'Rs. ' + d1],
+                    ['GIS', 'Rs. ' + d2],
+                    ['SLI', 'Rs. ' + d3],
+                    ['Medisep', 'Rs. ' + d4],
+                    ['SLI Loan', 'Rs. ' + d5],
+                    ['Other Deductions', 'Rs. ' + d6]
+                ],
+                theme: 'striped',
+                headStyles: { fillColor: [239, 68, 68] }, // Red for deductions
+                columnStyles: { 1: { halign: 'right' } }
+            });
+
+            // 5. Final Summary Table
+            doc.text("Final Summary", 14, doc.lastAutoTable.finalY + 15);
+            doc.autoTable({
+                startY: doc.lastAutoTable.finalY + 20,
+                body: [
+                    ['Gross Salary', 'Rs. ' + gross],
+                    ['Total Deductions', 'Rs. ' + deduct],
+                    ['Net Salary', 'Rs. ' + net]
+                ],
+                theme: 'grid',
+                styles: { fontSize: 12, fontStyle: 'bold' },
+                columnStyles: { 1: { halign: 'right' } }
+            });
+
+            // 6. Footer
+            const finalY = doc.lastAutoTable.finalY + 20;
+            doc.setFontSize(10);
+            doc.setTextColor(150);
+            doc.text("Email: sreee.sreejith@gmail.com", 14, finalY);
+
+            // 7. Output Management
             const cap = window.Capacitor;
-            const hasNativePlugins = !!(cap && cap.Plugins && (cap.Plugins.Filesystem || cap.Plugins.Share));
+            const isNative = !!(cap && cap.Plugins && (cap.Plugins.Filesystem || cap.Plugins.Share));
 
-            if (hasNativePlugins) {
-                const Filesystem = cap.Plugins.Filesystem;
-                const Share = cap.Plugins.Share;
-
-                if (Filesystem && Share) {
-                    const pdfDataUri = await html2pdf().set(opt).from(element).output('datauristring');
-                    cleanupAfterPDF();
-                    return { dataUri: pdfDataUri, title: reportTitle, isNative: true };
-                }
-            }
-
-            const pdfBlob = await html2pdf().set(opt).from(element).output('blob');
-            cleanupAfterPDF();
-            return { blob: pdfBlob, title: reportTitle, isNative: false };
+            return { blob: doc.output('blob'), title: reportTitle };
         } catch (err) {
-            cleanupAfterPDF();
+            console.error("Salary PDF Error:", err);
             throw err;
         }
     };
 
-    const handleNativeSave = async (dataUri, filename) => {
+    const downloadPDF = async () => {
+        const btn = document.getElementById('downloadBtn');
+        const originalText = btn?.innerHTML || "Download";
+        if (btn) {
+            btn.innerHTML = "<span>⏳</span> Saving...";
+            btn.disabled = true;
+        }
+
         try {
-            const cap = window.Capacitor || window.capacitor;
-            const Plugins = cap?.Plugins;
+            console.log('Starting PDF generation for download...');
+            const result = await generatePDFResult();
+            console.log('PDF generated successfully:', result);
 
-            if (!Plugins) throw new Error("Capacitor Plugins not found.");
+            if (!result || !result.blob) {
+                throw new Error('PDF generation failed - no blob returned');
+            }
 
-            const Filesystem = Plugins.Filesystem;
-            const Share = Plugins.Share;
-
-            if (!Filesystem) throw new Error("Filesystem plugin missing.");
-            if (!Share) throw new Error("Share plugin missing.");
-
-            const base64Data = dataUri.split(',')[1] || dataUri;
-
-            const fileResult = await Filesystem.writeFile({
-                path: filename,
-                data: base64Data,
-                directory: 'CACHE'
-            });
-
-            await Share.share({
-                title: 'Salary Report',
-                text: 'Here is your report',
-                url: fileResult.uri,
-                dialogTitle: 'Save or Share PDF'
-            });
-
-        } catch (e) {
-            console.error('Native save failed', e);
-            alert('APK Error: ' + e.message);
+            console.log('Calling PDFHelper.download...');
+            await await window.PDFHelper.download(result.blob, `${result.title}.pdf`);
+            console.log('Download initiated successfully');
+        } catch (err) {
+            console.error("Download error:", err);
+            alert("Error generating PDF for download: " + err.message);
+        } finally {
+            if (btn) {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
         }
     };
 
+    const sharePDF = async () => {
+        const btn = document.getElementById('shareBtn');
+        const originalText = btn?.innerHTML || "Share";
+        if (btn) {
+            btn.innerHTML = "<span>⏳</span> Sharing...";
+            btn.disabled = true;
+        }
+
+        try {
+            console.log('Starting PDF generation for sharing...');
+            const result = await generatePDFResult();
+            console.log('PDF generated successfully:', result);
+
+            if (!result || !result.blob) {
+                throw new Error('PDF generation failed - no blob returned');
+            }
+
+            console.log('Calling PDFHelper.share...');
+            const shareResult = await window.PDFHelper.share(result.blob, `${result.title}.pdf`, 'Salary Report');
+            console.log('Share completed:', shareResult);
+        } catch (err) {
+            console.error("Share error:", err);
+            // Only alert if it's not an AbortError (user cancelled)
+            if (err.name !== 'AbortError' && !err.toString().includes('AbortError')) {
+                alert("Sharing failed: " + err.message + ". Try 'Download PDF' instead.");
+            }
+        } finally {
+            if (btn) {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
+    };
+
+    const downloadButton = document.getElementById('downloadBtn');
+    if (downloadButton) downloadButton.addEventListener('click', downloadPDF);
+
+    const shareButton = document.getElementById('shareBtn');
+    if (shareButton) shareButton.addEventListener('click', sharePDF);
+
     const printBtn = document.getElementById('printBtn');
     if (printBtn) {
-        printBtn.addEventListener('click', async () => {
-            const originalText = printBtn.innerHTML;
-            printBtn.innerHTML = "<span>⏳</span> Generating...";
-            printBtn.disabled = true;
-
-            try {
-                const result = await generatePDFResult();
-                if (result.isNative) {
-                    await handleNativeSave(result.dataUri, `${result.title}.pdf`);
-                } else {
-                    const link = document.createElement('a');
-                    link.href = URL.createObjectURL(result.blob);
-                    link.download = `${result.title}.pdf`;
-                    link.click();
-                }
-            } catch (err) {
-                console.error(err);
-                alert("PDF Generation failed. Try standard print.");
-                window.print();
-            } finally {
-                printBtn.innerHTML = originalText;
-                printBtn.disabled = false;
-            }
-        });
-    }
-
-    const shareBtn = document.getElementById('shareBtn');
-    if (shareBtn) {
-        shareBtn.addEventListener('click', async () => {
-            const originalText = shareBtn.innerHTML;
-            shareBtn.innerHTML = "<span>⏳</span> Preparing...";
-            shareBtn.disabled = true;
-
-            try {
-                const result = await generatePDFResult();
-                if (result.isNative) {
-                    await handleNativeSave(result.dataUri, `${result.title}.pdf`);
-                } else if (navigator.share) {
-                    const file = new File([result.blob], `${result.title}.pdf`, { type: 'application/pdf' });
-                    await navigator.share({
-                        files: [file],
-                        title: 'Salary Calculation Report',
-                        text: 'Sharing my monthly salary calculation report.'
-                    });
-                } else {
-                    alert("Sharing not supported on this browser.");
-                }
-            } catch (err) {
-                console.error(err);
-                alert("Sharing failed.");
-            } finally {
-                shareBtn.innerHTML = originalText;
-                shareBtn.disabled = false;
-            }
-        });
+        printBtn.style.display = 'none';
     }
 });

@@ -145,7 +145,7 @@ const downloadPDF = async () => {
 
     try {
         const result = await generatePDFResult();
-        window.PDFHelper.download(result.blob, `${result.title}.pdf`);
+        await window.PDFHelper.download(result.blob, `${result.title}.pdf`);
     } catch (err) {
         alert("Error generating PDF for download.");
     } finally {

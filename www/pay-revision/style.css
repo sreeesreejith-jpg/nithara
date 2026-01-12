@@ -552,7 +552,7 @@ input[type=number] {
     margin-bottom: 10px;
 }
 
-.print-button,
+.download-button,
 .share-button {
     padding: 12px;
     border: none;
@@ -566,21 +566,20 @@ input[type=number] {
     gap: 8px;
     flex: 1;
     transition: transform 0.2s;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-.print-button {
+.download-button {
     background: #ffffff;
     color: #1e293b;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .share-button {
     background: #10b981;
     color: white;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-.print-button:active,
+.download-button:active,
 .share-button:active {
     transform: scale(0.95);
 }
@@ -610,7 +609,9 @@ input[type=number] {
 
     .report-header {
         display: block !important;
-        border-bottom: 2px solid black; margin-bottom: 10px !important; padding-bottom: 5px !important; 
+        border-bottom: 2px solid black;
+        margin-bottom: 10px !important;
+        padding-bottom: 5px !important;
     }
 
     .summary-card,
@@ -641,9 +642,11 @@ body.pdf-mode {
     background: white !important;
     background-image: none !important;
     color: black !important;
-    width: 760px !important; /* Optimized A4 width */ 
+    width: 760px !important;
+    /* Optimized A4 width */
     /* Stable width for PDF generation */
-    padding: 10px !important; /* Compact view */ 
+    padding: 10px !important;
+    /* Compact view */
 }
 
 body.pdf-mode .container {
@@ -657,7 +660,8 @@ body.pdf-mode * {
     color: black !important;
     background-color: transparent !important;
     background-image: none !important;
-    -webkit-text-fill-color: black !important; /* Force black text */ 
+    -webkit-text-fill-color: black !important;
+    /* Force black text */
     text-shadow: none !important;
     box-shadow: none !important;
     border-color: #ccc !important;
@@ -679,7 +683,9 @@ body.pdf-mode .report-header {
     display: block !important;
     text-align: center;
     margin-bottom: 30px;
-    border-bottom: 2px solid black; margin-bottom: 10px !important; padding-bottom: 5px !important; 
+    border-bottom: 2px solid black;
+    margin-bottom: 10px !important;
+    padding-bottom: 5px !important;
     padding-bottom: 15px;
 }
 
@@ -696,8 +702,8 @@ body.pdf-mode .revision-section {
     background: white !important;
     border: 1px solid black !important;
     border-radius: 8px !important;
-    margin-bottom: 8px !important; 
-    padding: 12px !important; 
+    margin-bottom: 8px !important;
+    padding: 12px !important;
     page-break-inside: avoid;
 }
 
@@ -742,12 +748,13 @@ body.pdf-mode .header-text h1 {
     color: black !important;
     font-size: 28px !important;
 }
+
 /* Final PDF Color Overrides - High Specificity to beat !important rules */
-body.pdf-mode .text-success, 
-body.pdf-mode .text-accent, 
-body.pdf-mode .text-danger, 
+body.pdf-mode .text-success,
+body.pdf-mode .text-accent,
+body.pdf-mode .text-danger,
 body.pdf-mode .text-primary,
-body.pdf-mode .value, 
+body.pdf-mode .value,
 body.pdf-mode .detail-value,
 body.pdf-mode .calculated-value,
 body.pdf-mode .pulse,
@@ -757,30 +764,45 @@ body.pdf-mode span[id*="val"] {
     color: #000000 !important;
     -webkit-text-fill-color: #000000 !important;
     visibility: visible !important;
-    display: inline-block !important; /* Ensure space */ 
+    display: inline-block !important;
+    /* Ensure space */
     font-weight: bold !important;
     opacity: 1 !important;
 }
 
 @media print {
-    .text-success, .text-accent, .text-danger, .text-primary,
-    .value, .detail-value, .calculated-value, .pulse, .highlight,
-    span[class*="text-"], span[id*="val"] {
+
+    .text-success,
+    .text-accent,
+    .text-danger,
+    .text-primary,
+    .value,
+    .detail-value,
+    .calculated-value,
+    .pulse,
+    .highlight,
+    span[class*="text-"],
+    span[id*="val"] {
         color: #000000 !important;
         -webkit-text-fill-color: #000000 !important;
         visibility: visible !important;
-    display: inline-block !important; /* Ensure space */ 
-    font-weight: bold !important;
+        display: inline-block !important;
+        /* Ensure space */
+        font-weight: bold !important;
         opacity: 1 !important;
     }
 }
 
 
 /* Layout Fix for PDF rows */
-body.pdf-mode .detail-item, 
-body.pdf-mode .result-row, 
+body.pdf-mode .detail-item,
+body.pdf-mode .result-row,
 body.pdf-mode .revision-row,
-body.pdf-mode .revised-bp-row { border-top: none !important; margin: 0 !important; }
+body.pdf-mode .revised-bp-row {
+    border-top: none !important;
+    margin: 0 !important;
+}
+
 body.pdf-mode .revised-bp-row,
 body.pdf-mode .input-field,
 body.pdf-mode .calculated-row {
@@ -794,7 +816,7 @@ body.pdf-mode .calculated-row {
     padding: 10px 0 !important;
 }
 
-body.pdf-mode .detail-label, 
+body.pdf-mode .detail-label,
 body.pdf-mode .result-row .label,
 body.pdf-mode .input-field label,
 body.pdf-mode .label {
@@ -804,7 +826,7 @@ body.pdf-mode .label {
     color: black !important;
 }
 
-body.pdf-mode .detail-value, 
+body.pdf-mode .detail-value,
 body.pdf-mode .result-row .value,
 body.pdf-mode .value,
 body.pdf-mode .calculated-value,

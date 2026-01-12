@@ -209,160 +209,150 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.classList.remove('pdf-mode');
     };
 
-    const generatePDFBlob = async () => {
-        // Reset scroll to top before capture
-        window.scrollTo(0, 0);
-
-        const reportTitle = prepareForPDF();
-        const element = document.querySelector('.container');
-
-        // Optimize for A4
-        const opt = {
-            margin: 10,
-            filename: `${reportTitle}.pdf`,
-            image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: {
-                scale: 2,
-                useCORS: true,
-                backgroundColor: '#ffffff',
-                logging: false,
-                scrollY: 0,
-                scrollX: 0
-            },
-            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-        };
-
+    const generatePDFResult = async () => {
         try {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            const reportTitle = "PayRevision_Report_" + new Date().getTime();
+
+            // 1. Header & Title
+            doc.setFillColor(59, 130, 246); // Blue theme
+            doc.rect(0, 0, 210, 40, 'F');
+
+            doc.setFontSize(22);
+            doc.setTextColor(255);
+            doc.setFont("helvetica", "bold");
+            doc.text("Pay Revision Report", 14, 25);
+
+            doc.setFontSize(10);
+            doc.setFont("helvetica", "normal");
+            doc.text("Generated on: " + new Date().toLocaleString('en-IN'), 14, 33);
+
+            // 2. Data Extraction
+            const bp = document.getElementById('basic-pay-in').value || "0";
+            const oldGross = document.getElementById('res-gross-old').textContent || "0";
+            const newGross = document.getElementById('res-gross-new').textContent || "0";
+            const growth = document.getElementById('growth-val').textContent || "0";
+            const revisedBp = document.getElementById('res-bp-fixed').textContent || "0";
+
+            // 3. Comparison Table
+            doc.setFontSize(14);
+            doc.setTextColor(40);
+            doc.text("Salary Comparison", 14, 50);
+
+            doc.autoTable({
+                startY: 55,
+                head: [['Component', 'Before Revision', 'After Revision']],
+                body: [
+                    ['Monthly Gross Salary', 'Rs. ' + oldGross, 'Rs. ' + newGross],
+                    ['Basic Pay', 'Rs. ' + bp, 'Rs. ' + revisedBp],
+                    ['Salary Growth', '-', growth]
+                ],
+                theme: 'striped',
+                headStyles: { fillColor: [59, 130, 246] },
+                columnStyles: { 1: { halign: 'right' }, 2: { halign: 'right' } }
+            });
+
+            // 4. Detailed Calculation Table
+            doc.text("Detailed Pay Fixation", 14, doc.lastAutoTable.finalY + 15);
+
+            const daMerged = document.getElementById('res-da-merged').textContent || "0";
+            const fitmentP = document.getElementById('fitment-perc').value || "0";
+            const fitmentV = document.getElementById('res-fitment').textContent || "0";
+            const actualTotal = document.getElementById('res-actual-total').textContent || "0";
+            const balDaP = document.getElementById('bal-da-perc').value || "0";
+            const balDaV = document.getElementById('res-bal-da').textContent || "0";
+            const hraP = document.getElementById('hra-perc').value || "0";
+            const hraV = document.getElementById('res-hra-new').textContent || "0";
+
+            doc.autoTable({
+                startY: doc.lastAutoTable.finalY + 20,
+                head: [['Fixation Step', 'Info', 'Amount']],
+                body: [
+                    ['Base Basic Pay', '-', 'Rs. ' + bp],
+                    ['DA Merged', '31 %', 'Rs. ' + daMerged],
+                    ['Fitment Benefit', fitmentP + ' %', 'Rs. ' + fitmentV],
+                    ['Total Calculation', 'Sum', 'Rs. ' + actualTotal],
+                    ['BP Fixed At', 'Round Next 100', 'Rs. ' + revisedBp],
+                    ['Balance DA', balDaP + ' %', 'Rs. ' + balDaV],
+                    ['HRA', hraP + ' %', 'Rs. ' + hraV]
+                ],
+                theme: 'grid',
+                headStyles: { fillColor: [75, 85, 99] },
+                columnStyles: { 2: { halign: 'right' } }
+            });
+
+            // 5. Footer
+            const finalY = doc.lastAutoTable.finalY + 20;
+            doc.setFontSize(10);
+            doc.setTextColor(150);
+            doc.text("Email: sreee.sreejith@gmail.com", 14, finalY);
+
+            // 6. Output Check
             const cap = window.Capacitor;
-            // Use a more direct check for Plugins availability
-            const hasNativePlugins = !!(cap && cap.Plugins && (cap.Plugins.Filesystem || cap.Plugins.Share));
+            const isNative = !!(cap && cap.Plugins && (cap.Plugins.Filesystem || cap.Plugins.Share));
 
-            if (hasNativePlugins) {
-                const Filesystem = cap.Plugins.Filesystem;
-                const Share = cap.Plugins.Share;
-
-                if (Filesystem && Share) {
-                    const pdfDataUri = await html2pdf().set(opt).from(element).output('datauristring');
-                    cleanupAfterPDF();
-                    return { dataUri: pdfDataUri, title: reportTitle, isNative: true };
-                }
-            }
-
-            // Fallback for Web/Desktop
-            const pdfBlob = await html2pdf().set(opt).from(element).output('blob');
-            cleanupAfterPDF();
-            return { blob: pdfBlob, title: reportTitle, isNative: false };
+            return { blob: doc.output('blob'), title: reportTitle };
         } catch (err) {
-            cleanupAfterPDF();
+            console.error("PayRevision PDF Error:", err);
             throw err;
         }
     };
 
-    const handleNativeSave = async (dataUri, filename) => {
+    const downloadPDF = async () => {
+        const btn = document.getElementById('downloadBtn');
+        const originalText = btn?.innerHTML || "Download";
+        if (btn) {
+            btn.innerHTML = "<span>⏳</span> Saving...";
+            btn.disabled = true;
+        }
+
         try {
-            const Plugins = window.Capacitor?.Plugins;
-
-            // Debug: Check if Plugins object exists
-            if (!Plugins) {
-                alert("DEBUG: window.Capacitor.Plugins is UNDEFINED. Bridge failed.");
-                throw new Error("Capacitor Bridge not found.");
+            const result = await generatePDFResult();
+            await window.PDFHelper.download(result.blob, `${result.title}.pdf`);
+        } catch (err) {
+            alert("Error generating PDF for download.");
+        } finally {
+            if (btn) {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
             }
-
-            const Filesystem = Plugins.Filesystem;
-            const Share = Plugins.Share;
-
-            if (!Filesystem) {
-                alert("DEBUG: Filesystem plugin not found in Plugins object.");
-                throw new Error("Filesystem plugin missing.");
-            }
-            if (!Share) {
-                alert("DEBUG: Share plugin not found in Plugins object.");
-                throw new Error("Share plugin missing.");
-            }
-
-            // Strip prefix for Filesystem write
-            const base64Data = dataUri.split(',')[1] || dataUri;
-
-            // Write to Cache Directory
-            const fileResult = await Filesystem.writeFile({
-                path: filename,
-                data: base64Data,
-                directory: 'CACHE'
-            });
-
-            // Share the file
-            await Share.share({
-                title: 'Pay Revision Report',
-                text: 'Here is your Pay Revision Report',
-                url: fileResult.uri,
-                dialogTitle: 'Save or Share PDF'
-            });
-
-        } catch (e) {
-            console.error('Native save failed', e);
-            alert('APK Error: ' + e.message);
         }
     };
 
+    const sharePDF = async () => {
+        const btn = document.getElementById('shareBtn');
+        const originalText = btn?.innerHTML || "Share";
+        if (btn) {
+            btn.innerHTML = "<span>⏳</span> Sharing...";
+            btn.disabled = true;
+        }
+
+        try {
+            const result = await generatePDFResult();
+            await window.PDFHelper.share(result.blob, `${result.title}.pdf`, 'Pay Revision Report');
+        } catch (err) {
+            console.error("Share error:", err);
+            if (err.name !== 'AbortError' && !err.toString().includes('AbortError')) {
+                alert("Sharing failed. Try 'Download PDF' instead.");
+            }
+        } finally {
+            if (btn) {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
+    };
+
+    const dBtn = document.getElementById('downloadBtn');
+    if (dBtn) dBtn.addEventListener('click', downloadPDF);
+
+    const sBtn = document.getElementById('shareBtn');
+    if (sBtn) sBtn.addEventListener('click', sharePDF);
+
+    // Removing printBtn listener as requested to avoid confusion
     const printBtn = document.getElementById('printBtn');
     if (printBtn) {
-        printBtn.addEventListener('click', async () => {
-            const originalText = printBtn.innerHTML;
-            printBtn.innerHTML = "<span>⏳</span> Generating...";
-            printBtn.disabled = true;
-
-            try {
-                const result = await generatePDFBlob();
-
-                if (result.isNative) {
-                    await handleNativeSave(result.dataUri, `${result.title}.pdf`);
-                } else {
-                    // Browser Fallback
-                    const link = document.createElement('a');
-                    link.href = URL.createObjectURL(result.blob);
-                    link.download = `${result.title}.pdf`;
-                    link.click();
-                }
-            } catch (err) {
-                console.error(err);
-                alert("PDF Generation failed. Try standard print.");
-                window.print();
-            } finally {
-                printBtn.innerHTML = originalText;
-                printBtn.disabled = false;
-            }
-        });
-    }
-
-    const shareBtn = document.getElementById('shareBtn');
-    if (shareBtn) {
-        shareBtn.addEventListener('click', async () => {
-            const originalText = shareBtn.innerHTML;
-            shareBtn.innerHTML = "<span>⏳</span> Preparing...";
-            shareBtn.disabled = true;
-
-            try {
-                const result = await generatePDFBlob();
-
-                if (result.isNative) {
-                    await handleNativeSave(result.dataUri, `${result.title}.pdf`);
-                } else if (navigator.share) {
-                    const file = new File([result.blob], `${result.title}.pdf`, { type: 'application/pdf' });
-                    await navigator.share({
-                        files: [file],
-                        title: 'Pay Revision Report',
-                        text: 'Sharing my pay revision calculation report.'
-                    });
-                } else {
-                    alert("Sharing not supported on this browser.");
-                }
-            } catch (err) {
-                console.error(err);
-                alert("Sharing failed.");
-            } finally {
-                shareBtn.innerHTML = originalText;
-                shareBtn.disabled = false;
-            }
-        });
+        printBtn.style.display = 'none'; // Hide it entirely
     }
 });

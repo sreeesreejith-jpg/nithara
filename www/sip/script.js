@@ -70,141 +70,123 @@ const cleanupAfterPDF = () => {
 };
 
 const generatePDFResult = async () => {
-    // Reset scroll to top before capture
-    window.scrollTo(0, 0);
-
-    const reportTitle = prepareForPDF();
-    const element = document.querySelector('.container');
-
-    // Optimize for A4
-    const opt = {
-        margin: 10,
-        filename: `${reportTitle}.pdf`,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: {
-            scale: 2,
-            useCORS: true,
-            backgroundColor: '#ffffff',
-            logging: false,
-            scrollY: 0,
-            scrollX: 0
-        },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-    };
-
     try {
-        const cap = window.Capacitor;
-        const hasNativePlugins = !!(cap && cap.Plugins && (cap.Plugins.Filesystem || cap.Plugins.Share));
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        const reportTitle = "SIP_Report_" + new Date().getTime();
 
-        if (hasNativePlugins) {
-            const Filesystem = cap.Plugins.Filesystem;
-            const Share = cap.Plugins.Share;
+        // 1. Header & Title 
+        doc.setFillColor(16, 185, 129); // Green theme
+        doc.rect(0, 0, 210, 40, 'F');
 
-            if (Filesystem && Share) {
-                const pdfDataUri = await html2pdf().set(opt).from(element).output('datauristring');
-                cleanupAfterPDF();
-                return { dataUri: pdfDataUri, title: reportTitle, isNative: true };
+        doc.setFontSize(22);
+        doc.setTextColor(255);
+        doc.setFont("helvetica", "bold");
+        doc.text("SIP Investment Report", 14, 25);
+
+        doc.setFontSize(10);
+        doc.setFont("helvetica", "normal");
+        doc.text("Generated on: " + new Date().toLocaleString('en-IN'), 14, 33);
+
+        // 2. Data Extraction
+        const mon = fields.investment.value || "0";
+        const rat = fields.rate.value || "0";
+        const yrs = fields.years.value || "0";
+        const mat = display.total.textContent || "0";
+        const inv = display.invested.textContent || "0";
+        const ret = display.returns.textContent || "0";
+
+        // 3. Table generation
+        doc.autoTable({
+            startY: 50,
+            head: [['Investment Parameter', 'Detail']],
+            body: [
+                ['Monthly Investment', 'Rs. ' + mon],
+                ['Expected Return Rate', rat + ' %'],
+                ['Time Period', yrs + ' Years'],
+                ['Total Invested Amount', 'Rs. ' + inv],
+                ['Estimated Returns (Wealth Gain)', 'Rs. ' + ret],
+                ['Net Maturity Value', 'Rs. ' + mat]
+            ],
+            theme: 'striped',
+            headStyles: { fillColor: [16, 185, 129], fontSize: 13 },
+            styles: { fontSize: 12, cellPadding: 6 },
+            columnStyles: {
+                0: { fontStyle: 'bold' },
+                1: { halign: 'right' }
             }
-        }
+        });
 
-        const pdfBlob = await html2pdf().set(opt).from(element).output('blob');
-        cleanupAfterPDF();
-        return { blob: pdfBlob, title: reportTitle, isNative: false };
+        // 4. Footer
+        const finalY = doc.lastAutoTable.finalY + 20;
+        doc.setFontSize(10);
+        doc.setTextColor(100);
+        doc.text("Email: sreee.sreejith@gmail.com", 14, finalY);
+        doc.text("* Note: Mutual fund investments are subject to market risks.", 14, finalY + 7);
+
+        // 5. Output Check
+        const cap = window.Capacitor;
+        const isNative = !!(cap && cap.Plugins && (cap.Plugins.Filesystem || cap.Plugins.Share));
+
+        return { blob: doc.output('blob'), title: reportTitle };
     } catch (err) {
-        cleanupAfterPDF();
+        console.error("SIP PDF Error:", err);
         throw err;
     }
 };
 
-const handleNativeSave = async (dataUri, filename) => {
+const downloadPDF = async () => {
+    const btn = document.getElementById('downloadBtn');
+    const originalText = btn?.innerHTML || "Download";
+    if (btn) {
+        btn.innerHTML = "<span>⏳</span> Saving...";
+        btn.disabled = true;
+    }
+
     try {
-        const cap = window.Capacitor || window.capacitor;
-        const Plugins = cap?.Plugins;
-
-        if (!Plugins) throw new Error("Capacitor Plugins not found.");
-
-        const Filesystem = Plugins.Filesystem;
-        const Share = Plugins.Share;
-
-        if (!Filesystem) throw new Error("Filesystem plugin missing.");
-        if (!Share) throw new Error("Share plugin missing.");
-
-        const base64Data = dataUri.split(',')[1] || dataUri;
-
-        const fileResult = await Filesystem.writeFile({
-            path: filename,
-            data: base64Data,
-            directory: 'CACHE'
-        });
-
-        await Share.share({
-            title: 'SIP Report',
-            text: 'Here is your report',
-            url: fileResult.uri,
-            dialogTitle: 'Save or Share PDF'
-        });
-
-    } catch (e) {
-        console.error('Native save failed', e);
-        alert('APK Error: ' + e.message);
+        const result = await generatePDFResult();
+        await window.PDFHelper.download(result.blob, `${result.title}.pdf`);
+    } catch (err) {
+        alert("Error generating PDF for download.");
+    } finally {
+        if (btn) {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }
     }
 };
 
+const sharePDF = async () => {
+    const btn = document.getElementById('shareBtn');
+    const originalText = btn?.innerHTML || "Share";
+    if (btn) {
+        btn.innerHTML = "<span>⏳</span> Sharing...";
+        btn.disabled = true;
+    }
+
+    try {
+        const result = await generatePDFResult();
+        await window.PDFHelper.share(result.blob, `${result.title}.pdf`, 'SIP Report');
+    } catch (err) {
+        console.error("Share error:", err);
+        if (err.name !== 'AbortError' && !err.toString().includes('AbortError')) {
+            alert("Sharing failed. Try 'Download PDF' instead.");
+        }
+    } finally {
+        if (btn) {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }
+    }
+};
+
+const dBtn = document.getElementById('downloadBtn');
+if (dBtn) dBtn.addEventListener('click', downloadPDF);
+
+const sBtn = document.getElementById('shareBtn');
+if (sBtn) sBtn.addEventListener('click', sharePDF);
+
 const printBtn = document.getElementById('printBtn');
 if (printBtn) {
-    printBtn.addEventListener('click', async () => {
-        const originalText = printBtn.innerHTML;
-        printBtn.innerHTML = "<span>⏳</span> Generating...";
-        printBtn.disabled = true;
-
-        try {
-            const result = await generatePDFResult();
-            if (result.isNative) {
-                await handleNativeSave(result.dataUri, `${result.title}.pdf`);
-            } else {
-                const link = document.createElement('a');
-                link.href = URL.createObjectURL(result.blob);
-                link.download = `${result.title}.pdf`;
-                link.click();
-            }
-        } catch (err) {
-            console.error(err);
-            alert("PDF Generation failed. Try standard print.");
-            window.print();
-        } finally {
-            printBtn.innerHTML = originalText;
-            printBtn.disabled = false;
-        }
-    });
-}
-
-const shareBtn = document.getElementById('shareBtn');
-if (shareBtn) {
-    shareBtn.addEventListener('click', async () => {
-        const originalText = shareBtn.innerHTML;
-        shareBtn.innerHTML = "<span>⏳</span> Preparing...";
-        shareBtn.disabled = true;
-
-        try {
-            const result = await generatePDFResult();
-            if (result.isNative) {
-                await handleNativeSave(result.dataUri, `${result.title}.pdf`);
-            } else if (navigator.share) {
-                const file = new File([result.blob], `${result.title}.pdf`, { type: 'application/pdf' });
-                await navigator.share({
-                    files: [file],
-                    title: 'SIP Calculation Report',
-                    text: 'Sharing my SIP calculation report.'
-                });
-            } else {
-                alert("Sharing not supported on this browser.");
-            }
-        } catch (err) {
-            console.error(err);
-            alert("Sharing failed.");
-        } finally {
-            shareBtn.innerHTML = originalText;
-            shareBtn.disabled = false;
-        }
-    });
+    printBtn.style.display = 'none';
 }
