@@ -220,11 +220,20 @@ document.addEventListener('DOMContentLoaded', () => {
             doc.setFontSize(22);
             doc.setTextColor(255);
             doc.setFont("helvetica", "bold");
-            doc.text("Salary Calculation Report", 14, 25);
+            doc.text("Salary Calculation Report", 14, 20);
 
             doc.setFontSize(10);
             doc.setFont("helvetica", "normal");
-            doc.text("Generated on: " + new Date().toLocaleString('en-IN'), 14, 33);
+
+            const name = document.getElementById('reportName')?.value;
+            const pen = document.getElementById('penNumber')?.value;
+            const school = document.getElementById('schoolName')?.value;
+
+            let headerY = 28;
+            if (name) { doc.text(`Employee: ${name}`, 14, headerY); headerY += 5; }
+            if (pen) { doc.text(`PEN Number: ${pen}`, 14, headerY); headerY += 5; }
+            if (school) { doc.text(`School/Office: ${school}`, 14, headerY); headerY += 5; }
+
 
             // 2. Data Extraction
             const bp = document.getElementById('basic-pay').value || "0";
@@ -253,7 +262,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     ['DA', daP + ' %', 'Rs. ' + daV],
                     ['HRA', hraP + ' %', 'Rs. ' + hraV],
                     ['DA Pending', daPendP + ' %', 'Rs. ' + daPendV],
-                    ['Other Earnings', '-', 'Rs. ' + otherEarn]
+                    ['Other Earnings', '-', 'Rs. ' + otherEarn],
+                    ['Gross Salary', '-', 'Rs. ' + gross]
                 ],
                 theme: 'striped',
                 headStyles: { fillColor: [16, 185, 129] },
@@ -278,7 +288,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     ['SLI', 'Rs. ' + d3],
                     ['Medisep', 'Rs. ' + d4],
                     ['SLI Loan', 'Rs. ' + d5],
-                    ['Other Deductions', 'Rs. ' + d6]
+                    ['Other Deductions', 'Rs. ' + d6],
+                    ['Total Deductions', 'Rs. ' + deduct]
                 ],
                 theme: 'striped',
                 headStyles: { fillColor: [239, 68, 68] }, // Red for deductions
@@ -334,7 +345,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             console.log('Calling PDFHelper.download...');
-            await await window.PDFHelper.download(result.blob, `${result.title}.pdf`);
+            await window.PDFHelper.download(result.blob, `${result.title}.pdf`);
             console.log('Download initiated successfully');
         } catch (err) {
             console.error("Download error:", err);

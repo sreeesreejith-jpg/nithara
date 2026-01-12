@@ -194,16 +194,6 @@ document.addEventListener('DOMContentLoaded', () => {
     calculate();
 
     // PDF & Sharing Logic
-    const prepareForPDF = () => {
-        const printDate = document.getElementById('printDate');
-        if (printDate) {
-            printDate.textContent = "Generated on: " + new Date().toLocaleDateString('en-IN', {
-                day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit'
-            });
-        }
-        document.body.classList.add('pdf-mode');
-        return "PayRevision_Report_" + new Date().getTime();
-    };
 
     const cleanupAfterPDF = () => {
         document.body.classList.remove('pdf-mode');
@@ -222,11 +212,20 @@ document.addEventListener('DOMContentLoaded', () => {
             doc.setFontSize(22);
             doc.setTextColor(255);
             doc.setFont("helvetica", "bold");
-            doc.text("Pay Revision Report", 14, 25);
+            doc.text("Pay Revision Report", 14, 20);
 
             doc.setFontSize(10);
             doc.setFont("helvetica", "normal");
-            doc.text("Generated on: " + new Date().toLocaleString('en-IN'), 14, 33);
+
+            const name = document.getElementById('reportName')?.value;
+            const pen = document.getElementById('penNumber')?.value;
+            const school = document.getElementById('schoolName')?.value;
+
+            let headerY = 28;
+            if (name) { doc.text(`Employee: ${name}`, 14, headerY); headerY += 5; }
+            if (pen) { doc.text(`PEN Number: ${pen}`, 14, headerY); headerY += 5; }
+            if (school) { doc.text(`School/Office: ${school}`, 14, headerY); headerY += 5; }
+
 
             // 2. Data Extraction
             const bp = document.getElementById('basic-pay-in').value || "0";

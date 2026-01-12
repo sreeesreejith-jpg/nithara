@@ -115,16 +115,6 @@ document.addEventListener('DOMContentLoaded', () => {
     calculate();
 
     // PDF & Sharing Logic
-    const prepareForPDF = () => {
-        const printDate = document.getElementById('printDate');
-        if (printDate) {
-            printDate.textContent = "Generated on: " + new Date().toLocaleDateString('en-IN', {
-                day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit'
-            });
-        }
-        document.body.classList.add('pdf-mode');
-        return "Housing_Report_" + new Date().getTime();
-    };
 
     const cleanupAfterPDF = () => {
         document.body.classList.remove('pdf-mode');
@@ -143,11 +133,8 @@ document.addEventListener('DOMContentLoaded', () => {
             doc.setFontSize(22);
             doc.setTextColor(255);
             doc.setFont("helvetica", "bold");
-            doc.text("Housing Loan Report", 14, 25);
+            doc.text("Housing Loan Calculation Report", 14, 20);
 
-            doc.setFontSize(10);
-            doc.setFont("helvetica", "normal");
-            doc.text("Generated on: " + new Date().toLocaleString('en-IN'), 14, 33);
 
             // 2. Data Extraction
             const cents = document.getElementById('land-area').value || "0";

@@ -182,16 +182,6 @@ function calcRate(P, T, E) {
     return (low + high) / 2 * 12 * 100;
 }
 
-const prepareForPDF = () => {
-    const printDate = document.getElementById('printDate');
-    if (printDate) {
-        printDate.textContent = "Generated on: " + new Date().toLocaleDateString('en-IN', {
-            day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit'
-        });
-    }
-    document.body.classList.add('pdf-mode');
-    return "EMI_Report_" + new Date().getTime();
-};
 
 const cleanupAfterPDF = () => { document.body.classList.remove('pdf-mode'); };
 
@@ -208,11 +198,8 @@ const generatePDFResult = async () => {
         doc.setFontSize(24);
         doc.setTextColor(255, 255, 255);
         doc.setFont("helvetica", "bold");
-        doc.text("EMI Calculation Report", 14, 25);
+        doc.text("EMI Calculation Report", 14, 20);
 
-        doc.setFontSize(10);
-        doc.setFont("helvetica", "normal");
-        doc.text("Generated on: " + new Date().toLocaleString('en-IN'), 14, 33);
 
         // 2. Data extraction
         const P = fields.principal.value || "0";
@@ -267,7 +254,7 @@ const downloadPDF = async () => {
 
     try {
         const result = await generatePDFResult();
-        await await window.PDFHelper.download(result.blob, `${result.title}.pdf`);
+        await window.PDFHelper.download(result.blob, `${result.title}.pdf`);
     } catch (err) {
         alert("Error generating PDF for download.");
     } finally {

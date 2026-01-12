@@ -268,14 +268,17 @@ document.addEventListener('DOMContentLoaded', () => {
         // Visibility Condition: Show sections only if Basic Pay and Service Years are valid
         const detailsSection = document.getElementById('details-section');
         const benefitsSection = document.getElementById('benefits-section');
+        const reportSettingsSection = document.getElementById('report-settings-section');
 
-        if (detailsSection && benefitsSection) {
+        if (detailsSection && benefitsSection && reportSettingsSection) {
             if (bp > 0 && years > 0) {
                 detailsSection.classList.remove('hidden');
                 benefitsSection.classList.remove('hidden');
+                reportSettingsSection.classList.remove('hidden');
             } else {
                 detailsSection.classList.add('hidden');
                 benefitsSection.classList.add('hidden');
+                reportSettingsSection.classList.add('hidden');
             }
         }
     };
@@ -295,14 +298,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit'
             });
         }
-
-        const checkService = document.getElementById('checkService');
-        const checkDetails = document.getElementById('checkDetails');
-        const checkSummary = document.getElementById('checkSummary');
-
-        if (checkService && !checkService.checked) document.body.classList.add('hide-service');
-        if (checkDetails && !checkDetails.checked) document.body.classList.add('hide-details');
-        if (checkSummary && !checkSummary.checked) document.body.classList.add('hide-summary');
 
         document.body.classList.add('pdf-mode');
         return reportTitle;
@@ -327,15 +322,20 @@ document.addEventListener('DOMContentLoaded', () => {
             doc.setFontSize(22);
             doc.setTextColor(255);
             doc.setFont("helvetica", "bold");
-            doc.text("Pension & DCRG Calculation Report", 14, 25);
+            doc.text("Pension & DCRG Calculation Report", 14, 20);
 
-            doc.setFontSize(11);
+            doc.setFontSize(10);
             doc.setFont("helvetica", "normal");
-            const nameInput = document.getElementById('reportName');
-            if (nameInput && nameInput.value) {
-                doc.text("Employee: " + nameInput.value, 14, 33);
-            }
-            doc.text("Generated on: " + new Date().toLocaleString('en-IN'), 14, 39);
+
+            const name = document.getElementById('reportName')?.value;
+            const pen = document.getElementById('penNumber')?.value;
+            const school = document.getElementById('schoolName')?.value;
+
+            let headerY = 28;
+            if (name) { doc.text(`Employee: ${name}`, 14, headerY); headerY += 5; }
+            if (pen) { doc.text(`PEN Number: ${pen}`, 14, headerY); headerY += 5; }
+            if (school) { doc.text(`School/Office: ${school}`, 14, headerY); headerY += 5; }
+
 
             // 2. Section: Service Details
             doc.setFontSize(14);
@@ -396,7 +396,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: [
                     ['Full Basic Pension', 'Rs. ' + bPension, stepPen],
                     ['Reduced Pension (60%)', 'Rs. ' + rPension, stepRed],
-                    ['Commutable Pension (40%)', 'Rs. ' + cPension, 'Portion for Lump Sum']
+                    ['Commutable Pension (40%)', 'Rs. ' + cPension, bPension + ' × 40%']
                 ],
                 theme: 'grid',
                 headStyles: { fillColor: [16, 185, 129] },
@@ -416,7 +416,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 startY: doc.lastAutoTable.finalY + 17,
                 head: [['Description', 'Amount', 'Formula / Step']],
                 body: [
-                    ['Pension Commutation', 'Rs. ' + commute, stepCom + ' (Commutable Portion × Factor × 12)'],
+                    ['Pension Commutation', 'Rs. ' + commute, stepCom],
                     ['DCRG Amount', 'Rs. ' + dcrgAmt, stepDcrgVal],
                     ['TOTAL LUMP SUM', 'Rs. ' + totalLump, 'Commutation + DCRG']
                 ],
@@ -429,8 +429,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const finalY = doc.lastAutoTable.finalY + 15;
             doc.setFontSize(10);
             doc.setTextColor(100);
-            doc.text("* Computed based on Kerala Government Pension Rules.", 14, finalY);
-            doc.text("Email: sreee.sreejith@gmail.com", 14, finalY + 7);
+            doc.text("Email: sreee.sreejith@gmail.com", 14, finalY);
 
             cleanupAfterPDF(); // Cleanup UI changes if any
 
@@ -457,7 +456,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         try {
             const result = await generatePDFResult();
-            await await window.PDFHelper.download(result.blob, `${result.title}.pdf`);
+            await window.PDFHelper.download(result.blob, `${result.title}.pdf`);
         } catch (err) {
             alert("Error generating PDF for download.");
         } finally {

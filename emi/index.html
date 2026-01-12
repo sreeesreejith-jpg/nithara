@@ -19,10 +19,6 @@
 </head>
 
 <body>
-    <div class="report-header">
-        <h1>EMI Calculation Report</h1>
-        <p id="printDate"></p>
-    </div>
     <script>
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('sw.js')
@@ -118,14 +114,17 @@
             <a href="amortization.html" class="btn-secondary" id="btn-amortization">Amortization Details</a>
         </div>
 
-        <div class="button-group">
-            <button id="downloadBtn" class="download-button">
+        <div class="button-group" style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+            <button id="downloadBtn" class="download-button"
+                style="flex: 1; padding: 0.8rem; border-radius: 10px; background: #4f46e5; color: white; border: none; font-weight: bold; cursor: pointer;">
                 <span>📥</span> Download PDF
             </button>
-            <button id="shareBtn" class="share-button">
+            <button id="shareBtn" class="share-button"
+                style="flex: 1; padding: 0.8rem; border-radius: 10px; background: #10b981; color: white; border: none; font-weight: bold; cursor: pointer;">
                 <span>📤</span> Share Report
             </button>
         </div>
+
         <p class="disclaimer">* Calculations are approximate</p>
         <footer class="footer">email: sreee.sreejith@gmail.com
 

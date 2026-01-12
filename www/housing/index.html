@@ -33,10 +33,6 @@
 </head>
 
 <body>
-    <div class="report-header">
-        <h1>Housing Loan Calculation Report</h1>
-        <p id="printDate"></p>
-    </div>
     <div class="background-animate"></div>
     <div class="container compact-mode">
         <header class="mini-header">
@@ -151,14 +147,17 @@
             </div>
         </main>
 
-        <div class="button-group">
-            <button id="downloadBtn" class="download-button">
+        <div class="button-group" style="display: flex; gap: 0.8rem; margin-top: 1.2rem;">
+            <button id="downloadBtn" class="download-button"
+                style="flex: 1; padding: 0.7rem; border-radius: 8px; background: #6366f1; color: white; border: none; font-weight: bold; cursor: pointer;">
                 <span>📥</span> Download PDF
             </button>
-            <button id="shareBtn" class="share-button">
+            <button id="shareBtn" class="share-button"
+                style="flex: 1; padding: 0.7rem; border-radius: 8px; background: #10b981; color: white; border: none; font-weight: bold; cursor: pointer;">
                 <span>📤</span> Share Report
             </button>
         </div>
+
         <p class="disclaimer">* Calculations are approximate</p>
         <footer>email: sreee.sreejith@gmail.com
 

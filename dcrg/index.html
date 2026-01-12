@@ -165,17 +165,29 @@
                     <span class="label">Balance Pension Next Month Onwards</span>
                 </div>
             </div>
+        </div>
 
-            <div class="print-config">
-                <div class="print-field">
-                    <label for="reportName">Employee Name (Optional)</label>
-                    <input type="text" id="reportName" placeholder="Enter name for report">
+        <!-- Section 4: Report Settings -->
+        <div class="card report-card hidden" id="report-settings-section">
+            <h2>Report Settings</h2>
+            <div class="input-grid">
+                <div class="input-group">
+                    <label for="reportName">Employee Name</label>
+                    <div class="input-wrapper">
+                        <input type="text" id="reportName" placeholder="Optional">
+                    </div>
                 </div>
-                <div class="print-options">
-                    <span class="options-label">Include in Report:</span>
-                    <label><input type="checkbox" id="checkService" checked> Service Details</label>
-                    <label><input type="checkbox" id="checkDetails" checked> Calculation Details</label>
-                    <label><input type="checkbox" id="checkSummary" checked> Summary</label>
+                <div class="input-group">
+                    <label for="penNumber">PEN Number</label>
+                    <div class="input-wrapper">
+                        <input type="text" id="penNumber" placeholder="Optional">
+                    </div>
+                </div>
+                <div class="input-group full-width">
+                    <label for="schoolName">School / Office Name</label>
+                    <div class="input-wrapper">
+                        <input type="text" id="schoolName" placeholder="Optional">
+                    </div>
                 </div>
             </div>
 

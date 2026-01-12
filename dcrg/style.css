@@ -859,3 +859,32 @@ body.pdf-mode .detail-desc {
     font-size: 0.8rem !important;
     margin-top: 4px !important;
 }
+
+/* Report Card Specifics */
+.report-card {
+    border-top: 4px solid #3b82f6 !important;
+    background: linear-gradient(135deg, #1e1b4b 0%, #0f172a 100%) !important;
+    margin-top: 2rem !important;
+}
+
+.report-card h2 {
+    font-size: 1.25rem;
+    margin-bottom: 1rem;
+    color: #60a5fa !important;
+}
+
+.report-card .input-wrapper input {
+    text-align: left !important;
+    padding-left: 1rem !important;
+}
+
+.full-width {
+    grid-column: 1 / -1;
+}
+
+@media (max-width: 480px) {
+    .report-card .input-grid {
+        grid-template-columns: 1fr !important;
+        gap: 0.25rem;
+    }
+}
