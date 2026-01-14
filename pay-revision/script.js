@@ -168,6 +168,49 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 150);
     }
 
+    // Helper to sync selection based on scroll position (Mobile friendly)
+    function syncSelectionOnScroll(dropdownEl, inputEl) {
+        const items = dropdownEl.querySelectorAll('li');
+        if (items.length === 0) return;
+
+        const dropdownRect = dropdownEl.getBoundingClientRect();
+        const centerY = dropdownRect.top + dropdownRect.height / 2;
+
+        let closestItem = null;
+        let minDistance = Infinity;
+
+        items.forEach(item => {
+            const itemRect = item.getBoundingClientRect();
+            const itemCenterY = itemRect.top + itemRect.height / 2;
+            const distance = Math.abs(centerY - itemCenterY);
+
+            if (distance < minDistance) {
+                minDistance = distance;
+                closestItem = item;
+            }
+        });
+
+        if (closestItem && !closestItem.classList.contains('active')) {
+            items.forEach(li => li.classList.remove('active'));
+            closestItem.classList.add('active');
+            inputEl.value = closestItem.textContent;
+            calculate();
+        }
+    }
+
+    // Add scroll listeners for live updates on mobile
+    dropdown.addEventListener('scroll', () => {
+        if (dropdown.classList.contains('show')) {
+            syncSelectionOnScroll(dropdown, basicPayInput);
+        }
+    });
+
+    yearsDropdown.addEventListener('scroll', () => {
+        if (yearsDropdown.classList.contains('show')) {
+            syncSelectionOnScroll(yearsDropdown, yearsInput);
+        }
+    });
+
     // Input Listeners for Basic Pay
     basicPayInput.addEventListener('focus', function () {
         this.select();
