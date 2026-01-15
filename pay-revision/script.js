@@ -1,21 +1,29 @@
 document.addEventListener('DOMContentLoaded', () => {
     const inputs = [
         'basic-pay-in',
-        'da-pend-perc',
-        'hra-old-perc',
         'fitment-perc',
         'bal-da-perc',
         'hra-perc',
-        'years-service'
+        'years-service',
+        'increment-month',
+        'grade-check',
+        'grade-month',
+        'grade-year',
+        'others-val'
     ];
+
+    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
     inputs.forEach(id => {
         const el = document.getElementById(id);
-        el.addEventListener('input', calculate);
-        // Auto-select text on click/focus to easily see datalist
-        el.addEventListener('click', function () {
-            this.select();
-        });
+        if (el) {
+            el.addEventListener('input', calculate);
+            el.addEventListener('change', calculate);
+            // Auto-select text on click/focus to easily see datalist
+            el.addEventListener('click', function () {
+                this.select();
+            });
+        }
     });
 
     const weightageCheck = document.getElementById('weightage-check');
@@ -31,6 +39,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 weightageContainer.style.display = 'none';
                 if (weightageResultRow) weightageResultRow.style.display = 'none';
             }
+            calculate();
+        });
+    }
+
+    const gradeCheck = document.getElementById('grade-check');
+    const gradeDetailsContainer = document.getElementById('grade-details-container');
+
+    if (gradeCheck && gradeDetailsContainer) {
+        gradeCheck.addEventListener('change', () => {
+            gradeDetailsContainer.style.display = gradeCheck.checked ? 'flex' : 'none';
             calculate();
         });
     }
@@ -268,84 +286,197 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     function calculate() {
+        // Inputs
         const bp = parseFloat(document.getElementById('basic-pay-in').value) || 0;
-
-        // Before Revision Percentages
-        const daOldPerc = 22; // Fixed
-        const daPendPerc = parseFloat(document.getElementById('da-pend-perc').value) || 0;
-        const hraOldPerc = parseFloat(document.getElementById('hra-old-perc').value) || 0;
-
-        // After Revision Percentages
-        const daMergedPerc = 31; // Fixed
         const fitmentPerc = parseFloat(document.getElementById('fitment-perc').value) || 0;
+        const isWeightageEnabled = document.getElementById('weightage-check')?.checked;
+        const yearsService = Math.floor(parseFloat(document.getElementById('years-service').value) || 0);
+
+        const incMonthVal = document.getElementById('increment-month').value;
+        const incMonth = incMonthVal !== "" ? parseInt(incMonthVal) : null;
+
+        const hasGrade = document.getElementById('grade-check')?.checked;
+        const gradeMonth = parseInt(document.getElementById('grade-month').value);
+        const gradeYear = parseInt(document.getElementById('grade-year').value);
+
+        // --- DYNAMIC PROGRESSION CALCULATION (TIMELINE) ---
+        const startDate = new Date(2024, 6, 1); // July 1, 2024
+
+        // Progression goes up to the present month (User prefers Jan 2026 as benchmark)
+        let today = new Date();
+        const jan2026 = new Date(2026, 0, 1);
+        if (!today || today < jan2026) {
+            today = jan2026;
+        }
+
+
+        let events = [];
+        let incrementsCount = 0;
+        let checkDate = new Date(startDate);
+
+        // 1. Identify all events between 07/2024 and Benchmark Date
+        while (checkDate <= today) {
+            // Check for Annual Increment
+            if (incMonth !== null && checkDate.getMonth() === incMonth && checkDate.getTime() !== startDate.getTime()) {
+                incrementsCount++;
+                events.push({
+                    type: 'increment',
+                    date: new Date(checkDate),
+                    label: `Annual Increment (${monthNames[checkDate.getMonth()]} ${checkDate.getFullYear()})`,
+                    steps: 1
+                });
+            }
+            // Check for Grade (Must be AFTER July 2024)
+            const gradeThreshold = new Date(2024, 7, 1); // August 1, 2024
+            if (hasGrade && checkDate.getMonth() === gradeMonth && checkDate.getFullYear() === gradeYear) {
+                if (checkDate >= gradeThreshold) {
+                    events.push({
+                        type: 'grade',
+                        date: new Date(checkDate),
+                        label: `Higher Grade Promotion (${monthNames[checkDate.getMonth()]} ${checkDate.getFullYear()})`,
+                        steps: 2
+                    });
+                }
+            }
+            checkDate.setMonth(checkDate.getMonth() + 1);
+        }
+
+        // Sort events by date (Stable sort: Increment always before Grade on same date)
+        events.sort((a, b) => {
+            if (a.date.getTime() !== b.date.getTime()) {
+                return a.date - b.date;
+            }
+            if (a.type === 'increment' && b.type === 'grade') return -1;
+            if (a.type === 'grade' && b.type === 'increment') return 1;
+            return 0;
+        });
+        // --------------------------------------------------
+
+        // Static Percentages
+        const daMergedPerc = 31;
         const balDaPerc = parseFloat(document.getElementById('bal-da-perc').value) || 0;
         const hraNewPerc = parseFloat(document.getElementById('hra-perc').value) || 0;
 
-        // Before Revision Calculations
-        const daOldVal = Math.round(bp * (daOldPerc / 100));
-        const daPendVal = Math.round(bp * (daPendPerc / 100));
-        const hraOldVal = Math.round(bp * (hraOldPerc / 100));
-        const grossOld = bp + daOldVal + daPendVal + hraOldVal;
+        // 1. GENERATE DYNAMIC MASTER SCALE
+        // This calculates the revised BP for EVERY stage in the old scale
+        const revisedScale = payStagesList.map(stage => {
+            const mDaVal = Math.round(stage * (daMergedPerc / 100));
+            const mFitmentVal = Math.round(stage * (fitmentPerc / 100));
 
-        // Update Before UI
-        document.getElementById('res-bp-old').textContent = bp;
-        document.getElementById('res-da-old').textContent = daOldVal;
-        document.getElementById('res-da-pend').textContent = daPendVal;
-        document.getElementById('res-hra-old').textContent = hraOldVal;
-        document.getElementById('res-gross-old').textContent = grossOld;
-        document.getElementById('gross-old-val').textContent = grossOld;
+            let mWeightagePerc = 0;
+            let mWeightageVal = 0;
+            if (isWeightageEnabled) {
+                mWeightagePerc = Math.min(yearsService * 0.5, 15);
+                mWeightageVal = Math.round(stage * (mWeightagePerc / 100));
+            }
 
-        // After Revision Calculations
-        const daMergedVal = Math.round(bp * (daMergedPerc / 100));
-        const fitmentVal = Math.round(bp * (fitmentPerc / 100));
+            const mActualTotal = stage + mDaVal + mFitmentVal + mWeightageVal;
+            return Math.ceil(mActualTotal / 100) * 100;
+        });
 
-        // Service Weightage: 0.5% per year of service, Max 15%
-        // Only if checked
-        const isWeightageEnabled = document.getElementById('weightage-check')?.checked;
+        // 2. NO LONGER CALCULATING BEFORE REVISION GROSS
+
+        // 3. AFTER REVISION FIXATION (July 2024)
+        const baseIndex = payStagesList.indexOf(bp);
+        let bpFixed = 0;
+        let daMergedVal = 0;
+        let fitmentVal = 0;
         let weightageVal = 0;
         let weightagePerc = 0;
+        let actualTotal = 0;
 
-        if (isWeightageEnabled) {
-            const yearsService = Math.floor(parseFloat(document.getElementById('years-service').value) || 0);
-            weightagePerc = yearsService * 0.5;
-            if (weightagePerc > 15) weightagePerc = 15; // Cap at 15%
-            weightageVal = Math.round(bp * (weightagePerc / 100));
+        if (baseIndex !== -1) {
+            bpFixed = revisedScale[baseIndex];
+
+            // For breakdown display
+            daMergedVal = Math.round(bp * (daMergedPerc / 100));
+            fitmentVal = Math.round(bp * (fitmentPerc / 100));
+            if (isWeightageEnabled) {
+                weightagePerc = Math.min(yearsService * 0.5, 15);
+                weightageVal = Math.round(bp * (weightagePerc / 100));
+            }
+            actualTotal = bp + daMergedVal + fitmentVal + weightageVal;
         }
 
-        const actualTotal = bp + daMergedVal + fitmentVal + weightageVal;
+        // 4. POST-FIXATION PROGRESSION (Timeline Building)
+        const timelineDiv = document.getElementById('timeline-steps');
+        const timelineContainer = document.getElementById('progression-timeline');
+        timelineDiv.innerHTML = '';
 
-        // BP Fixed At: Rounded to next multiple of 100
-        const bpFixed = Math.ceil(actualTotal / 100) * 100;
+        let bpCurrent = bpFixed;
+        let currentIndex = baseIndex;
+        let timelineHTML = '';
 
-        // Updated: Bal DA and HRA are calculated on BP Fixed At
-        const balDaVal = Math.round(bpFixed * (balDaPerc / 100));
-        const hraNewVal = Math.round(bpFixed * (hraNewPerc / 100));
-        const grossNew = bpFixed + balDaVal + hraNewVal;
+        if (baseIndex !== -1) {
+            events.forEach(event => {
+                currentIndex += event.steps;
+                currentIndex = Math.min(currentIndex, revisedScale.length - 1);
+                const stepPay = revisedScale[currentIndex];
 
-        const growth = grossNew - grossOld;
-        const growthPerc = grossOld > 0 ? ((growth / grossOld) * 100).toFixed(1) : 0;
+                // Labels as requested by user
+                const month = monthNames[event.date.getMonth()];
+                const year = event.date.getFullYear();
+                let localizedLabel = "";
+
+                if (event.type === 'increment') {
+                    localizedLabel = `${year} ${month} Annual Increment`;
+                } else {
+                    localizedLabel = `${year} ${month} Higher Grade`;
+                }
+
+                timelineHTML += `
+                    <div style="display: flex; justify-content: space-between; font-size: 0.7rem; color: var(--text-muted); font-weight: 500; border-bottom: 1px solid rgba(255,255,255,0.02); padding: 0.2rem 0;">
+                        <span>&nbsp;&nbsp;&bull; ${localizedLabel}</span>
+                        <span style="font-weight: 700; color: var(--text-main);">Rs. ${stepPay}</span>
+                    </div>
+                `;
+            });
+            bpCurrent = revisedScale[currentIndex];
+        }
+
+        if (timelineHTML && bp > 0) {
+            timelineDiv.innerHTML = timelineHTML;
+            timelineContainer.style.display = 'flex';
+        } else {
+            timelineContainer.style.display = 'none';
+        }
+
+        // 5. CURRENT MONETARY CALCS (Jan 2026)
+        // Note: DA and HRA are now calculated on bpCurrent (the pay as of Jan 2026)
+        const balDaVal = Math.round(bpCurrent * (balDaPerc / 100));
+        const hraNewVal = Math.round(bpCurrent * (hraNewPerc / 100));
+        const othersVal = parseFloat(document.getElementById('others-val').value) || 0;
+        const grossNew = bpCurrent + balDaVal + hraNewVal + othersVal;
 
         // Update After UI
-        document.getElementById('res-bp-new').textContent = bp;
-        document.getElementById('res-da-merged').textContent = daMergedVal;
-        document.getElementById('res-fitment').textContent = fitmentVal;
-        if (isWeightageEnabled) {
-            document.querySelector('#res-weightage-row .label').textContent = `Service Weightage (${weightagePerc.toFixed(1)}%)`;
-        }
-        document.getElementById('res-weightage').textContent = weightageVal;
-        document.getElementById('res-actual-total').textContent = actualTotal;
+        // res-bp-new and breakdown are hidden in HTML but kept for logic if needed
+        const bpNewEl = document.getElementById('res-bp-new');
+        if (bpNewEl) bpNewEl.textContent = bp;
+
+        const daMergedEl = document.getElementById('res-da-merged');
+        if (daMergedEl) daMergedEl.textContent = daMergedVal;
+
+        const fitmentEl = document.getElementById('res-fitment');
+        if (fitmentEl) fitmentEl.textContent = fitmentVal;
+
+        const weightageRow = document.getElementById('res-weightage-row');
+        if (weightageRow) weightageRow.style.display = isWeightageEnabled ? 'grid' : 'none';
+
+        const weightageEl = document.getElementById('res-weightage');
+        if (weightageEl) weightageEl.textContent = weightageVal;
+
+        const actualTotalEl = document.getElementById('res-actual-total');
+        if (actualTotalEl) actualTotalEl.textContent = actualTotal;
+
         document.getElementById('res-bp-fixed').textContent = bpFixed;
+        document.getElementById('res-bp-current').textContent = bpCurrent;
         document.getElementById('res-bal-da').textContent = balDaVal;
         document.getElementById('res-hra-new').textContent = hraNewVal;
+        document.getElementById('res-others').textContent = othersVal;
         document.getElementById('res-gross-new').textContent = grossNew;
-
-        // Update Before UI (already done earlier but ensuring consistency)
-        document.getElementById('res-gross-old').textContent = grossOld;
 
         // Summary Card
         document.getElementById('gross-new-val').textContent = grossNew;
-        document.getElementById('gross-old-val').textContent = grossOld;
-        document.getElementById('growth-val').textContent = bp > 0 ? `${growth} (${growthPerc}%)` : '-';
         document.getElementById('revised-bp-val').textContent = bp > 0 ? bpFixed : '';
     }
 
@@ -360,14 +491,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const generatePDFResult = async () => {
         try {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
+            // Flexible detection for jsPDF in different environments
+            const jsPDFLib = window.jsPDF || (window.jspdf ? window.jspdf.jsPDF : null);
+            if (!jsPDFLib) {
+                console.error("PDF Library (jsPDF) not found on window");
+                throw new Error("PDF Library not loaded");
+            }
+
+            const doc = new jsPDFLib();
             const reportTitle = "PayRevision_Report_" + new Date().getTime();
+            const localMonths = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
             // 1. Header & Title
-            doc.setFillColor(59, 130, 246); // Blue theme
+            doc.setFillColor(59, 130, 246);
             doc.rect(0, 0, 210, 40, 'F');
-
             doc.setFontSize(22);
             doc.setTextColor(255);
             doc.setFont("helvetica", "bold");
@@ -376,69 +513,68 @@ document.addEventListener('DOMContentLoaded', () => {
             doc.setFontSize(10);
             doc.setFont("helvetica", "normal");
 
-            const name = document.getElementById('reportName')?.value;
-            const pen = document.getElementById('penNumber')?.value;
-            const school = document.getElementById('schoolName')?.value;
+            const name = document.getElementById('reportName')?.value || "";
+            const pen = document.getElementById('penNumber')?.value || "";
+            const school = document.getElementById('schoolName')?.value || "";
 
             let headerY = 28;
             if (name) { doc.text(`Employee: ${name}`, 14, headerY); headerY += 5; }
             if (pen) { doc.text(`PEN Number: ${pen}`, 14, headerY); headerY += 5; }
             if (school) { doc.text(`School/Office: ${school}`, 14, headerY); headerY += 5; }
 
-
             // 2. Data Extraction
-            const bp = document.getElementById('basic-pay-in').value || "0";
-            const oldGross = document.getElementById('gross-old-val').textContent || "0";
-            const newGross = document.getElementById('gross-new-val').textContent || "0";
-            const growth = document.getElementById('growth-val').textContent || "0";
-            const revisedBp = document.getElementById('res-bp-fixed').textContent || "0";
+            const bpInitial = document.getElementById('basic-pay-in')?.value || "0";
+            const fixedBp = document.getElementById('res-bp-fixed')?.textContent || "0";
+            const currentBp = document.getElementById('res-bp-current')?.textContent || "0";
+            const newGross = document.getElementById('res-gross-new')?.textContent || "0";
 
-            // 3. Comparison Table
+            const now = new Date();
+            const curMonthLabel = localMonths[now.getMonth()] || "Month";
+            const currentMonthYear = curMonthLabel + " " + now.getFullYear();
+
+            // 3. Main Summary Table (3 Stages)
             doc.setFontSize(14);
             doc.setTextColor(40);
-            doc.text("Salary Comparison", 14, 50);
+            doc.text("Pay Summary Breakdown", 14, 50);
 
             doc.autoTable({
                 startY: 55,
-                head: [['Component', 'Before Revision', 'After Revision']],
+                head: [['Stage', 'Effective Date', 'Basic Pay', 'Gross Salary']],
                 body: [
-                    ['Basic Pay', 'Rs. ' + bp, 'Rs. ' + revisedBp],
-                    ['Monthly Gross Salary', 'Rs. ' + oldGross, 'Rs. ' + newGross],
-                    ['Salary Growth', '-', growth]
+                    ['Initial Basic Pay', '01/07/2024', 'Rs. ' + bpInitial, '-'],
+                    ['Revised Basic Pay', '01/07/2024', 'Rs. ' + fixedBp, '-'],
+                    ['Present Basic Pay', currentMonthYear, 'Rs. ' + currentBp, 'Rs. ' + newGross]
                 ],
                 theme: 'striped',
                 headStyles: { fillColor: [59, 130, 246], halign: 'left' },
                 columnStyles: {
                     0: { halign: 'left' },
-                    1: { halign: 'right' },
-                    2: { halign: 'right' }
+                    1: { halign: 'left' },
+                    2: { halign: 'right' },
+                    3: { halign: 'right' }
                 },
                 didParseCell: function (data) {
-                    if (data.section === 'head' && data.column.index > 0) {
+                    if (data.section === 'head' && (data.column.index === 2 || data.column.index === 3)) {
                         data.cell.styles.halign = 'right';
                     }
                 }
             });
 
-            // 4. Detailed Pay Fixation
-            doc.text("Detailed Pay Fixation", 14, doc.lastAutoTable.finalY + 15);
+            // 4. Detailed Pay Fixation (01/07/2024)
+            let currentY = doc.lastAutoTable ? doc.lastAutoTable.finalY + 15 : 120;
+            doc.text("Pay Fixation Details (01/07/2024)", 14, currentY);
 
-            const daMerged = document.getElementById('res-da-merged').textContent || "0";
-            const fitmentP = document.getElementById('fitment-perc').value || "0";
-            const fitmentV = document.getElementById('res-fitment').textContent || "0";
-            const yearsService = document.getElementById('years-service').value || "0";
-            const weightageV = document.getElementById('res-weightage').textContent || "0";
-            const actualTotal = document.getElementById('res-actual-total').textContent || "0";
-            const balDaP = document.getElementById('bal-da-perc').value || "0";
-            const balDaV = document.getElementById('res-bal-da').textContent || "0";
-            const hraP = document.getElementById('hra-perc').value || "0";
-            const hraV = document.getElementById('res-hra-new').textContent || "0";
-
+            const daMerged = document.getElementById('res-da-merged')?.textContent || "0";
+            const fitmentP = document.getElementById('fitment-perc')?.value || "0";
+            const fitmentV = document.getElementById('res-fitment')?.textContent || "0";
+            const yearsService = document.getElementById('years-service')?.value || "0";
+            const weightageV = document.getElementById('res-weightage')?.textContent || "0";
+            const actualTotal = document.getElementById('res-actual-total')?.textContent || "0";
 
             const isWeightageChecked = document.getElementById('weightage-check')?.checked;
 
             const fixationRows = [
-                ['Base Basic Pay', '-', 'Rs. ' + bp],
+                ['Base Basic Pay (Old)', '-', 'Rs. ' + bpInitial],
                 ['DA Merged', '31 %', 'Rs. ' + daMerged],
                 ['Fitment Benefit', fitmentP + ' %', 'Rs. ' + fitmentV]
             ];
@@ -448,54 +584,87 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             fixationRows.push(
-                ['Total Calculation', 'Sum', 'Rs. ' + actualTotal],
-                ['BP Fixed At', 'Round Next 100', 'Rs. ' + revisedBp],
-                ['Balance DA', balDaP + ' %', 'Rs. ' + balDaV],
-                ['HRA', hraP + ' %', 'Rs. ' + hraV],
-                ['Gross Salary', '-', 'Rs. ' + newGross]
+                ['Actual Total', 'Sum', 'Rs. ' + actualTotal],
+                ['Fixed Basic Pay', 'Round Next 100', 'Rs. ' + fixedBp]
             );
 
             doc.autoTable({
-                startY: doc.lastAutoTable.finalY + 20,
-                head: [['Fixation Step', 'Info', 'Amount']],
+                startY: currentY + 5,
+                head: [['Fixation Component', 'Info', 'Amount']],
                 body: fixationRows,
                 theme: 'grid',
                 headStyles: { fillColor: [75, 85, 99] },
                 columnStyles: { 2: { halign: 'right' } }
             });
 
-            // 5. Before Revision Details
-            doc.text("Before Revision Details", 14, doc.lastAutoTable.finalY + 15);
-            const daOld = document.getElementById('res-da-old').textContent || "0";
-            const daPendP = document.getElementById('da-pend-perc').value || "0";
-            const daPendV = document.getElementById('res-da-pend').textContent || "0";
-            const hraOldP = document.getElementById('hra-old-perc').value || "0";
-            const hraOldV = document.getElementById('res-hra-old').textContent || "0";
+            // 5. Present Salary Breakdown (Dynamic Date)
+            currentY = doc.lastAutoTable ? doc.lastAutoTable.finalY + 15 : 200;
+            doc.text(`Present Salary Details (${currentMonthYear})`, 14, currentY);
+
+            const balDaP = document.getElementById('bal-da-perc')?.value || "0";
+            const balDaV = document.getElementById('res-bal-da')?.textContent || "0";
+            const hraP = document.getElementById('hra-perc')?.value || "0";
+            const hraV = document.getElementById('res-hra-new')?.textContent || "0";
+            const othersV = document.getElementById('res-others')?.textContent || "0";
 
             doc.autoTable({
-                startY: doc.lastAutoTable.finalY + 20,
-                head: [['Component', 'Info', 'Amount']],
+                startY: currentY + 5,
+                head: [['Current Component', 'Rate/Info', 'Amount']],
                 body: [
-                    ['Basic Pay', '-', 'Rs. ' + bp],
-                    ['Dearness Allowance (DA)', '22%', 'Rs. ' + daOld],
-                    ['DA Pending', daPendP + '%', 'Rs. ' + daPendV],
-                    ['House Rent Allowance (HRA)', hraOldP + '%', 'Rs. ' + hraOldV],
-                    ['Gross Salary', '-', 'Rs. ' + oldGross]
+                    ['Current Basic Pay', 'From Progression', 'Rs. ' + currentBp],
+                    ['Dearness Allowance (DA)', balDaP + '%', 'Rs. ' + balDaV],
+                    ['House Rent Allowance (HRA)', hraP + '%', 'Rs. ' + hraV],
+                    ['Others', '-', 'Rs. ' + othersV],
+                    ['Total Monthly Gross', currentMonthYear, 'Rs. ' + newGross]
                 ],
                 theme: 'grid',
-                headStyles: { fillColor: [100, 116, 139] },
-                columnStyles: { 2: { halign: 'right' } }
+                headStyles: { fillColor: [16, 185, 129] },
+                columnStyles: { 2: { halign: 'right' } },
+                didParseCell: function (data) {
+                    if (data.section === 'head' && data.column.index === 2) {
+                        data.cell.styles.halign = 'right';
+                    }
+                }
             });
 
-            // 5. Footer
+            // 6. Timeline Summary
+            const timelineSteps = document.querySelectorAll('#timeline-steps > div');
+            if (timelineSteps && timelineSteps.length > 0) {
+                doc.addPage();
+                doc.setFillColor(59, 130, 246);
+                doc.rect(0, 0, 210, 20, 'F');
+                doc.setFontSize(14);
+                doc.setTextColor(255);
+                doc.text("Detailed Pay Progression Timeline", 14, 13);
+
+                doc.setTextColor(40);
+                doc.setFontSize(11);
+
+                let timelineRows = [];
+                timelineSteps.forEach(step => {
+                    const spans = step.querySelectorAll('span');
+                    if (spans.length >= 2) {
+                        const labelText = spans[0].textContent.replace('• ', '').trim() || "";
+                        const valText = spans[1].textContent.trim() || "";
+                        timelineRows.push([labelText, valText]);
+                    }
+                });
+
+                doc.autoTable({
+                    startY: 30,
+                    head: [['Progression Event', 'Pay Stage']],
+                    body: timelineRows,
+                    theme: 'striped',
+                    headStyles: { fillColor: [139, 92, 246] },
+                    columnStyles: { 1: { halign: 'right' } }
+                });
+            }
+
+            // 7. Footer
             const finalY = doc.lastAutoTable.finalY + 20;
             doc.setFontSize(10);
             doc.setTextColor(150);
-            doc.text("Email: sreee.sreejith@gmail.com", 14, finalY);
-
-            // 6. Output Check
-            const cap = window.Capacitor;
-            const isNative = !!(cap && cap.Plugins && (cap.Plugins.Filesystem || cap.Plugins.Share));
+            doc.text("Email: sreee.sreejith@gmail.com", 14, finalY < 280 ? finalY : 280);
 
             return { blob: doc.output('blob'), title: reportTitle };
         } catch (err) {
