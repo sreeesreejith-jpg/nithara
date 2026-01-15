@@ -53,7 +53,7 @@
         <div class="input-main-card"
             style="padding: 1.5rem; background: linear-gradient(145deg, rgba(30, 41, 59, 1), rgba(15, 23, 42, 1)); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 1.25rem; box-shadow: 0 12px 40px rgba(0,0,0,0.4);">
             <div class="dashboard-header"
-                style="margin-bottom: 1.5rem; display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; align-items: end;">
+                style="margin-bottom: 1.5rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 1rem; align-items: end;">
                 <!-- 1. Primary Input Group -->
                 <div
                     style="display: flex; flex-direction: column; align-items: center; gap: 0.6rem; text-align: center;">
@@ -76,6 +76,19 @@
                     <div
                         style="width: 100%; max-width: 180px; height: 50px; border-radius: 0.8rem; border: none; background: rgba(59, 130, 246, 0.15); display: flex; align-items: center; justify-content: center; box-shadow: inset 0 0 20px rgba(59, 130, 246, 0.1), 0 0 15px rgba(59, 130, 246, 0.2);">
                         <span id="revised-bp-val"
+                            style="font-size: 1.4rem; color: #fff; font-weight: 900; line-height: 1; text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);"></span>
+                    </div>
+                </div>
+
+                <!-- 3. Present Basic Pay (New) -->
+                <div
+                    style="display: flex; flex-direction: column; align-items: center; gap: 0.6rem; text-align: center;">
+                    <label
+                        style="font-size: 0.65rem; font-weight: 800; color: var(--primary); text-transform: uppercase; letter-spacing: 1px;">Present
+                        Basic Pay</label>
+                    <div
+                        style="width: 100%; max-width: 180px; height: 50px; border-radius: 0.8rem; border: none; background: rgba(59, 130, 246, 0.15); display: flex; align-items: center; justify-content: center; box-shadow: inset 0 0 20px rgba(59, 130, 246, 0.1), 0 0 15px rgba(59, 130, 246, 0.2);">
+                        <span id="header-present-bp"
                             style="font-size: 1.4rem; color: #fff; font-weight: 900; line-height: 1; text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);"></span>
                     </div>
                 </div>

@@ -479,6 +479,8 @@ document.addEventListener('DOMContentLoaded', () => {
         // Summary Card
         document.getElementById('gross-new-val').textContent = grossNew;
         document.getElementById('revised-bp-val').textContent = bp > 0 ? bpFixed : '';
+        const headerPresentBp = document.getElementById('header-present-bp');
+        if (headerPresentBp) headerPresentBp.textContent = bp > 0 ? bpCurrent : '';
     }
 
     // Initial calculation
