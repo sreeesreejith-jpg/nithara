@@ -409,6 +409,13 @@ document.addEventListener('DOMContentLoaded', () => {
         let timelineHTML = '';
 
         if (baseIndex !== -1) {
+            timelineHTML += `
+                    <div class="timeline-item">
+                        <span class="label">Revised BP on 01/07/2024</span>
+                        <span class="value">Rs. ${bpFixed}</span>
+                    </div>
+                `;
+
             events.forEach(event => {
                 currentIndex += event.steps;
                 currentIndex = Math.min(currentIndex, revisedScale.length - 1);
@@ -426,9 +433,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 timelineHTML += `
-                    <div style="display: flex; justify-content: space-between; font-size: 0.7rem; color: var(--text-muted); font-weight: 500; border-bottom: 1px solid rgba(255,255,255,0.02); padding: 0.2rem 0;">
-                        <span>&nbsp;&nbsp;&bull; ${localizedLabel}</span>
-                        <span style="font-weight: 700; color: var(--text-main);">Rs. ${stepPay}</span>
+                    <div class="timeline-item">
+                        <span class="label">${localizedLabel}</span>
+                        <span class="value">Rs. ${stepPay}</span>
                     </div>
                 `;
             });

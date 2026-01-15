@@ -922,3 +922,45 @@ body.pdf-mode .input-hint {
         gap: 0.2rem;
     }
 }
+/* Timeline Styles */
+.timeline-item {
+    display: grid;
+    grid-template-columns: 1fr 120px;
+    align-items: center;
+    padding: 0.6rem 0.75rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 0.4rem;
+    margin-bottom: 0.25rem;
+}
+
+.timeline-item:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+.timeline-item .label {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.timeline-item .label::before {
+    content: '';
+    display: block;
+    width: 6px;
+    height: 6px;
+    background-color: var(--primary);
+    border-radius: 50%;
+}
+
+.timeline-item .value {
+    font-weight: 700;
+    color: var(--text-main);
+    text-align: right;
+    font-family: monospace;
+    font-size: 0.95rem;
+}
