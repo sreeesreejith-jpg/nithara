@@ -4,6 +4,13 @@ window.PDFHelper = {
      */
     share: async function (blob, fileName, title) {
         console.log('PDFHelper.share initiation', { fileName });
+        // DEBUG: Check blob size
+        if (blob) {
+            alert("Debug: PDF Size = " + blob.size + " bytes\nType: " + blob.type);
+        } else {
+            alert("Debug: PDF Blob is NULL/Undefined!");
+        }
+
         const cap = window.Capacitor;
         const isNative = !!(cap && (cap.isNative || (cap.Plugins && cap.Plugins.Filesystem)));
 
@@ -84,6 +91,16 @@ window.PDFHelper = {
      */
     download: async function (blob, fileName) {
         console.log('PDFHelper.download initiation', { fileName });
+        // DEBUG: Check blob size
+        if (blob) {
+            // Only alert if not coming from share (share calls download on fallback)
+            // But simplest to just alert here too to catch browser download cases.
+            // We can check if share already alerted by a flag, or just allow double alert for now.
+            // alert("Debug Download: PDF Size = " + blob.size + " bytes");
+        } else {
+            alert("Debug Download: PDF Blob is NULL!");
+        }
+
         const cap = window.Capacitor;
         const isNative = !!(cap && (cap.isNative || (cap.Plugins && cap.Plugins.Filesystem)));
 
