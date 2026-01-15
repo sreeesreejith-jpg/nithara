@@ -122,31 +122,54 @@ window.PDFHelper = {
                 return { success: true, method: 'native-save', uri: fileResult.uri };
 
             } else {
-                console.log('Browser download initiated (Data URL method)');
+                console.log('Browser download process started');
                 const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-
-                // Convert to Data URL (Base64) - much more compatible for mobile PWA handovers
-                const base64Data = await this._blobToBase64(blob);
-                const dataUrl = `data:application/pdf;base64,${base64Data}`;
+                const url = URL.createObjectURL(blob);
 
                 if (isMobile) {
-                    // Create a clickable element as a backup, but usually location.href works for Data URLs
-                    console.log('Mobile browser: Opening via Base64 Data URL');
-                    window.location.href = dataUrl;
-                    return { success: true, method: 'browser-mobile-dataurl-open' };
+                    console.log('Mobile detected: Showing manual download prompt');
+
+                    const overlay = document.createElement('div');
+                    overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:99999;display:flex;align-items:center;justify-content:center;flex-direction:column;padding:20px;backdrop-filter:blur(5px);';
+
+                    const card = document.createElement('div');
+                    card.style.cssText = 'background:#1e293b;padding:30px;border-radius:20px;box-shadow:0 25px 50px -12px rgba(0,0,0,0.5);width:100%;max-width:320px;text-align:center;border:1px solid rgba(255,255,255,0.1);';
+
+                    card.innerHTML = `
+                        <div style="font-size:3.5rem;margin-bottom:15px;">📊</div>
+                        <h3 style="color:white;margin:0 0 10px 0;font-family:system-ui,-apple-system,sans-serif;font-size:1.4rem;">Report Ready</h3>
+                        <p style="color:#94a3b8;margin:0 0 25px 0;font-size:0.95rem;line-height:1.5;font-family:system-ui,-apple-system,sans-serif;">Click the button below to view and save your calculation report.</p>
+                        <a href="${url}" target="_blank" id="manualDownloadBtn" style="display:block;background:#3b82f6;color:white;text-decoration:none;padding:14px;border-radius:12px;font-weight:bold;font-family:system-ui,-apple-system,sans-serif;font-size:1.1rem;box-shadow:0 4px 6px -1px rgba(59,130,246,0.5);">OPEN PDF REPORT</a>
+                        <button id="closeOverlay" style="margin-top:20px;background:none;border:none;color:#64748b;font-size:0.85rem;cursor:pointer;font-family:system-ui,-apple-system,sans-serif;text-decoration:underline;">Close</button>
+                    `;
+
+                    overlay.appendChild(card);
+                    document.body.appendChild(overlay);
+
+                    const link = card.querySelector('#manualDownloadBtn');
+                    const closeBtn = card.querySelector('#closeOverlay');
+
+                    link.onclick = () => {
+                        // Keep overlay briefly for feedback, then remove
+                        setTimeout(() => { if (overlay.parentNode) document.body.removeChild(overlay); }, 1000);
+                    };
+                    closeBtn.onclick = () => {
+                        if (overlay.parentNode) document.body.removeChild(overlay);
+                        URL.revokeObjectURL(url);
+                    };
+
+                    return { success: true, method: 'browser-manual-prompt' };
                 } else {
                     const link = document.createElement('a');
-                    link.href = dataUrl;
+                    link.href = url;
                     link.download = safeFileName;
-                    link.style.display = 'none';
                     document.body.appendChild(link);
                     link.click();
-
                     setTimeout(() => {
                         document.body.removeChild(link);
+                        URL.revokeObjectURL(url);
                     }, 5000);
-
-                    return { success: true, method: 'browser-download-dataurl' };
+                    return { success: true, method: 'browser-download' };
                 }
             }
         } catch (err) {
