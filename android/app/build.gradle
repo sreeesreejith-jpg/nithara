@@ -19,9 +19,9 @@ android {
     signingConfigs {
         release {
             storeFile file("nithara-release.keystore")
-            storePassword System.getenv("KEYSTORE_PASSWORD")
-            keyAlias System.getenv("KEY_ALIAS")
-            keyPassword System.getenv("KEY_PASSWORD")
+            storePassword System.getenv("KEYSTORE_PASSWORD") ?: findProperty("KEYSTORE_PASSWORD")
+            keyAlias System.getenv("KEY_ALIAS") ?: findProperty("KEY_ALIAS")
+            keyPassword System.getenv("KEY_PASSWORD") ?: findProperty("KEY_PASSWORD")
         }
     }
 
