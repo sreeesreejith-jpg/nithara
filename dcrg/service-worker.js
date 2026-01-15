@@ -1,4 +1,5 @@
-const CACHE_NAME = 'pension-calc-v6';
+const CACHE_NAME = 'nithara-pension-calc-v6';
+const CACHE_PREFIX = 'nithara-pension-calc-';
 const ASSETS = [
     './',
     './index.html',
@@ -27,12 +28,15 @@ self.addEventListener('activate', (event) => {
     event.waitUntil(
         caches.keys().then((cacheNames) => {
             return Promise.all(
-                cacheNames.map((cache) => {
-                    if (cache !== CACHE_NAME) return caches.delete(cache);
+                cacheNames.map((cacheName) => {
+                    if (cacheName.startsWith(CACHE_PREFIX) && cacheName !== CACHE_NAME) {
+                        return caches.delete(cacheName);
+                    }
                 })
             );
         })
     );
+    self.clients.claim();
 });
 
 self.addEventListener('fetch', (event) => {

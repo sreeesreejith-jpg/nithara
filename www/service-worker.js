@@ -1,4 +1,5 @@
-const CACHE_NAME = 'nithara-app-v13';
+const CACHE_NAME = 'nithara-main-v14';
+const CACHE_PREFIX = 'nithara-main-';
 const ASSETS_TO_CACHE = [
     './',
     './index.html',
@@ -29,7 +30,13 @@ const ASSETS_TO_CACHE = [
     './housing/script.js',
     './sip/index.html',
     './sip/style.css',
-    './sip/script.js'
+    './sip/script.js',
+    // Library and Helper scripts
+    './js/pdf-helper.js',
+    './js/jspdf.umd.min.js',
+    './js/jspdf.plugin.autotable.min.js',
+    './capacitor.js',
+    './capacitor-handler.js'
 ];
 
 // Install Event
@@ -48,7 +55,10 @@ self.addEventListener('activate', (event) => {
         caches.keys().then((cacheNames) => {
             return Promise.all(
                 cacheNames.map((cacheName) => {
-                    if (cacheName !== CACHE_NAME) {
+                    // Only delete caches that belong to this module (nithara-main-)
+                    // but are not the current versions
+                    if (cacheName.startsWith(CACHE_PREFIX) && cacheName !== CACHE_NAME) {
+                        console.log('Main SW: Deleting old cache:', cacheName);
                         return caches.delete(cacheName);
                     }
                 })

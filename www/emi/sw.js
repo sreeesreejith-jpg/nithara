@@ -1,4 +1,5 @@
-const CACHE_NAME = 'emi-calc-v2';
+const CACHE_NAME = 'nithara-emi-calc-v3';
+const CACHE_PREFIX = 'nithara-emi-calc-';
 const ASSETS = [
     './',
     './index.html',
@@ -8,7 +9,12 @@ const ASSETS = [
     './icon-512.png',
     './icon-192.png',
     './manifest.json',
-    './screenshot.png'
+    './screenshot.png',
+    '../js/pdf-helper.js',
+    '../js/jspdf.umd.min.js',
+    '../js/jspdf.plugin.autotable.min.js',
+    '../capacitor.js',
+    '../capacitor-handler.js'
 ];
 
 self.addEventListener('install', (e) => {
@@ -17,6 +23,22 @@ self.addEventListener('install', (e) => {
             return cache.addAll(ASSETS);
         })
     );
+});
+
+// Activate Event
+self.addEventListener('activate', (event) => {
+    event.waitUntil(
+        caches.keys().then((keys) => {
+            return Promise.all(
+                keys.map((key) => {
+                    if (key.startsWith(CACHE_PREFIX) && key !== CACHE_NAME) {
+                        return caches.delete(key);
+                    }
+                })
+            );
+        })
+    );
+    self.clients.claim();
 });
 
 self.addEventListener('fetch', (e) => {

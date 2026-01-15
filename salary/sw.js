@@ -1,4 +1,5 @@
-const CACHE_NAME = 'salary-v4';
+const CACHE_NAME = 'nithara-salary-v4';
+const CACHE_PREFIX = 'nithara-salary-';
 const ASSETS = [
     './',
     './index.html',

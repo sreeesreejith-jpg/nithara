@@ -27,7 +27,7 @@
 <body>
     <div class="container">
         <header>
-            <h1>Important Apps for Kerala Govt Employees</h1>
+            <h1> apps for employees</h1>
         </header>
 
         <main>
@@ -96,9 +96,28 @@
             </div>
         </main>
     </div>
-    <div class="footer-email">
-        email: sreee.sreejith@gmail.com
+    <div class="footer-email" style="display: flex; flex-direction: column; gap: 0.5rem; align-items: center;">
+        <div>email: sreee.sreejith@gmail.com</div>
+        <button onclick="clearAllCaches()"
+            style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #94a3b8; padding: 4px 10px; border-radius: 4px; font-size: 0.65rem; cursor: pointer;">Clear
+            Cache & Update</button>
     </div>
+
+    <script>
+        async function clearAllCaches() {
+            if (confirm("This will clear all saved data and refresh the app. Continue?")) {
+                const names = await caches.keys();
+                await Promise.all(names.map(name => caches.delete(name)));
+
+                const registrations = await navigator.serviceWorker.getRegistrations();
+                for (let registration of registrations) {
+                    await registration.unregister();
+                }
+
+                window.location.reload(true);
+            }
+        }
+    </script>
 </body>
 
 </html>

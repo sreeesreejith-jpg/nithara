@@ -1,4 +1,5 @@
-const CACHE_NAME = 'sip-calc-v3';
+const CACHE_NAME = 'nithara-sip-calc-v3';
+const CACHE_PREFIX = 'nithara-sip-calc-';
 const ASSETS = [
     './',
     './index.html',
@@ -22,6 +23,22 @@ self.addEventListener('install', (e) => {
             return cache.addAll(ASSETS);
         })
     );
+});
+
+// Activate Event
+self.addEventListener('activate', (event) => {
+    event.waitUntil(
+        caches.keys().then((keys) => {
+            return Promise.all(
+                keys.map((key) => {
+                    if (key.startsWith(CACHE_PREFIX) && key !== CACHE_NAME) {
+                        return caches.delete(key);
+                    }
+                })
+            );
+        })
+    );
+    self.clients.claim();
 });
 
 self.addEventListener('fetch', (e) => {

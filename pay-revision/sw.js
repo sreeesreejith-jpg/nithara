@@ -1,4 +1,5 @@
-const CACHE_NAME = 'pay-rev-v9';
+const CACHE_NAME = 'nithara-pay-rev-v9';
+const CACHE_PREFIX = 'nithara-pay-rev-';
 const ASSETS = [
     'index.html',
     'style.css',
@@ -17,6 +18,23 @@ self.addEventListener('install', (event) => {
         caches.open(CACHE_NAME)
             .then((cache) => cache.addAll(ASSETS))
     );
+});
+
+// Activate Event
+self.addEventListener('activate', (event) => {
+    event.waitUntil(
+        caches.keys().then((cacheNames) => {
+            return Promise.all(
+                cacheNames.map((cacheName) => {
+                    if (cacheName.startsWith(CACHE_PREFIX) && cacheName !== CACHE_NAME) {
+                        console.log('Pay-Rev SW: Deleting old cache:', cacheName);
+                        return caches.delete(cacheName);
+                    }
+                })
+            );
+        })
+    );
+    self.clients.claim();
 });
 
 self.addEventListener('fetch', (event) => {

@@ -1,4 +1,5 @@
-const CACHE_NAME = 'housing-emi-v2';
+const CACHE_NAME = 'nithara-housing-emi-v3';
+const CACHE_PREFIX = 'nithara-housing-emi-';
 const urlsToCache = [
     './',
     './index.html',
@@ -8,7 +9,12 @@ const urlsToCache = [
     './icon-1024.jpg',
     './icon-512.png',
     './icon-192.png',
-    './screenshot.png'
+    './screenshot.png',
+    '../js/pdf-helper.js',
+    '../js/jspdf.umd.min.js',
+    '../js/jspdf.plugin.autotable.min.js',
+    '../capacitor.js',
+    '../capacitor-handler.js'
 ];
 
 // Install event - cache resources
@@ -56,12 +62,11 @@ self.addEventListener('fetch', event => {
 
 // Activate event - clean up old caches
 self.addEventListener('activate', event => {
-    const cacheWhitelist = [CACHE_NAME];
     event.waitUntil(
         caches.keys().then(cacheNames => {
             return Promise.all(
                 cacheNames.map(cacheName => {
-                    if (cacheWhitelist.indexOf(cacheName) === -1) {
+                    if (cacheName.startsWith(CACHE_PREFIX) && cacheName !== CACHE_NAME) {
                         return caches.delete(cacheName);
                     }
                 })
