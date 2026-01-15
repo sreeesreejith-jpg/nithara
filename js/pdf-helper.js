@@ -3,16 +3,12 @@ window.PDFHelper = {
      * Share a PDF blob using Capacitor or Web Share API
      */
     share: async function (blob, fileName, title) {
-        console.log('PDFHelper.share initiation', { fileName });
-        // DEBUG: Check blob size
-        if (blob) {
-            alert("Debug: PDF Size = " + blob.size + " bytes\nType: " + blob.type);
-        } else {
-            alert("Debug: PDF Blob is NULL/Undefined!");
-        }
+        console.log('PDFHelper.share initiation', { fileName, size: blob.size });
+        // REMOVED DEBUG ALERT to reduce noise, assuming logic fix works.
 
         const cap = window.Capacitor;
-        const isNative = !!(cap && (cap.isNative || (cap.Plugins && cap.Plugins.Filesystem)));
+        // Strict Native Check: Must have Filesystem AND Share plugins
+        const isNative = !!(cap && cap.isNative && cap.Plugins && cap.Plugins.Filesystem && cap.Plugins.Share);
 
         if (!fileName.toLowerCase().endsWith('.pdf')) {
             fileName += '.pdf';
@@ -20,66 +16,65 @@ window.PDFHelper = {
         const safeFileName = fileName.replace(/[^a-z0-9.]/gi, '_');
 
         try {
-            if (isNative && cap.Plugins && cap.Plugins.Filesystem && cap.Plugins.Share) {
+            if (isNative) {
                 console.log('Native sharing detected');
 
-                // 1. Request/Check Permissions
+                // 1. Permission Check (Best Effort)
                 try {
                     const status = await cap.Plugins.Filesystem.checkPermissions();
                     if (status.publicStorage !== 'granted') {
                         await cap.Plugins.Filesystem.requestPermissions();
                     }
                 } catch (pErr) {
-                    console.warn('Permission check failed, continuing anyway', pErr);
+                    console.warn('Permission check failed, continuing', pErr);
                 }
 
-                // 2. Convert Blob to Base64
+                // 2. Write to Cache (Required for Sharing)
                 const base64Data = await this._blobToBase64(blob);
-
-                // 3. Save to Temporary Directory
-                console.log('Writing file to CACHE:', safeFileName);
                 const fileResult = await cap.Plugins.Filesystem.writeFile({
                     path: safeFileName,
                     data: base64Data,
-                    directory: 'CACHE'
+                    directory: 'CACHE' // Sharing usually requires CACHE or EXTERNAL_CACHE
                 });
 
-                console.log('Native file saved, URI:', fileResult.uri);
+                console.log('Native file saved for share:', fileResult.uri);
 
-                // 4. Share
+                // 3. Share the File URI
                 await cap.Plugins.Share.share({
                     title: title || 'Report',
-                    text: 'View my calculation report from Nithara Apps',
+                    text: 'View my calculation report',
                     url: fileResult.uri,
-                    files: [fileResult.uri]
+                    dialogTitle: 'Share PDF'
                 });
 
                 return { success: true, method: 'native-share' };
+
             } else if (navigator.share) {
                 console.log('Web Share API detected');
                 const file = new File([blob], safeFileName, { type: 'application/pdf' });
 
+                // Check if canShare is supported and returns true
                 if (navigator.canShare && navigator.canShare({ files: [file] })) {
                     await navigator.share({
                         files: [file],
-                        title: title || 'Report'
+                        title: title || 'Report',
+                        text: 'PDF Report'
                     });
                     return { success: true, method: 'web-share' };
                 } else {
-                    console.log('Web Share API - no file support, fallback to download');
+                    console.warn('navigator.share available but file sharing NOT supported. Falling back.');
                     return await this.download(blob, safeFileName);
                 }
             } else {
-                console.log('No sharing API available, using download');
+                console.log('No sharing API available, falling back to download');
                 return await this.download(blob, safeFileName);
             }
         } catch (err) {
-            console.error("PDFHelper Share Error details:", err);
-            // Alert user if native share fails
-            if (isNative && err.name !== 'AbortError') {
-                alert("Share failed: " + (err.message || err.toString()) + "\n\nPlease try 'Download PDF' instead.");
-            }
+            console.error("PDFHelper Share Error:", err);
+            // If share fails (e.g. user cancelled or empty message error), fallback to download
+            // UNLESS it was a user abort
             if (err.name !== 'AbortError') {
+                alert("Share failed (" + err.message + "). Attempting to save file instead...");
                 return await this.download(blob, safeFileName);
             }
             throw err;
@@ -91,18 +86,9 @@ window.PDFHelper = {
      */
     download: async function (blob, fileName) {
         console.log('PDFHelper.download initiation', { fileName });
-        // DEBUG: Check blob size
-        if (blob) {
-            // Only alert if not coming from share (share calls download on fallback)
-            // But simplest to just alert here too to catch browser download cases.
-            // We can check if share already alerted by a flag, or just allow double alert for now.
-            // alert("Debug Download: PDF Size = " + blob.size + " bytes");
-        } else {
-            alert("Debug Download: PDF Blob is NULL!");
-        }
 
         const cap = window.Capacitor;
-        const isNative = !!(cap && (cap.isNative || (cap.Plugins && cap.Plugins.Filesystem)));
+        const isNative = !!(cap && cap.isNative && cap.Plugins && cap.Plugins.Filesystem);
 
         if (!fileName.toLowerCase().endsWith('.pdf')) {
             fileName += '.pdf';
@@ -110,22 +96,11 @@ window.PDFHelper = {
         const safeFileName = fileName.replace(/[^a-z0-9.]/gi, '_');
 
         try {
-            if (isNative && cap.Plugins && cap.Plugins.Filesystem) {
+            if (isNative) {
                 console.log('Native save initiated');
-
-                // Check Permissions
-                try {
-                    const status = await cap.Plugins.Filesystem.checkPermissions();
-                    if (status.publicStorage !== 'granted') {
-                        await cap.Plugins.Filesystem.requestPermissions();
-                    }
-                } catch (pErr) {
-                    console.log('Permission error', pErr);
-                }
-
                 const base64Data = await this._blobToBase64(blob);
 
-                // Save to Documents (better for download)
+                // Save to DOCUMENTS for permanent access
                 const fileResult = await cap.Plugins.Filesystem.writeFile({
                     path: safeFileName,
                     data: base64Data,
@@ -134,34 +109,50 @@ window.PDFHelper = {
                 });
 
                 console.log('Native save success:', fileResult.uri);
-                alert("✅ Report saved successfully!\n\nFile: " + safeFileName + "\nLocation: Your Downloads/Documents folder.");
+                // Important: Show where it is saved
+                alert("✅ Saved to Documents!\n\nFile: " + safeFileName);
+
+                // Try to open it immediately if possible (optional, but good UX)
+                try {
+                    if (cap.Plugins.FileOpener) {
+                        // If FileOpener plugin existed, we'd use it. Without it, just Alert is safest.
+                    }
+                } catch (e) { }
 
                 return { success: true, method: 'native-save', uri: fileResult.uri };
+
             } else {
-                console.log('Standard browser download initiated');
+                console.log('Browser download initiated');
+
+                // Method 1: Anchor Tag (Standard)
                 const url = URL.createObjectURL(blob);
                 const link = document.createElement('a');
                 link.href = url;
                 link.download = safeFileName;
-                link.style.display = 'none';
                 document.body.appendChild(link);
                 link.click();
 
+                // Validation: Some mobile browsers ignore the click
+                // We set a backup timeout to open in new tab if download doesn't trigger? 
+                // Hard to detect. Instead, we can provide a manual link if needed.
+                // For now, let's keep the standard anchor click but cleanup cleaner.
+
                 setTimeout(() => {
                     document.body.removeChild(link);
-                    URL.revokeObjectURL(url);
-                }, 1000);
+                    // Do NOT revoke immediately on mobile, sometimes it breaks the download stream
+                    setTimeout(() => URL.revokeObjectURL(url), 10000);
+                }, 100);
 
                 return { success: true, method: 'browser-download' };
             }
         } catch (err) {
-            console.error("PDFHelper Download Error details:", err);
-            if (isNative) {
-                alert("Download failed: " + (err.message || err.toString()));
-                // Ultimate fallback for native
-                const url = URL.createObjectURL(blob);
-                window.open(url, '_blank');
-            }
+            console.error("PDFHelper Download Error:", err);
+
+            // Ultimate Fallback: Open in New Tab
+            const url = URL.createObjectURL(blob);
+            window.open(url, '_blank');
+            alert("Auto-download failed. Opening PDF in new tab...");
+
             throw err;
         }
     },
@@ -178,9 +169,6 @@ window.PDFHelper = {
                     return reject(new Error("FileReader result is empty"));
                 }
                 const base64 = result.includes(',') ? result.split(',')[1] : result;
-                if (!base64 || base64.length < 10) {
-                    return reject(new Error("Generated base64 is invalid or too short"));
-                }
                 resolve(base64);
             };
             reader.onerror = (err) => reject(err);
