@@ -685,7 +685,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const result = await generatePDFResult();
             await window.PDFHelper.download(result.blob, `${result.title}.pdf`);
         } catch (err) {
-            alert("Error generating PDF for download.");
+            alert("PDF Fail: " + err.message + "\n" + (err.stack ? err.stack.slice(0, 100) : ""));
         } finally {
             if (btn) {
                 btn.innerHTML = originalText;
@@ -708,7 +708,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (err) {
             console.error("Share error:", err);
             if (err.name !== 'AbortError' && !err.toString().includes('AbortError')) {
-                alert("Sharing failed. Try 'Download PDF' instead.");
+                alert("Share Fail: " + err.message);
             }
         } finally {
             if (btn) {
