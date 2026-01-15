@@ -40,10 +40,10 @@ window.PDFHelper = {
                 console.log('Native file saved, URI:', fileResult.uri);
 
                 // 4. Share
-                // Some Android versions prefer NO url if files are provided
                 await cap.Plugins.Share.share({
                     title: title || 'Report',
                     text: 'View my calculation report from Nithara Apps',
+                    url: fileResult.uri,
                     files: [fileResult.uri]
                 });
 

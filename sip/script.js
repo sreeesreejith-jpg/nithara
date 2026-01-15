@@ -115,10 +115,7 @@ const generatePDFResult = async () => {
         const cap = window.Capacitor;
         const isNative = !!(cap && cap.Plugins && (cap.Plugins.Filesystem || cap.Plugins.Share));
 
-        // More robust blob creation for mobile
-        const pdfOutput = doc.output('arraybuffer');
-        const blob = new Blob([pdfOutput], { type: 'application/pdf' });
-        return { blob: blob, title: reportTitle };
+        return { blob: doc.output('blob'), title: reportTitle };
     } catch (err) {
         console.error("SIP PDF Error:", err);
         throw err;

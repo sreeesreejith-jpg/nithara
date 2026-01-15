@@ -1,4 +1,4 @@
-const CACHE_NAME = 'nithara-pay-rev-v9';
+const CACHE_NAME = 'nithara-pay-rev-v10';
 const CACHE_PREFIX = 'nithara-pay-rev-';
 const ASSETS = [
     'index.html',

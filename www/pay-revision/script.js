@@ -669,13 +669,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 doc.text("Email: sreee.sreejith@gmail.com", 14, finalY < 280 ? finalY : 280);
             }
 
-            // More robust blob creation for mobile
-            const pdfOutput = doc.output('arraybuffer');
-            const blob = new Blob([pdfOutput], { type: 'application/pdf' });
-            return { blob: blob, title: reportTitle };
+            return { blob: doc.output('blob'), title: reportTitle };
         } catch (err) {
-            console.error("PayRevision PDF Generation Breakdown:", err);
-            throw new Error("PDF layout failed: " + err.message);
+            console.error("PayRevision PDF Error:", err);
+            throw err;
         }
     };
 

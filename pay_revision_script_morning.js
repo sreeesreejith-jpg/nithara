@@ -1,4 +1,3 @@
-// Pay Revision Script v1.6
 document.addEventListener('DOMContentLoaded', () => {
     const inputs = [
         'basic-pay-in',
@@ -514,9 +513,9 @@ document.addEventListener('DOMContentLoaded', () => {
             doc.setFontSize(10);
             doc.setFont("helvetica", "normal");
 
-            const name = document.getElementById('reportName')?.value?.trim() || "";
-            const pen = document.getElementById('penNumber')?.value?.trim() || "";
-            const school = document.getElementById('schoolName')?.value?.trim() || "";
+            const name = document.getElementById('reportName')?.value || "";
+            const pen = document.getElementById('penNumber')?.value || "";
+            const school = document.getElementById('schoolName')?.value || "";
 
             let headerY = 28;
             if (name) { doc.text(`Employee: ${name}`, 14, headerY); headerY += 5; }
@@ -662,12 +661,10 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             // 7. Footer
-            if (doc.lastAutoTable) {
-                const finalY = doc.lastAutoTable.finalY + 20;
-                doc.setFontSize(10);
-                doc.setTextColor(150);
-                doc.text("Email: sreee.sreejith@gmail.com", 14, finalY < 280 ? finalY : 280);
-            }
+            const finalY = doc.lastAutoTable.finalY + 20;
+            doc.setFontSize(10);
+            doc.setTextColor(150);
+            doc.text("Email: sreee.sreejith@gmail.com", 14, finalY < 280 ? finalY : 280);
 
             return { blob: doc.output('blob'), title: reportTitle };
         } catch (err) {
@@ -688,8 +685,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const result = await generatePDFResult();
             await window.PDFHelper.download(result.blob, `${result.title}.pdf`);
         } catch (err) {
-            console.error("PayRevision PDF Generation Error:", err);
-            alert("Error generating PDF: " + (err.message || "Please check your inputs."));
+            alert("Error generating PDF for download.");
         } finally {
             if (btn) {
                 btn.innerHTML = originalText;
@@ -710,10 +706,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const result = await generatePDFResult();
             await window.PDFHelper.share(result.blob, `${result.title}.pdf`, 'Pay Revision Report');
         } catch (err) {
-            console.error("PayRevision Share Error:", err);
-            const errMsg = err.message || err.toString();
-            if (err.name !== 'AbortError' && !errMsg.includes('AbortError')) {
-                alert("Sharing failed: " + errMsg + "\n\nPlease try 'Download PDF' instead.");
+            console.error("Share error:", err);
+            if (err.name !== 'AbortError' && !err.toString().includes('AbortError')) {
+                alert("Sharing failed. Try 'Download PDF' instead.");
             }
         } finally {
             if (btn) {
