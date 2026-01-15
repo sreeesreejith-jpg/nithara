@@ -49,10 +49,24 @@ window.PDFHelper = {
 
                 return { success: true, method: 'native-share' };
 
+            } else if (navigator.share) {
+                console.log('Web Share API detected');
+                const file = new File([blob], safeFileName, { type: 'application/pdf' });
+
+                // Check if canShare is supported and returns true
+                if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                    await navigator.share({
+                        files: [file],
+                        title: title || 'Report',
+                        text: 'PDF Report'
+                    });
+                    return { success: true, method: 'web-share' };
+                } else {
+                    console.warn('navigator.share available but file sharing NOT supported. Falling back.');
+                    return await this.download(blob, safeFileName);
+                }
             } else {
-                // WEB FALLBACK: Do not use navigator.share for files on mobile (flaky support)
-                // Direct download is safer and more consistent.
-                console.log('Web environment: using download fallback');
+                console.log('No sharing API available, falling back to download');
                 return await this.download(blob, safeFileName);
             }
         } catch (err) {
@@ -98,27 +112,21 @@ window.PDFHelper = {
                 return { success: true, method: 'native-save', uri: fileResult.uri };
 
             } else {
-                console.log('Browser download initiated (Opening in new tab)');
-
+                console.log('Browser download initiated (Classic Anchor Method)');
                 const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = safeFileName;
+                link.style.display = 'none';
+                document.body.appendChild(link);
+                link.click();
 
-                // Attempt 1: Open directly (Best for Mobile Chrome)
-                const newWindow = window.open(url, '_blank');
+                setTimeout(() => {
+                    document.body.removeChild(link);
+                    URL.revokeObjectURL(url);
+                }, 1000);
 
-                if (!newWindow || newWindow.closed || typeof newWindow.closed == 'undefined') {
-                    // Popup blocked? Fallback to Anchor click
-                    console.warn('Popup blocked, falling back to anchor click');
-                    const link = document.createElement('a');
-                    link.href = url;
-                    link.download = safeFileName;
-                    document.body.appendChild(link);
-                    link.click();
-                    setTimeout(() => document.body.removeChild(link), 100);
-                } else {
-                    // Success - user sees PDF
-                }
-
-                return { success: true, method: 'browser-open' };
+                return { success: true, method: 'browser-download' };
             }
         } catch (err) {
             console.error("PDFHelper Download Error:", err);
