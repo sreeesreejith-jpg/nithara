@@ -311,8 +311,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Print / PDF logic
     const generatePDFResult = async () => {
         try {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
+            const jsPDFLib = window.jsPDF || (window.jspdf ? window.jspdf.jsPDF : null);
+            if (!jsPDFLib) throw new Error("PDF Library not loaded");
+            const doc = new jsPDFLib();
             const reportTitle = prepareForPDF();
 
             // 1. Header & Branding
@@ -438,7 +439,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const isNative = !!(cap && cap.Plugins && (cap.Plugins.Filesystem || cap.Plugins.Share));
 
             cleanupAfterPDF();
-            return { blob: doc.output('blob'), title: reportTitle };
+            // More robust blob creation for mobile
+            const pdfOutput = doc.output('arraybuffer');
+            const blob = new Blob([pdfOutput], { type: 'application/pdf' });
+            return { blob: blob, title: reportTitle };
         } catch (err) {
             cleanupAfterPDF();
             console.error(err);

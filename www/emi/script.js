@@ -187,8 +187,9 @@ const cleanupAfterPDF = () => { document.body.classList.remove('pdf-mode'); };
 
 const generatePDFResult = async () => {
     try {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
+        const jsPDFLib = window.jsPDF || (window.jspdf ? window.jspdf.jsPDF : null);
+        if (!jsPDFLib) throw new Error("PDF Library not loaded");
+        const doc = new jsPDFLib();
         const reportTitle = "EMI_Report_" + new Date().getTime();
 
         // 1. Header with styling
@@ -237,7 +238,10 @@ const generatePDFResult = async () => {
         doc.text("Email: sreee.sreejith@gmail.com", 14, finalY);
         doc.text("* This is a computer-generated report based on standard EMI formulas.", 14, finalY + 7);
 
-        return { blob: doc.output('blob'), title: reportTitle };
+        // More robust blob creation for mobile
+        const pdfOutput = doc.output('arraybuffer');
+        const blob = new Blob([pdfOutput], { type: 'application/pdf' });
+        return { blob: blob, title: reportTitle };
     } catch (err) {
         console.error("Professional PDF Error:", err);
         throw err;

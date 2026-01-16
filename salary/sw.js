@@ -1,12 +1,17 @@
-const CACHE_NAME = 'salary-v3';
+const CACHE_NAME = 'nithara-reset-final';
+const CACHE_PREFIX = 'nithara-salary-';
 const ASSETS = [
     './',
     './index.html',
     './style.css?v=1.0',
     './script.js?v=1.0',
     './manifest.json',
-    '../icon-192.png'
+    '../icon-192.png',
+    '../js/pdf-helper.js',
+    '../js/jspdf.umd.min.js',
+    '../js/jspdf.plugin.autotable.min.js'
 ];
+
 
 self.addEventListener('install', (event) => {
     self.skipWaiting();

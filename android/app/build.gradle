@@ -7,8 +7,8 @@ android {
         applicationId "com.sreejith.nithara"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 4
-        versionName "1.3"
+        versionCode 104
+        versionName "1.8"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
@@ -19,9 +19,9 @@ android {
     signingConfigs {
         release {
             storeFile file("nithara-release.keystore")
-            storePassword System.getenv("KEYSTORE_PASSWORD")
-            keyAlias System.getenv("KEY_ALIAS")
-            keyPassword System.getenv("KEY_PASSWORD")
+            storePassword System.getenv("KEYSTORE_PASSWORD") ?: findProperty("KEYSTORE_PASSWORD")
+            keyAlias System.getenv("KEY_ALIAS") ?: findProperty("KEY_ALIAS")
+            keyPassword System.getenv("KEY_PASSWORD") ?: findProperty("KEY_PASSWORD")
         }
     }
 

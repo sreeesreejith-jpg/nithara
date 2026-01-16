@@ -1,13 +1,17 @@
-const CACHE_NAME = 'nithara-app-v13';
+const CACHE_NAME = 'nithara-FINAL-RESTORE-v1';
+const CACHE_PREFIX = 'nithara-main-';
 const ASSETS_TO_CACHE = [
     './',
     './index.html',
     './style.css',
     './manifest.json',
-    './capacitor-handler.js',
     './icon-192.png',
     './icon-512.png',
     './icon-maskable.png',
+    // Core JS Libraries
+    './pdf-helper.js',
+    './jspdf.umd.min.js',
+    './jspdf.plugin.autotable.min.js',
     // Cache entry points for sub-apps
     './calculator/index.html',
     './calculator/style.css',
@@ -29,7 +33,9 @@ const ASSETS_TO_CACHE = [
     './housing/script.js',
     './sip/index.html',
     './sip/style.css',
-    './sip/script.js'
+    './sip/script.js',
+    // Library and Helper scripts
+    './capacitor-handler.js'
 ];
 
 // Install Event
@@ -48,7 +54,10 @@ self.addEventListener('activate', (event) => {
         caches.keys().then((cacheNames) => {
             return Promise.all(
                 cacheNames.map((cacheName) => {
-                    if (cacheName !== CACHE_NAME) {
+                    // Only delete caches that belong to this module (nithara-main-)
+                    // but are not the current versions
+                    if (cacheName.startsWith(CACHE_PREFIX) && cacheName !== CACHE_NAME) {
+                        console.log('Main SW: Deleting old cache:', cacheName);
                         return caches.delete(cacheName);
                     }
                 })
@@ -58,26 +67,36 @@ self.addEventListener('activate', (event) => {
     self.clients.claim();
 });
 
-// Fetch Event - Stale-While-Revalidate Strategy
-// This allows the app to work offline immediately (from cache)
-// and update the cache in the background when online.
+// Fetch Event - Network First for logic, Stale-While-Revalidate for assets
 self.addEventListener('fetch', (event) => {
-    event.respondWith(
-        caches.match(event.request).then((cachedResponse) => {
-            const fetchPromise = fetch(event.request).then((networkResponse) => {
-                if (networkResponse && networkResponse.status === 200) {
-                    const responseToCache = networkResponse.clone();
-                    caches.open(CACHE_NAME).then((cache) => {
-                        cache.put(event.request, responseToCache);
-                    });
-                }
-                return networkResponse;
-            }).catch(() => {
-                // Return cached response if network fails
-                return cachedResponse;
-            });
+    const isLogic = event.request.url.includes('.js') || event.request.url.includes('.css');
 
-            return cachedResponse || fetchPromise;
-        })
-    );
+    if (isLogic) {
+        // Network-First for logic to avoid staleness
+        event.respondWith(
+            fetch(event.request)
+                .then((networkResponse) => {
+                    if (networkResponse && networkResponse.status === 200) {
+                        const responseToCache = networkResponse.clone();
+                        caches.open(CACHE_NAME).then((cache) => cache.put(event.request, responseToCache));
+                    }
+                    return networkResponse;
+                })
+                .catch(() => caches.match(event.request))
+        );
+    } else {
+        // Stale-While-Revalidate for images/other assets
+        event.respondWith(
+            caches.match(event.request).then((cachedResponse) => {
+                const fetchPromise = fetch(event.request).then((networkResponse) => {
+                    if (networkResponse && networkResponse.status === 200) {
+                        const responseToCache = networkResponse.clone();
+                        caches.open(CACHE_NAME).then((cache) => cache.put(event.request, responseToCache));
+                    }
+                    return networkResponse;
+                });
+                return cachedResponse || fetchPromise;
+            })
+        );
+    }
 });

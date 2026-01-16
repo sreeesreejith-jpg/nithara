@@ -5,3 +5,6 @@ node_modules/
 .idea/
 *.log
 *.apk
+*.keystore
+keystore_b64.txt
+android/gradle.properties

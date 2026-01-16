@@ -1,3 +1,4 @@
+// Pay Revision Script v1.6
 document.addEventListener('DOMContentLoaded', () => {
     const inputs = [
         'basic-pay-in',
@@ -408,6 +409,13 @@ document.addEventListener('DOMContentLoaded', () => {
         let timelineHTML = '';
 
         if (baseIndex !== -1) {
+            timelineHTML += `
+                    <div class="timeline-item">
+                        <span class="label">Revised BP on 01/07/2024</span>
+                        <span class="value">Rs. ${bpFixed}</span>
+                    </div>
+                `;
+
             events.forEach(event => {
                 currentIndex += event.steps;
                 currentIndex = Math.min(currentIndex, revisedScale.length - 1);
@@ -425,9 +433,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 timelineHTML += `
-                    <div style="display: flex; justify-content: space-between; font-size: 0.7rem; color: var(--text-muted); font-weight: 500; border-bottom: 1px solid rgba(255,255,255,0.02); padding: 0.2rem 0;">
-                        <span>&nbsp;&nbsp;&bull; ${localizedLabel}</span>
-                        <span style="font-weight: 700; color: var(--text-main);">Rs. ${stepPay}</span>
+                    <div class="timeline-item">
+                        <span class="label">${localizedLabel}</span>
+                        <span class="value">Rs. ${stepPay}</span>
                     </div>
                 `;
             });
@@ -478,6 +486,8 @@ document.addEventListener('DOMContentLoaded', () => {
         // Summary Card
         document.getElementById('gross-new-val').textContent = grossNew;
         document.getElementById('revised-bp-val').textContent = bp > 0 ? bpFixed : '';
+        const headerPresentBp = document.getElementById('header-present-bp');
+        if (headerPresentBp) headerPresentBp.textContent = bp > 0 ? bpCurrent : '';
     }
 
     // Initial calculation
@@ -513,9 +523,9 @@ document.addEventListener('DOMContentLoaded', () => {
             doc.setFontSize(10);
             doc.setFont("helvetica", "normal");
 
-            const name = document.getElementById('reportName')?.value || "";
-            const pen = document.getElementById('penNumber')?.value || "";
-            const school = document.getElementById('schoolName')?.value || "";
+            const name = document.getElementById('reportName')?.value?.trim() || "";
+            const pen = document.getElementById('penNumber')?.value?.trim() || "";
+            const school = document.getElementById('schoolName')?.value?.trim() || "";
 
             let headerY = 28;
             if (name) { doc.text(`Employee: ${name}`, 14, headerY); headerY += 5; }
@@ -661,10 +671,12 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             // 7. Footer
-            const finalY = doc.lastAutoTable.finalY + 20;
-            doc.setFontSize(10);
-            doc.setTextColor(150);
-            doc.text("Email: sreee.sreejith@gmail.com", 14, finalY < 280 ? finalY : 280);
+            if (doc.lastAutoTable) {
+                const finalY = doc.lastAutoTable.finalY + 20;
+                doc.setFontSize(10);
+                doc.setTextColor(150);
+                doc.text("Email: sreee.sreejith@gmail.com", 14, finalY < 280 ? finalY : 280);
+            }
 
             return { blob: doc.output('blob'), title: reportTitle };
         } catch (err) {
@@ -685,7 +697,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const result = await generatePDFResult();
             await window.PDFHelper.download(result.blob, `${result.title}.pdf`);
         } catch (err) {
-            alert("PDF Fail: " + err.message + "\n" + (err.stack ? err.stack.slice(0, 100) : ""));
+            console.error("PayRevision PDF Generation Error:", err);
+            alert("Error generating PDF: " + (err.message || "Please check your inputs."));
         } finally {
             if (btn) {
                 btn.innerHTML = originalText;
@@ -706,9 +719,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const result = await generatePDFResult();
             await window.PDFHelper.share(result.blob, `${result.title}.pdf`, 'Pay Revision Report');
         } catch (err) {
-            console.error("Share error:", err);
-            if (err.name !== 'AbortError' && !err.toString().includes('AbortError')) {
-                alert("Share Fail: " + err.message);
+            console.error("PayRevision Share Error:", err);
+            const errMsg = err.message || err.toString();
+            if (err.name !== 'AbortError' && !errMsg.includes('AbortError')) {
+                alert("Sharing failed: " + errMsg + "\n\nPlease try 'Download PDF' instead.");
             }
         } finally {
             if (btn) {
