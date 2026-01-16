@@ -411,7 +411,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (baseIndex !== -1) {
             timelineHTML += `
                     <div class="timeline-item">
-                        <span class="label">Revised BP on 01/07/2024</span>
+                        <span class="label">Revised BP On 01/07/2024</span>
                         <span class="value">Rs. ${bpFixed}</span>
                     </div>
                 `;
@@ -427,9 +427,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 let localizedLabel = "";
 
                 if (event.type === 'increment') {
-                    localizedLabel = `${year} ${month} Annual Increment`;
+                    localizedLabel = `Increment on ${month} ${year}`;
                 } else {
-                    localizedLabel = `${year} ${month} If got Grade after 1/7/24`;
+                    localizedLabel = `Grade on ${month} ${year}`;
                 }
 
                 timelineHTML += `
@@ -640,33 +640,60 @@ document.addEventListener('DOMContentLoaded', () => {
             // 6. Timeline Summary
             const timelineSteps = document.querySelectorAll('#timeline-steps > div');
             if (timelineSteps && timelineSteps.length > 0) {
-                doc.addPage();
-                doc.setFillColor(59, 130, 246);
-                doc.rect(0, 0, 210, 20, 'F');
-                doc.setFontSize(14);
-                doc.setTextColor(255);
-                doc.text("Detailed Pay Progression Timeline", 14, 13);
+                let timelineY = doc.lastAutoTable ? doc.lastAutoTable.finalY + 15 : 240;
 
-                doc.setTextColor(40);
-                doc.setFontSize(11);
+                // Check if we need a new page
+                const estimatedHeight = (timelineSteps.length * 8) + 30;
+                if (timelineY + estimatedHeight > 285) {
+                    doc.addPage();
+                    timelineY = 20;
+                }
+
+                doc.setFontSize(14);
+                doc.setTextColor(59, 130, 246); // Primary Color
+                doc.setFont("Outfit", "bold");
+                doc.text("Detailed Pay Progression Timeline", 14, timelineY);
 
                 let timelineRows = [];
                 timelineSteps.forEach(step => {
                     const spans = step.querySelectorAll('span');
                     if (spans.length >= 2) {
-                        const labelText = spans[0].textContent.replace('• ', '').trim() || "";
+                        let fullLabel = spans[0].textContent.replace('• ', '').trim();
+                        let eventType = fullLabel;
+                        let dateText = "-";
+
+                        // Split "Event on Date" into two columns
+                        if (fullLabel.toLowerCase().includes(" on ")) {
+                            const parts = fullLabel.split(/ on /i);
+                            eventType = parts[0].trim();
+                            dateText = parts[1].trim();
+                        }
+
                         const valText = spans[1].textContent.trim() || "";
-                        timelineRows.push([labelText, valText]);
+                        timelineRows.push([eventType, dateText, valText]);
                     }
                 });
 
                 doc.autoTable({
-                    startY: 30,
-                    head: [['Progression Event', 'Pay Stage']],
+                    startY: timelineY + 5,
+                    head: [['Progression Event', 'Date / Period', 'Revised Pay Stage']],
                     body: timelineRows,
-                    theme: 'striped',
-                    headStyles: { fillColor: [139, 92, 246] },
-                    columnStyles: { 1: { halign: 'right' } }
+                    theme: 'grid',
+                    headStyles: {
+                        fillColor: [59, 130, 246],
+                        halign: 'center',
+                        fontSize: 10
+                    },
+                    columnStyles: {
+                        0: { cellWidth: 'auto' },
+                        1: { halign: 'center', cellWidth: 50 },
+                        2: { halign: 'right', fontStyle: 'bold', cellWidth: 50 }
+                    },
+                    styles: {
+                        fontSize: 9,
+                        cellPadding: 4,
+                        valign: 'middle'
+                    }
                 });
             }
 
