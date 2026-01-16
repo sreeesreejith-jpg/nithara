@@ -22,7 +22,9 @@ document.addEventListener('DOMContentLoaded', () => {
             el.addEventListener('change', calculate);
             // Auto-select text on click/focus to easily see datalist
             el.addEventListener('click', function () {
-                this.select();
+                if (typeof this.select === 'function') {
+                    this.select();
+                }
             });
         }
     });
@@ -66,6 +68,102 @@ document.addEventListener('DOMContentLoaded', () => {
         126500, 129300, 132100, 134900, 137700, 140500, 143600, 146700, 149800,
         153200, 156600, 160000, 163400, 166800
     ];
+
+    // --- Fitment Dropdown logic ---
+    const fitmentInput = document.getElementById('fitment-perc');
+    const fitmentDropdown = document.getElementById('fitment-dropdown');
+    const fitmentList = [7, 8, 9, 10];
+
+    function renderFitmentDropdown() {
+        fitmentDropdown.innerHTML = "";
+        fitmentList.forEach(val => {
+            const li = document.createElement('li');
+            li.textContent = val;
+            li.addEventListener('mousedown', (e) => {
+                e.preventDefault();
+                fitmentInput.value = val;
+                fitmentDropdown.classList.remove('show');
+                calculate();
+            });
+            li.addEventListener('mouseenter', () => {
+                fitmentInput.value = val;
+                calculate();
+            });
+            fitmentDropdown.appendChild(li);
+        });
+    }
+
+    function showFitmentDropdown() {
+        renderFitmentDropdown();
+        fitmentDropdown.classList.add('show');
+        const currentVal = fitmentInput.value;
+        const items = Array.from(fitmentDropdown.querySelectorAll('li'));
+        const match = items.find(li => li.textContent == currentVal);
+        if (match) {
+            match.scrollIntoView({ block: 'center' });
+            items.forEach(li => li.classList.remove('active'));
+            match.classList.add('active');
+        }
+    }
+
+    fitmentInput.addEventListener('focus', showFitmentDropdown);
+    fitmentInput.addEventListener('click', showFitmentDropdown);
+    fitmentInput.addEventListener('blur', () => {
+        setTimeout(() => fitmentDropdown.classList.remove('show'), 150);
+    });
+    fitmentDropdown.addEventListener('scroll', () => {
+        if (fitmentDropdown.classList.contains('show')) {
+            syncSelectionOnScroll(fitmentDropdown, fitmentInput);
+        }
+    });
+
+    // --- HRA Dropdown logic ---
+    const hraInput = document.getElementById('hra-perc');
+    const hraDropdown = document.getElementById('hra-dropdown');
+    const hraList = [4, 6, 8, 10];
+
+    function renderHRADropdown() {
+        hraDropdown.innerHTML = "";
+        hraList.forEach(val => {
+            const li = document.createElement('li');
+            li.textContent = val;
+            li.addEventListener('mousedown', (e) => {
+                e.preventDefault();
+                hraInput.value = val;
+                hraDropdown.classList.remove('show');
+                calculate();
+            });
+            li.addEventListener('mouseenter', () => {
+                hraInput.value = val;
+                calculate();
+            });
+            hraDropdown.appendChild(li);
+        });
+    }
+
+    function showHRADropdown() {
+        renderHRADropdown();
+        hraDropdown.classList.add('show');
+        const currentVal = hraInput.value;
+        const items = Array.from(hraDropdown.querySelectorAll('li'));
+        const match = items.find(li => li.textContent == currentVal);
+        if (match) {
+            match.scrollIntoView({ block: 'center' });
+            items.forEach(li => li.classList.remove('active'));
+            match.classList.add('active');
+        }
+    }
+
+    hraInput.addEventListener('focus', showHRADropdown);
+    hraInput.addEventListener('click', showHRADropdown);
+    hraInput.addEventListener('blur', () => {
+        setTimeout(() => hraDropdown.classList.remove('show'), 150);
+    });
+    hraDropdown.addEventListener('scroll', () => {
+        if (hraDropdown.classList.contains('show')) {
+            syncSelectionOnScroll(hraDropdown, hraInput);
+        }
+    });
 
     // --- Custom Dropdown Logic ---
     const basicPayInput = document.getElementById('basic-pay-in');
@@ -699,10 +797,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // 7. Footer
             if (doc.lastAutoTable) {
-                const finalY = doc.lastAutoTable.finalY + 20;
+                let finalY = doc.lastAutoTable.finalY + 15;
+                if (finalY > 275) {
+                    doc.addPage();
+                    finalY = 20;
+                }
+
+                doc.setFontSize(9);
+                doc.setTextColor(100);
+                doc.setFont("Outfit", "normal");
+                const disclaimer = "* NOTE: Calculations are approximate and for informational purposes only.";
+                doc.text(disclaimer, 14, finalY);
+
                 doc.setFontSize(10);
                 doc.setTextColor(150);
-                doc.text("Email: sreee.sreejith@gmail.com", 14, finalY < 280 ? finalY : 280);
+                doc.text("Email: sreee.sreejith@gmail.com", 14, finalY + 8);
             }
 
             return { blob: doc.output('blob'), title: reportTitle };
