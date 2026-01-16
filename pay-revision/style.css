@@ -248,7 +248,14 @@ header {
     gap: 0.5rem;
 }
 
-.result-row,
+.result-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+}
+
 .row-input {
     display: flex;
     justify-content: space-between;
@@ -260,6 +267,7 @@ header {
     font-size: 0.85rem;
     color: var(--text-muted);
     font-weight: 500;
+    white-space: nowrap;
 }
 
 .value {
@@ -269,7 +277,7 @@ header {
 
 .row-input {
     display: grid;
-    grid-template-columns: 1fr 65px 80px;
+    grid-template-columns: 1fr 100px 90px;
     gap: 0.5rem;
     align-items: center;
 }
@@ -404,7 +412,8 @@ footer {
     }
 
     .revision-grid {
-        align-items: stretch;
+        grid-template-columns: 1fr;
+        gap: 1rem;
     }
 }
 
@@ -440,8 +449,12 @@ footer {
     }
 
     .row-input {
-        grid-template-columns: 80px 55px 1fr;
-        gap: 0.3rem;
+        grid-template-columns: 1fr 70px 80px;
+        gap: 0.4rem;
+    }
+
+    .result-row {
+        gap: 0.5rem;
     }
 
     .label {
@@ -922,6 +935,7 @@ body.pdf-mode .input-hint {
         gap: 0.2rem;
     }
 }
+
 /* Timeline Styles */
 .timeline-item {
     display: grid;

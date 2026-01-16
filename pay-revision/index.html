@@ -119,8 +119,8 @@
                         <div class="input-field row-input"
                             style="display: grid; grid-template-columns: 1fr 100px; gap: 1rem; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.03); padding-bottom: 0.75rem;">
                             <label for="weightage-check"
-                                style="font-size: 0.9rem; color: var(--text-muted); font-weight: 600;">Service
-                                Weightage?</label>
+                                style="font-size: 0.9rem; color: var(--text-muted); font-weight: 600;">If Service
+                                Weightage allowed?</label>
                             <div style="display: flex; justify-content: center;">
                                 <input type="checkbox" id="weightage-check"
                                     style="width: 20px; height: 20px; accent-color: var(--primary);">
@@ -179,12 +179,10 @@
                     <div class="input-field row-input"
                         style="display: grid; grid-template-columns: 1fr 100px; gap: 1rem; align-items: center;">
                         <label for="grade-check"
-                            style="font-size: 0.9rem; color: var(--text-main); font-weight: 700;">Higher
-                            Grade?<br><small
-                                style="font-size: 0.65rem; color: var(--text-muted); font-weight: 500;">(after
-                                01/07/2024)</small></label>
+                            style="font-size: 0.9rem; color: var(--text-main); font-weight: 700;">If got Grade after
+                            1/7/24?</label>
                         <div style="display: flex; justify-content: center;">
-                            <input type="checkbox" id="grade-check"
+                            <input type="checkbox" id="grade-check" autocomplete="off"
                                 style="width: 20px; height: 20px; accent-color: #8b5cf6;">
                         </div>
                     </div>
@@ -195,9 +193,22 @@
                         <div class="input-field row-input"
                             style="display: grid; grid-template-columns: 1fr 140px; gap: 1rem; align-items: center;">
                             <label style="font-size: 0.85rem; color: var(--text-main); font-weight: 700;">Grade
-                                Month</label>
-                            <select id="grade-month"
+                                Year</label>
+                            <select id="grade-year" autocomplete="off"
                                 style="text-align: center; height: 32px; font-size: 0.85rem; background: rgba(0,0,0,0.2); color: white; border-radius: 0.4rem; border: 1px solid #8b5cf6;">
+                                <option value="" selected disabled>Select Year</option>
+                                <option value="2024">2024</option>
+                                <option value="2025">2025</option>
+                                <option value="2026">2026</option>
+                            </select>
+                        </div>
+                        <div class="input-field row-input"
+                            style="display: grid; grid-template-columns: 1fr 140px; gap: 1rem; align-items: center;">
+                            <label style="font-size: 0.85rem; color: var(--text-main); font-weight: 700;">Grade
+                                Month</label>
+                            <select id="grade-month" autocomplete="off"
+                                style="text-align: center; height: 32px; font-size: 0.85rem; background: rgba(0,0,0,0.2); color: white; border-radius: 0.4rem; border: 1px solid #8b5cf6;">
+                                <option value="" selected disabled>Select Month</option>
                                 <option value="0">January</option>
                                 <option value="1">February</option>
                                 <option value="2">March</option>
@@ -210,17 +221,6 @@
                                 <option value="9">October</option>
                                 <option value="10">November</option>
                                 <option value="11">December</option>
-                            </select>
-                        </div>
-                        <div class="input-field row-input"
-                            style="display: grid; grid-template-columns: 1fr 140px; gap: 1rem; align-items: center;">
-                            <label style="font-size: 0.85rem; color: var(--text-main); font-weight: 700;">Grade
-                                Year</label>
-                            <select id="grade-year"
-                                style="text-align: center; height: 32px; font-size: 0.85rem; background: rgba(0,0,0,0.2); color: white; border-radius: 0.4rem; border: 1px solid #8b5cf6;">
-                                <option value="2024">2024</option>
-                                <option value="2025">2025</option>
-                                <option value="2026">2026</option>
                             </select>
                         </div>
                     </div>
@@ -265,28 +265,24 @@
                 </div>
                 <div class="input-group"
                     style="padding: 1rem; display: flex; flex-direction: column; gap: 0.5rem; flex: 1;">
-                    <div class="result-row"
-                        style="display: grid; grid-template-columns: 1.2fr 1fr; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.03); padding: 0.5rem 0;">
+                    <div class="result-row">
                         <span class="label">Basic Pay</span>
                         <span id="res-bp-new" class="value" style="text-align: right;">0</span>
                     </div>
-                    <div class="result-row"
-                        style="display: grid; grid-template-columns: 1.2fr 1fr; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.03); padding: 0.5rem 0;">
+                    <div class="result-row">
                         <span class="label">DA Merged (31%)</span>
                         <span id="res-da-merged" class="value" style="text-align: right;">0</span>
                     </div>
-                    <div class="result-row"
-                        style="display: grid; grid-template-columns: 1.2fr 1fr; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.03); padding: 0.5rem 0;">
+                    <div class="result-row">
                         <span class="label">Fitment Amount</span>
                         <span id="res-fitment" class="value" style="text-align: right;">0</span>
                     </div>
-                    <div class="result-row" id="res-weightage-row"
-                        style="display: none; grid-template-columns: 1.2fr 1fr; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.03); padding: 0.5rem 0;">
-                        <span class="label">Service Weightage</span>
+                    <div class="result-row" id="res-weightage-row" style="display: none;">
+                        <span class="label">Service Weightage (if allowed)</span>
                         <span id="res-weightage" class="value" style="text-align: right;">0</span>
                     </div>
                     <div class="result-row highlight-row"
-                        style="display: grid; grid-template-columns: 1.2fr 1fr; align-items: center; padding: 0.75rem 0; margin: 0.25rem 0;">
+                        style="border-top: 1px dashed rgba(255,255,255,0.1); margin-top: 0.5rem;">
                         <span class="label" style="font-weight: 700;">Actual Total</span>
                         <span id="res-actual-total" class="value" style="text-align: right; font-weight: 800;">0</span>
                     </div>
@@ -307,43 +303,36 @@
                 </div>
                 <div class="input-group"
                     style="padding: 1rem; display: flex; flex-direction: column; gap: 0.5rem; flex: 1;">
-                    <div class="result-row"
-                        style="display: grid; grid-template-columns: 1.2fr 1fr; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.03); padding: 0.5rem 0;">
+                    <div class="result-row">
                         <span class="label">Current Basic Pay</span>
                         <span id="res-bp-current" class="value highlight"
                             style="text-align: right; font-weight: 800;">0</span>
                     </div>
 
                     <!-- Input Rows -->
-                    <div class="input-field row-input"
-                        style="display: grid; grid-template-columns: 1.2fr 100px 1fr; gap: 0.75rem; align-items: center; margin-top: 0.5rem;">
-                        <label style="font-size: 0.85rem;">DA</label>
+                    <div class="input-field row-input" style="margin-top: 0.5rem;">
+                        <label>DA</label>
                         <div class="input-with-val" style="margin: 0;">
-                            <input type="number" id="bal-da-perc" value="4" step="0.1"
-                                style="text-align: center; height: 32px; font-size: 0.9rem;">
-                            <span class="unit" style="font-size: 0.8rem;">%</span>
+                            <input type="number" id="bal-da-perc" value="4" step="0.1">
+                            <span class="unit">%</span>
                         </div>
-                        <span id="res-bal-da" class="calc-val" style="text-align: right; font-weight: 600;">0</span>
+                        <span id="res-bal-da" class="calc-val">0</span>
                     </div>
-                    <div class="input-field row-input"
-                        style="display: grid; grid-template-columns: 1.2fr 100px 1fr; gap: 0.75rem; align-items: center;">
-                        <label style="font-size: 0.85rem;">HRA</label>
+                    <div class="input-field row-input">
+                        <label>HRA</label>
                         <div class="input-with-val" style="margin: 0;">
-                            <input type="number" id="hra-perc" value="4" step="0.5"
-                                style="text-align: center; height: 32px; font-size: 0.9rem;">
-                            <span class="unit" style="font-size: 0.8rem;">%</span>
+                            <input type="number" id="hra-perc" value="4" step="0.5">
+                            <span class="unit">%</span>
                         </div>
-                        <span id="res-hra-new" class="calc-val" style="text-align: right; font-weight: 600;">0</span>
+                        <span id="res-hra-new" class="calc-val">0</span>
                     </div>
-                    <div class="input-field row-input"
-                        style="display: grid; grid-template-columns: 1.2fr 100px 1fr; gap: 0.75rem; align-items: center;">
-                        <label style="font-size: 0.85rem;">Others</label>
+                    <div class="input-field row-input">
+                        <label>Others</label>
                         <div class="input-with-val" style="margin: 0;">
-                            <input type="number" id="others-val" value="0" step="1"
-                                style="text-align: center; height: 32px; font-size: 0.9rem;">
-                            <span class="unit" style="font-size: 0.8rem;">Rs</span>
+                            <input type="number" id="others-val" value="0" step="1">
+                            <span class="unit">Rs</span>
                         </div>
-                        <span id="res-others" class="calc-val" style="text-align: right; font-weight: 600;">0</span>
+                        <span id="res-others" class="calc-val">0</span>
                     </div>
                 </div>
                 <!-- Box-style footer -->

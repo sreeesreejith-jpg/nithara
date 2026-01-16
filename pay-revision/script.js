@@ -334,7 +334,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     events.push({
                         type: 'grade',
                         date: new Date(checkDate),
-                        label: `Higher Grade Promotion (${monthNames[checkDate.getMonth()]} ${checkDate.getFullYear()})`,
+                        label: `If got Grade after 1/7/24 (${monthNames[checkDate.getMonth()]} ${checkDate.getFullYear()})`,
                         steps: 2
                     });
                 }
@@ -429,7 +429,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (event.type === 'increment') {
                     localizedLabel = `${year} ${month} Annual Increment`;
                 } else {
-                    localizedLabel = `${year} ${month} Higher Grade`;
+                    localizedLabel = `${year} ${month} If got Grade after 1/7/24`;
                 }
 
                 timelineHTML += `
@@ -590,7 +590,7 @@ document.addEventListener('DOMContentLoaded', () => {
             ];
 
             if (isWeightageChecked) {
-                fixationRows.push(['Service Weightage', yearsService + ' Yrs', 'Rs. ' + weightageV]);
+                fixationRows.push(['Service Weightage (if allowed)', yearsService + ' Yrs', 'Rs. ' + weightageV]);
             }
 
             fixationRows.push(
