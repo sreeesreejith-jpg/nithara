@@ -574,6 +574,17 @@ document.addEventListener('DOMContentLoaded', () => {
         const actualTotalEl = document.getElementById('res-actual-total');
         if (actualTotalEl) actualTotalEl.textContent = actualTotal;
 
+        // Update After UI
+        const benchmarkMonth = monthNames[today.getMonth()];
+        const benchmarkYear = today.getFullYear();
+        const shortYear = benchmarkYear.toString().slice(-2);
+
+        const bpLabel = document.getElementById('label-bp-current');
+        if (bpLabel) bpLabel.textContent = `Revised BP on ${benchmarkMonth} ${shortYear}`;
+
+        const grossLabel = document.getElementById('label-gross-new');
+        if (grossLabel) grossLabel.textContent = `Gross Salary (${benchmarkMonth} ${benchmarkYear})`;
+
         document.getElementById('res-bp-fixed').textContent = bpFixed;
         document.getElementById('res-bp-current').textContent = bpCurrent;
         document.getElementById('res-bal-da').textContent = balDaVal;
