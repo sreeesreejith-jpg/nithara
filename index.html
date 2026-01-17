@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Apps Portal - Access all your finance and utility tools in one place">
     <title>Nithara | Portal</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=2.0">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#0f172a">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -98,26 +98,7 @@
     </div>
     <div class="footer-email" style="display: flex; flex-direction: column; gap: 0.5rem; align-items: center;">
         <div>email: sreee.sreejith@gmail.com</div>
-        <button onclick="clearAllCaches()"
-            style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #94a3b8; padding: 4px 10px; border-radius: 4px; font-size: 0.65rem; cursor: pointer;">Clear
-            Cache & Update</button>
     </div>
-
-    <script>
-        async function clearAllCaches() {
-            if (confirm("This will clear all saved data and refresh the app. Continue?")) {
-                const names = await caches.keys();
-                await Promise.all(names.map(name => caches.delete(name)));
-
-                const registrations = await navigator.serviceWorker.getRegistrations();
-                for (let registration of registrations) {
-                    await registration.unregister();
-                }
-
-                window.location.reload(true);
-            }
-        }
-    </script>
 </body>
 
 </html>
