@@ -36,8 +36,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (weightageCheck && weightageContainer) {
         weightageCheck.addEventListener('change', () => {
             if (weightageCheck.checked) {
-                weightageContainer.style.display = 'flex'; // Changed to flex for proper layout
-                if (weightageResultRow) weightageResultRow.style.display = 'flex';
+                weightageContainer.style.display = 'flex'; // Proper layout for input container (column)
+                if (weightageResultRow) weightageResultRow.style.display = 'grid'; // Strict Grid for result row
             } else {
                 weightageContainer.style.display = 'none';
                 if (weightageResultRow) weightageResultRow.style.display = 'none';
@@ -703,7 +703,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (fitmentLabelEl) fitmentLabelEl.textContent = `Fitment Amount (${fitmentPerc}%)`;
 
         const weightageRow = document.getElementById('res-weightage-row');
-        if (weightageRow) weightageRow.style.display = isWeightageEnabled ? 'flex' : 'none';
+        if (weightageRow) weightageRow.style.display = isWeightageEnabled ? 'grid' : 'none';
 
         const weightageEl = document.getElementById('res-weightage');
         if (weightageEl) weightageEl.textContent = weightageVal;

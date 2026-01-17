@@ -998,3 +998,83 @@ body.pdf-mode .input-hint {
     font-family: monospace;
     font-size: 0.95rem;
 }
+
+/* Mobile Optimization < 768px */
+@media (max-width: 768px) {
+    body {
+        padding: 0.5rem;
+        /* Reduce body padding */
+    }
+
+    .container {
+        padding: 0.75rem;
+        /* Reduce container inner padding */
+        border-radius: 1rem;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .header-content h1 {
+        font-size: 1.5rem;
+    }
+
+    /* Maximize Card Widths */
+    .input-main-card,
+    .config-group-card,
+    .revision-section,
+    #progression-timeline,
+    .report-card {
+        padding: 1rem 0.75rem !important;
+        /* Maximizing width usage */
+        margin-left: 0;
+        margin-right: 0;
+        width: 100%;
+    }
+
+    /* Part 1: Employee Details */
+    .input-main-card {
+        margin-bottom: 2rem !important;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        /* Visual Clue */
+    }
+
+    /* Part 2: Progression */
+    #progression-timeline {
+        margin-bottom: 2rem !important;
+        border: 1px solid rgba(139, 92, 246, 0.3);
+    }
+
+    /* Part 3: Pay Fixation (Detailed Breakdown) */
+    .revision-section.before {
+        margin-bottom: 2rem !important;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        padding-bottom: 1.5rem;
+    }
+
+    /* Part 4: Present Salary DETAILS */
+    .revision-section.after {
+        margin-bottom: 2rem !important;
+    }
+
+    /* Part 5: Report Settings */
+    .download-section {
+        margin-top: 2rem !important;
+        padding-top: 1rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    /* Optimize Data Visibility */
+    .result-row {
+        grid-template-columns: 1fr auto !important;
+        gap: 0.25rem;
+    }
+
+    .result-row .value {
+        text-align: right;
+        min-width: 70px;
+    }
+
+    .label {
+        font-size: 0.85rem !important;
+        /* Slightly smaller to fit more text */
+    }
+}
