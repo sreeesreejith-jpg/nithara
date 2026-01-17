@@ -13,27 +13,15 @@ const ASSETS_TO_CACHE = [
     './jspdf.umd.min.js',
     './jspdf.plugin.autotable.min.js',
     // Cache entry points for sub-apps
-    './calculator/index.html',
-    './calculator/style.css',
-    './calculator/script.js',
     './dcrg/index.html',
     './dcrg/style.css',
     './dcrg/script.js',
     './emi/index.html',
     './emi/style.css',
     './emi/script.js',
-    './salary/index.html',
-    './salary/style.css',
-    './salary/script.js',
     './pay-revision/index.html',
     './pay-revision/style.css',
     './pay-revision/script.js',
-    './housing/index.html',
-    './housing/style.css',
-    './housing/script.js',
-    './sip/index.html',
-    './sip/style.css',
-    './sip/script.js',
     // Library and Helper scripts
     './capacitor-handler.js'
 ];
