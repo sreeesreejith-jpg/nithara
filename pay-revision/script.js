@@ -36,8 +36,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (weightageCheck && weightageContainer) {
         weightageCheck.addEventListener('change', () => {
             if (weightageCheck.checked) {
-                weightageContainer.style.display = ''; // Reverts to CSS (grid)
-                if (weightageResultRow) weightageResultRow.style.display = '';
+                weightageContainer.style.display = 'flex'; // Changed to flex for proper layout
+                if (weightageResultRow) weightageResultRow.style.display = 'flex';
             } else {
                 weightageContainer.style.display = 'none';
                 if (weightageResultRow) weightageResultRow.style.display = 'none';
@@ -57,13 +57,21 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Increment Month Conditional Display Logic
-    const incrementMonth = document.getElementById('increment-month');
+    const incrementMonthInput = document.getElementById('increment-month');
+    const incrementMonthDisplay = document.getElementById('increment-month-display');
+    const incrementMonthDropdown = document.getElementById('increment-month-dropdown');
+
+    // Grade Month Logic
+    const gradeMonthInput = document.getElementById('grade-month');
+    const gradeMonthDisplay = document.getElementById('grade-month-display');
+    const gradeMonthDropdown = document.getElementById('grade-month-dropdown');
+
     const revisedBpContainer = document.getElementById('revised-bp-container');
     const presentBpContainer = document.getElementById('present-bp-container');
     const presentSalaryContainer = document.getElementById('present-salary-container');
 
     function toggleConditionalSections() {
-        const isIncrementSelected = incrementMonth && incrementMonth.value !== "";
+        const isIncrementSelected = incrementMonthInput && incrementMonthInput.value !== "";
 
         if (revisedBpContainer) {
             revisedBpContainer.style.display = isIncrementSelected ? 'flex' : 'none';
@@ -76,12 +84,75 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    if (incrementMonth) {
-        incrementMonth.addEventListener('change', () => {
-            toggleConditionalSections();
+    // Generic Month Dropdown Logic
+    function setupMonthDropdown(inputEl, displayEl, dropdownEl) {
+        function renderMonths() {
+            dropdownEl.innerHTML = "";
+            monthNames.forEach((month, index) => {
+                const li = document.createElement('li');
+                li.textContent = month;
+                li.dataset.value = index; // Store 0-11 index
+
+                li.addEventListener('mousedown', (e) => {
+                    e.preventDefault();
+                    selectMonth(index, month);
+                });
+
+                // Optional: Preview on hover (might be annoying for months, maybe skip)
+                // li.addEventListener('mouseenter', () => ... );
+
+                dropdownEl.appendChild(li);
+            });
+        }
+
+        function selectMonth(index, name) {
+            inputEl.value = index;
+            displayEl.value = name;
+            dropdownEl.classList.remove('show');
+            toggleConditionalSections(); // Update visibility if needed
             calculate();
+        }
+
+        function showDropdown() {
+            renderMonths();
+            dropdownEl.classList.add('show');
+            const currentVal = inputEl.value;
+            if (currentVal !== "") {
+                const items = Array.from(dropdownEl.querySelectorAll('li'));
+                const match = items.find(li => li.dataset.value == currentVal);
+                if (match) {
+                    match.scrollIntoView({ block: 'center' });
+                    items.forEach(li => li.classList.remove('active'));
+                    match.classList.add('active');
+                }
+            }
+        }
+
+        displayEl.addEventListener('click', showDropdown);
+        displayEl.addEventListener('focus', showDropdown);
+        displayEl.addEventListener('blur', () => {
+            setTimeout(() => dropdownEl.classList.remove('show'), 150);
+        });
+
+        dropdownEl.addEventListener('scroll', () => {
+            if (dropdownEl.classList.contains('show')) {
+                // Reuse the generic sync function if possible, or adapt it
+                syncSelectionOnScroll(dropdownEl, displayEl, inputEl, true);
+            }
         });
     }
+
+    if (incrementMonthInput && incrementMonthDisplay && incrementMonthDropdown) {
+        setupMonthDropdown(incrementMonthInput, incrementMonthDisplay, incrementMonthDropdown);
+    }
+
+    if (gradeMonthInput && gradeMonthDisplay && gradeMonthDropdown) {
+        setupMonthDropdown(gradeMonthInput, gradeMonthDisplay, gradeMonthDropdown);
+    }
+
+    // Overload syncSelectionOnScroll to handle Month dropdowns (value vs text)
+    // We'll modify the existing one below or create a new one. Let's modify the existing one to be more flexible.
+
 
     // Initialize conditional sections on page load
     toggleConditionalSections();
@@ -216,6 +287,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // Manual entry listener for HRA
+    hraInput.addEventListener('input', calculate);
+
     // --- Custom Dropdown Logic ---
     const basicPayInput = document.getElementById('basic-pay-in');
     const dropdown = document.getElementById('custom-dropdown');
@@ -337,7 +411,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Helper to sync selection based on scroll position (Mobile friendly)
-    function syncSelectionOnScroll(dropdownEl, inputEl) {
+    // updated signature: syncSelectionOnScroll(dropdownEl, displayEl, hiddenInputEl = null, isMonth = false)
+    function syncSelectionOnScroll(dropdownEl, displayEl, hiddenInputEl = null, isMonth = false) {
         const items = dropdownEl.querySelectorAll('li');
         if (items.length === 0) return;
 
@@ -361,7 +436,14 @@ document.addEventListener('DOMContentLoaded', () => {
         if (closestItem && !closestItem.classList.contains('active')) {
             items.forEach(li => li.classList.remove('active'));
             closestItem.classList.add('active');
-            inputEl.value = closestItem.textContent;
+
+            if (isMonth && hiddenInputEl) {
+                displayEl.value = closestItem.textContent;
+                hiddenInputEl.value = closestItem.dataset.value;
+                toggleConditionalSections();
+            } else {
+                displayEl.value = closestItem.textContent;
+            }
             calculate();
         }
     }
@@ -616,11 +698,19 @@ document.addEventListener('DOMContentLoaded', () => {
         const fitmentEl = document.getElementById('res-fitment');
         if (fitmentEl) fitmentEl.textContent = fitmentVal;
 
+        // Dynamic Label for Fitment
+        const fitmentLabelEl = document.getElementById('label-res-fitment');
+        if (fitmentLabelEl) fitmentLabelEl.textContent = `Fitment Amount (${fitmentPerc}%)`;
+
         const weightageRow = document.getElementById('res-weightage-row');
-        if (weightageRow) weightageRow.style.display = isWeightageEnabled ? 'grid' : 'none';
+        if (weightageRow) weightageRow.style.display = isWeightageEnabled ? 'flex' : 'none';
 
         const weightageEl = document.getElementById('res-weightage');
         if (weightageEl) weightageEl.textContent = weightageVal;
+
+        // Dynamic Label for Weightage
+        const weightageLabelEl = document.getElementById('label-res-weightage');
+        if (weightageLabelEl) weightageLabelEl.textContent = `Service Weightage (${weightagePerc}%)`;
 
         const actualTotalEl = document.getElementById('res-actual-total');
         if (actualTotalEl) actualTotalEl.textContent = actualTotal;
