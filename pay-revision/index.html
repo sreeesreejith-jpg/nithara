@@ -216,31 +216,22 @@
         </div>
 
         <!-- Detailed Progression Results (Timeline) -->
-        <div id="progression-timeline"
-            style="margin: 0.5rem 0 1.25rem 0; width: 100%; display: none; flex-direction: column; gap: 0.5rem;">
-            <div
-                style="background: rgba(59, 130, 246, 0.1); border-left: 4px solid var(--primary); padding: 0.75rem 1rem; border-radius: 0.4rem;">
-                <h4
-                    style="font-size: 0.75rem; color: var(--primary); text-transform: uppercase; margin-bottom: 0.5rem; letter-spacing: 0.5px;">
-                    Detailed Progression</h4>
-                <div id="timeline-steps" style="display: flex; flex-direction: column; gap: 0.4rem;">
-                    <!-- Timeline items injected here -->
-                </div>
-            </div>
-        </div>
+
 
         <!-- Step 2: Visualization -->
-        <div class="step-header" style="margin: 1.25rem 0 0.75rem 0; display: flex; align-items: center; gap: 0.75rem;">
-            <div
-                style="background: var(--growth-color); color: white; width: 26px; height: 26px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 0.85rem; flex-shrink: 0; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);">
-                2</div>
-            <div style="display: flex; flex-direction: column;">
-                <span
-                    style="font-size: 0.8rem; font-weight: 800; color: var(--text-main); text-transform: uppercase; letter-spacing: 0.5px; line-height: 1;">Calculation
-                    Results</span>
-                <span style="font-size: 0.6rem; color: var(--text-muted); font-weight: 500;">Review Detailed
-                    Breakdown</span>
+        <!-- Divider / Result Header -->
+        <div class="results-divider">
+            <div class="divider-line"></div>
+            <div class="divider-content">
+                <div class="divider-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 5v14M5 12l7 7 7-7" />
+                    </svg>
+                </div>
+                <span class="divider-text">Calculation Results</span>
             </div>
+            <div class="divider-line"></div>
         </div>
 
         <main class="revision-grid">
@@ -342,6 +333,20 @@
             * NOTE: Calculations are approximate and for informational purposes only.
         </p>
 
+
+        <!-- Detailed Progression Results (Timeline) -->
+        <div id="progression-timeline"
+            style="margin: 0.5rem 0 1.25rem 0; width: 100%; display: none; flex-direction: column; gap: 0.5rem;">
+            <div
+                style="background: var(--input-bg); border-left: 4px solid var(--primary); padding: 0.75rem 1rem; border-radius: 0.4rem;">
+                <h4
+                    style="font-size: 0.75rem; color: var(--primary); text-transform: uppercase; margin-bottom: 0.5rem; letter-spacing: 0.5px;">
+                    Detailed Progression</h4>
+                <div id="timeline-steps" style="display: flex; flex-direction: column; gap: 0.4rem;">
+                    <!-- Timeline items injected here -->
+                </div>
+            </div>
+        </div>
 
         <!-- Section: Report Settings -->
         <section class="revision-section report-card" id="report-settings-section" style="margin-top: 2rem;">

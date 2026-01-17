@@ -527,6 +527,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const incMonthVal = document.getElementById('increment-month').value;
         const incMonth = incMonthVal !== "" ? parseInt(incMonthVal) : null;
 
+        // Validation: Ensure BP and Increment Month are selected
+        if (!bp || incMonth === null) {
+            return;
+        }
+
         const hasGrade = document.getElementById('grade-check')?.checked;
         const gradeMonth = parseInt(document.getElementById('grade-month').value);
         const gradeYear = parseInt(document.getElementById('grade-year').value);
@@ -801,7 +806,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 startY: 55,
                 head: [['Stage', 'Effective Date', 'Basic Pay', 'Gross Salary']],
                 body: [
-                    ['Initial Basic Pay', '01/07/2024', 'Rs. ' + bpInitial, '-'],
+                    ['PreRevised BP', '01/07/2024', 'Rs. ' + bpInitial, '-'],
                     ['Revised Basic Pay', '01/07/2024', 'Rs. ' + fixedBp, '-'],
                     ['Present Basic Pay', currentMonthYear, 'Rs. ' + currentBp, 'Rs. ' + newGross]
                 ],
@@ -834,7 +839,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const isWeightageChecked = document.getElementById('weightage-check')?.checked;
 
             const fixationRows = [
-                ['Base Basic Pay (Old)', '-', 'Rs. ' + bpInitial],
+                ['PreRevised BP', '-', 'Rs. ' + bpInitial],
                 ['DA Merged', '31 %', 'Rs. ' + daMerged],
                 ['Fitment Benefit', fitmentP + ' %', 'Rs. ' + fitmentV]
             ];
