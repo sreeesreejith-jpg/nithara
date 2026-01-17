@@ -42,10 +42,9 @@
                 1</div>
             <div style="display: flex; flex-direction: column;">
                 <span
-                    style="font-size: 0.8rem; font-weight: 800; color: var(--text-main); text-transform: uppercase; letter-spacing: 0.5px; line-height: 1;">Employee
+                    style="font-size: 0.8rem; font-weight: 800; color: #ffffff; text-transform: uppercase; letter-spacing: 0.5px; line-height: 1;">Employee
                     Details</span>
-                <span style="font-size: 0.6rem; color: var(--text-muted); font-weight: 500;">Enter Initial Basic Pay &
-                    Parameters</span>
+
             </div>
         </div>
 
@@ -58,8 +57,8 @@
                 <div
                     style="display: flex; flex-direction: column; align-items: center; gap: 0.6rem; text-align: center;">
                     <label
-                        style="font-size: 0.7rem; font-weight: 800; color: var(--primary); text-transform: uppercase; letter-spacing: 1px;">BP
-                        on 01/07/2024</label>
+                        style="font-size: 0.7rem; font-weight: 800; color: #ffffff; text-transform: uppercase; letter-spacing: 1px;">BP
+                        on 01/07/2024 <span style="color: #ef4444; font-weight: 900;">*</span></label>
                     <div class="input-wrapper" style="width: 100%; max-width: 180px;">
                         <input type="number" id="basic-pay-in" placeholder="Select" autocomplete="off"
                             style="width: 100%; font-size: 1.2rem; height: 50px; border-radius: 0.8rem; border: 2.5px solid var(--primary); background: rgba(0,0,0,0.25); color: #fff; font-weight: 800; padding: 0 0.5rem; text-align: center; box-shadow: 0 0 15px rgba(59, 130, 246, 0.15);">
@@ -100,9 +99,7 @@
                 <!-- Group B: Pay Progression (Moved Up) -->
                 <div class="config-group-card"
                     style="background: rgba(139, 92, 246, 0.05); border-radius: 1rem; padding: 1.25rem; border: 1px solid rgba(139, 92, 246, 0.2); display: flex; flex-direction: column; gap: 1rem;">
-                    <h3
-                        style="font-size: 0.75rem; color: #8b5cf6; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.25rem; font-weight: 800;">
-                        Pay Progression (Post 01/07/2024)</h3>
+
 
                     <!-- Increment Month -->
                     <div class="input-field row-input"
@@ -163,9 +160,7 @@
                 <!-- Group A: Fixation Parameters (Moved Down) -->
                 <div class="config-group-card"
                     style="background: rgba(59, 130, 246, 0.05); border-radius: 1rem; padding: 1.25rem; border: 1px solid rgba(59, 130, 246, 0.2); display: flex; flex-direction: column; gap: 1rem;">
-                    <h3
-                        style="font-size: 0.75rem; color: var(--primary); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.25rem; font-weight: 800;">
-                        Fixation Parameters</h3>
+
 
                     <div class="input-field row-input"
                         style="display: grid; grid-template-columns: 1fr 100px; gap: 1rem; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.03); padding-bottom: 0.75rem;">
@@ -239,7 +234,7 @@
             <section class="revision-section before" style="display: flex; flex-direction: column;">
                 <div class="section-header before-header"
                     style="border-bottom: 2px solid var(--text-muted); background: rgba(255, 255, 255, 0.02);">
-                    <h2 style="color: var(--text-muted);">Pay Fixation (01/07/2024)</h2>
+                    <h2 style="color: #ffffff;">Pay Fixation (01/07/2024)</h2>
                 </div>
                 <div class="input-group"
                     style="padding: 1rem; display: flex; flex-direction: column; gap: 0.5rem; flex: 1;">
@@ -260,18 +255,32 @@
                         <span id="res-weightage" class="value">0</span>
                     </div>
                     <div class="result-row highlight-row">
-                        <span class="label" style="font-weight: 700;">Actual Total</span>
+                        <span class="label" style="font-weight: 700; color: #ffffff;">Actual Total</span>
                         <span id="res-actual-total" class="value" style="font-weight: 800;">0</span>
                     </div>
                     <div class="result-row"
                         style="background: rgba(59, 130, 246, 0.05); padding: 0.75rem 0.5rem; border-radius: 0.5rem; border: 1px dashed rgba(59, 130, 246, 0.3); grid-template-columns: 1fr 110px;">
-                        <span class="label" style="font-size: 0.75rem; color: var(--primary); font-weight: 700;">Fixed
+                        <span class="label" style="font-size: 0.75rem; color: #ffffff; font-weight: 700;">Fixed
                             BP (01/07/24)</span>
                         <span id="res-bp-fixed" class="value highlight"
                             style="font-size: 1.15rem; font-weight: 800;">0</span>
                     </div>
                 </div>
             </section>
+
+            <!-- Detailed Progression Results (Timeline) -->
+            <div id="progression-timeline"
+                style="margin: 0 0 1.25rem 0; width: 100%; display: none; flex-direction: column; gap: 0.5rem;">
+                <div
+                    style="background: var(--input-bg); border-left: 4px solid var(--primary); padding: 0.75rem 1rem; border-radius: 0.4rem;">
+                    <h4
+                        style="font-size: 0.75rem; color: #ffffff; text-transform: uppercase; margin-bottom: 0.5rem; letter-spacing: 0.5px;">
+                        Detailed Progression</h4>
+                    <div id="timeline-steps" style="display: flex; flex-direction: column; gap: 0.4rem;">
+                        <!-- Timeline items injected here -->
+                    </div>
+                </div>
+            </div>
 
             <!-- Right Side: Present Salary Details (Conditional) -->
             <section id="present-salary-container" class="revision-section after"
@@ -329,39 +338,31 @@
             </section>
         </main>
 
-        <p class="disclaimer" style="margin-top: 1.5rem; padding: 0 1rem; line-height: 1.4;">
-            * NOTE: Calculations are approximate and for informational purposes only.
-        </p>
+
 
 
         <!-- Detailed Progression Results (Timeline) -->
-        <div id="progression-timeline"
-            style="margin: 0.5rem 0 1.25rem 0; width: 100%; display: none; flex-direction: column; gap: 0.5rem;">
-            <div
-                style="background: var(--input-bg); border-left: 4px solid var(--primary); padding: 0.75rem 1rem; border-radius: 0.4rem;">
-                <h4
-                    style="font-size: 0.75rem; color: var(--primary); text-transform: uppercase; margin-bottom: 0.5rem; letter-spacing: 0.5px;">
-                    Detailed Progression</h4>
-                <div id="timeline-steps" style="display: flex; flex-direction: column; gap: 0.4rem;">
-                    <!-- Timeline items injected here -->
-                </div>
-            </div>
-        </div>
+
+
+        <p class="disclaimer"
+            style="margin: 1rem 0 0.5rem 0; padding: 0 1rem; line-height: 1.4; font-size: 0.95rem; color: #ef4444; text-align: center; font-weight: 500; letter-spacing: 0.5px;">
+            * NOTE: Calculations are approximate and for informational purposes only.
+        </p>
 
         <!-- Section: Report Settings -->
-        <section class="revision-section report-card" id="report-settings-section" style="margin-top: 2rem;">
+        <section class="revision-section report-card" id="report-settings-section" style="margin-top: 1rem;">
             <div class="section-header reports-header">
-                <h2>Report Settings</h2>
+                <h2 style="color: #ffffff;">Report Settings</h2>
             </div>
             <div class="input-group">
                 <div class="input-field report-field">
-                    <label>Employee Name</label>
+                    <label style="color: #ffffff;">Employee Name</label>
                     <div class="input-wrapper">
                         <input type="text" id="reportName" placeholder="Optional">
                     </div>
                 </div>
                 <div class="input-field report-field">
-                    <label>PEN Number</label>
+                    <label style="color: #ffffff;">PEN Number</label>
                     <div class="input-wrapper">
                         <input type="text" id="penNumber" placeholder="Optional">
                     </div>

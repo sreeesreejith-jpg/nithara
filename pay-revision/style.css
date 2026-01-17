@@ -70,10 +70,8 @@ header {
 .header-text h1 {
     font-size: 1.8rem;
     font-weight: 700;
-    background: var(--accent-gradient);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
+    color: #ffffff;
+    margin: 0;
 }
 
 /* Summary Cards */
@@ -242,7 +240,7 @@ header {
 .section-header h2 {
     font-size: 0.95rem;
     font-weight: 700;
-    color: var(--text-muted);
+    color: #ffffff;
 }
 
 .after-header h2 {
@@ -276,7 +274,7 @@ header {
 
 .label {
     font-size: 0.85rem;
-    color: var(--text-muted);
+    color: #ffffff;
     font-weight: 500;
     white-space: normal;
     line-height: 1.25;
@@ -941,7 +939,7 @@ body.pdf-mode .input-hint {
 .report-field label {
     font-size: 0.9rem !important;
     font-weight: 600 !important;
-    color: var(--text-muted) !important;
+    color: #ffffff !important;
     margin: 0 !important;
 }
 
@@ -975,7 +973,7 @@ body.pdf-mode .input-hint {
 
 .timeline-item .label {
     font-size: 0.8rem;
-    color: var(--text-muted);
+    color: #ffffff;
     font-weight: 500;
     display: flex;
     align-items: center;
@@ -993,7 +991,7 @@ body.pdf-mode .input-hint {
 
 .timeline-item .value {
     font-weight: 700;
-    color: var(--text-main);
+    color: #ffffff;
     text-align: right;
     font-family: monospace;
     font-size: 0.95rem;
@@ -1042,7 +1040,7 @@ body.pdf-mode .input-hint {
     text-transform: uppercase;
     letter-spacing: 1.5px;
     font-weight: 800;
-    color: var(--primary);
+    color: #ffffff;
 }
 
 @keyframes bounce {
