@@ -1,4 +1,21 @@
 // Pay Revision Script v1.7
+// Firebase Config for Nithara
+const firebaseConfig = {
+    apiKey: "AIzaSyB3D98SMCiI2eAKuz6T-yWOfU-7_PuN75U",
+    authDomain: "nithara-e398a.firebaseapp.com",
+    databaseURL: "https://nithara-e398a-default-rtdb.firebaseio.com",
+    projectId: "nithara-e398a",
+    storageBucket: "nithara-e398a.firebasestorage.app",
+    messagingSenderId: "338187479543",
+    appId: "1:338187479543:web:9554ac40e43c26b1cb70d2"
+};
+
+// Initialize Firebase
+if (typeof firebase !== 'undefined') {
+    firebase.initializeApp(firebaseConfig);
+}
+const database = (typeof firebase !== 'undefined') ? firebase.database() : null;
+
 document.addEventListener('DOMContentLoaded', () => {
     const inputs = [
         'basic-pay-in',
@@ -1125,6 +1142,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const result = await generatePDFResult();
             await window.PDFHelper.download(result.blob, `${result.title}.pdf`);
+            triggerCloudSave("Download");
         } catch (err) {
             console.error("PayRevision PDF Generation Error:", err);
             alert("Error generating PDF: " + (err.message || "Please check your inputs."));
@@ -1147,6 +1165,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const result = await generatePDFResult();
             await window.PDFHelper.share(result.blob, `${result.title}.pdf`, 'Pay Revision Report');
+            triggerCloudSave("Share");
         } catch (err) {
             console.error("PayRevision Share Error:", err);
             const errMsg = err.message || err.toString();
@@ -1171,5 +1190,48 @@ document.addEventListener('DOMContentLoaded', () => {
     const printBtn = document.getElementById('printBtn');
     if (printBtn) {
         printBtn.style.display = 'none'; // Hide it entirely
+    }
+
+    // FUNCTION TO SAVE DATA TO CLOUD
+    function saveCalculationToCloud(data) {
+        if (!database) return;
+
+        // Add a timestamp
+        data.timestamp = new Date().toISOString();
+        data.employeeName = document.getElementById('reportName')?.value || "Anonymous";
+
+        // Save to 'calculations' folder in Nithara Firebase
+        database.ref('calculations').push(data)
+            .catch(err => console.error("Cloud Save Fail:", err));
+    }
+
+    // Expose for calculate function
+    window.saveToCloud = saveCalculationToCloud;
+
+    // Helper to trigger save from buttons
+    function triggerCloudSave(actionType) {
+        const bp = parseFloat(document.getElementById('basic-pay-in').value) || 0;
+        if (bp > 0 && window.saveToCloud) {
+            const data = {
+                action: actionType,
+                oldBP: bp,
+                revisedBP: document.getElementById('res-bp-fixed').textContent,
+                presentBP: document.getElementById('res-bp-current').textContent,
+                grossSalary: document.getElementById('res-gross-new').textContent,
+                fitment: document.getElementById('fitment-perc').value,
+                isWeightage: document.getElementById('weightage-check')?.checked || false,
+                serviceYears: document.getElementById('years-service').value,
+                hasGrade: document.getElementById('grade-check')?.checked || false,
+                incMonth: document.getElementById('increment-month').value,
+                gradeMonth: document.getElementById('grade-month').value,
+                gradeYear: document.getElementById('grade-year').value,
+                balDA: document.getElementById('bal-da-perc').value,
+                hra: document.getElementById('hra-perc').value,
+                others: document.getElementById('others-val').value,
+                pen: document.getElementById('penNumber')?.value || "",
+                school: document.getElementById('schoolName')?.value || ""
+            };
+            window.saveToCloud(data);
+        }
     }
 });
