@@ -1,4 +1,4 @@
-// Pay Revision Script v1.6
+// Pay Revision Script v1.7
 document.addEventListener('DOMContentLoaded', () => {
     const inputs = [
         'basic-pay-in',
@@ -13,7 +13,8 @@ document.addEventListener('DOMContentLoaded', () => {
         'others-val'
     ];
 
-    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    const monthShortNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
     inputs.forEach(id => {
         const el = document.getElementById(id);
@@ -84,11 +85,15 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Generic Month Dropdown Logic
+    // Generic Month Dropdown Logic with Search
     function setupMonthDropdown(inputEl, displayEl, dropdownEl) {
-        function renderMonths() {
+        function renderMonths(filterText = "") {
             dropdownEl.innerHTML = "";
+            let hasMatches = false;
             monthNames.forEach((month, index) => {
+                if (filterText && !month.toLowerCase().startsWith(filterText.toLowerCase())) return;
+                hasMatches = true;
+
                 const li = document.createElement('li');
                 li.textContent = month;
                 li.dataset.value = index; // Store 0-11 index
@@ -98,24 +103,28 @@ document.addEventListener('DOMContentLoaded', () => {
                     selectMonth(index, month);
                 });
 
-                // Optional: Preview on hover (might be annoying for months, maybe skip)
-                // li.addEventListener('mouseenter', () => ... );
-
                 dropdownEl.appendChild(li);
             });
+
+            if (!hasMatches) {
+                dropdownEl.classList.remove('show');
+            } else {
+                dropdownEl.classList.add('show');
+            }
         }
 
         function selectMonth(index, name) {
             inputEl.value = index;
             displayEl.value = name;
+            displayEl.dataset.lastValid = name;
+            inputEl.dataset.lastValid = index;
             dropdownEl.classList.remove('show');
             toggleConditionalSections(); // Update visibility if needed
             calculate();
         }
 
         function showDropdown() {
-            renderMonths();
-            dropdownEl.classList.add('show');
+            renderMonths(displayEl.value === "Select" ? "" : displayEl.value);
             const currentVal = inputEl.value;
             if (currentVal !== "") {
                 const items = Array.from(dropdownEl.querySelectorAll('li'));
@@ -128,16 +137,124 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        displayEl.addEventListener('click', showDropdown);
-        displayEl.addEventListener('focus', showDropdown);
+        displayEl.addEventListener('click', function () {
+            this.select();
+            showDropdown();
+        });
+        displayEl.addEventListener('focus', function () {
+            this.select();
+            showDropdown();
+        });
+        displayEl.addEventListener('input', function () {
+            renderMonths(this.value);
+        });
         displayEl.addEventListener('blur', () => {
-            setTimeout(() => dropdownEl.classList.remove('show'), 150);
+            setTimeout(() => {
+                if (!dropdownEl.classList.contains('show')) {
+                    if (inputEl.value === "") {
+                        displayEl.value = "";
+                    } else {
+                        // Restore last valid name if current text doesn't match a month
+                        const currentText = displayEl.value.toLowerCase();
+                        const matchIndex = monthNames.findIndex(m => m.toLowerCase() === currentText);
+                        if (matchIndex === -1) {
+                            displayEl.value = monthNames[inputEl.value] || "";
+                        }
+                    }
+                }
+                dropdownEl.classList.remove('show');
+            }, 150);
         });
 
         dropdownEl.addEventListener('scroll', () => {
             if (dropdownEl.classList.contains('show')) {
-                // Reuse the generic sync function if possible, or adapt it
                 syncSelectionOnScroll(dropdownEl, displayEl, inputEl, true);
+            }
+        });
+    }
+
+    // Generic Year Dropdown Logic with Search
+    function setupYearDropdown(inputEl, displayEl, dropdownEl) {
+        const yearList = ["2024", "2025", "2026"];
+
+        function renderYears(filterText = "") {
+            dropdownEl.innerHTML = "";
+            let hasMatches = false;
+            yearList.forEach((year) => {
+                if (filterText && !year.startsWith(filterText)) return;
+                hasMatches = true;
+
+                const li = document.createElement('li');
+                li.textContent = year;
+
+                li.addEventListener('mousedown', (e) => {
+                    e.preventDefault();
+                    selectYear(year);
+                });
+
+                dropdownEl.appendChild(li);
+            });
+
+            if (!hasMatches) {
+                dropdownEl.classList.remove('show');
+            } else {
+                dropdownEl.classList.add('show');
+            }
+        }
+
+        function selectYear(year) {
+            inputEl.value = year;
+            displayEl.value = year;
+            displayEl.dataset.lastValid = year;
+            inputEl.dataset.lastValid = year;
+            dropdownEl.classList.remove('show');
+            calculate();
+        }
+
+        function showDropdown() {
+            renderYears(displayEl.value === "Select" ? "" : displayEl.value);
+            const currentVal = inputEl.value;
+            if (currentVal !== "") {
+                const items = Array.from(dropdownEl.querySelectorAll('li'));
+                const match = items.find(li => li.textContent == currentVal);
+                if (match) {
+                    match.scrollIntoView({ block: 'center' });
+                    items.forEach(li => li.classList.remove('active'));
+                    match.classList.add('active');
+                }
+            }
+        }
+
+        displayEl.addEventListener('click', function () {
+            this.select();
+            showDropdown();
+        });
+        displayEl.addEventListener('focus', function () {
+            this.select();
+            showDropdown();
+        });
+        displayEl.addEventListener('input', function () {
+            renderYears(this.value);
+        });
+        displayEl.addEventListener('blur', () => {
+            setTimeout(() => {
+                if (!dropdownEl.classList.contains('show')) {
+                    if (inputEl.value === "") {
+                        displayEl.value = "";
+                    } else {
+                        const currentText = displayEl.value;
+                        if (!yearList.includes(currentText)) {
+                            displayEl.value = inputEl.value;
+                        }
+                    }
+                }
+                dropdownEl.classList.remove('show');
+            }, 150);
+        });
+
+        dropdownEl.addEventListener('scroll', () => {
+            if (dropdownEl.classList.contains('show')) {
+                syncSelectionOnScroll(dropdownEl, displayEl, inputEl, false);
             }
         });
     }
@@ -148,6 +265,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (gradeMonthInput && gradeMonthDisplay && gradeMonthDropdown) {
         setupMonthDropdown(gradeMonthInput, gradeMonthDisplay, gradeMonthDropdown);
+    }
+
+    const gradeYearInput = document.getElementById('grade-year');
+    const gradeYearDisplay = document.getElementById('grade-year-display');
+    const gradeYearDropdown = document.getElementById('grade-year-dropdown');
+
+    if (gradeYearInput && gradeYearDisplay && gradeYearDropdown) {
+        setupYearDropdown(gradeYearInput, gradeYearDisplay, gradeYearDropdown);
     }
 
     // Overload syncSelectionOnScroll to handle Month dropdowns (value vs text)
@@ -437,12 +562,16 @@ document.addEventListener('DOMContentLoaded', () => {
             items.forEach(li => li.classList.remove('active'));
             closestItem.classList.add('active');
 
-            if (isMonth && hiddenInputEl) {
-                displayEl.value = closestItem.textContent;
-                hiddenInputEl.value = closestItem.dataset.value;
+            displayEl.value = closestItem.textContent;
+            displayEl.dataset.lastValid = closestItem.textContent;
+
+            if (hiddenInputEl) {
+                hiddenInputEl.value = isMonth ? closestItem.dataset.value : closestItem.textContent;
+                hiddenInputEl.dataset.lastValid = hiddenInputEl.value;
+            }
+
+            if (isMonth) {
                 toggleConditionalSections();
-            } else {
-                displayEl.value = closestItem.textContent;
             }
             calculate();
         }
@@ -559,7 +688,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 events.push({
                     type: 'increment',
                     date: new Date(checkDate),
-                    label: `Annual Increment (${monthNames[checkDate.getMonth()]} ${checkDate.getFullYear()})`,
+                    label: `Annual Increment (${monthShortNames[checkDate.getMonth()]} ${checkDate.getFullYear()})`,
                     steps: 1
                 });
             }
@@ -570,7 +699,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     events.push({
                         type: 'grade',
                         date: new Date(checkDate),
-                        label: `If got Grade after 1/7/24 (${monthNames[checkDate.getMonth()]} ${checkDate.getFullYear()})`,
+                        label: `If got Grade after 1/7/24 (${monthShortNames[checkDate.getMonth()]} ${checkDate.getFullYear()})`,
                         steps: 2
                     });
                 }
@@ -658,7 +787,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const stepPay = revisedScale[currentIndex];
 
                 // Labels as requested by user
-                const month = monthNames[event.date.getMonth()];
+                const month = monthShortNames[event.date.getMonth()];
                 const year = event.date.getFullYear();
                 let localizedLabel = "";
 
@@ -721,7 +850,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (actualTotalEl) actualTotalEl.textContent = actualTotal;
 
         // Update After UI
-        const benchmarkMonth = monthNames[today.getMonth()];
+        const benchmarkMonth = monthShortNames[today.getMonth()];
         const benchmarkYear = today.getFullYear();
         const shortYear = benchmarkYear.toString().slice(-2);
 
