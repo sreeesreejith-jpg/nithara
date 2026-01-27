@@ -1001,17 +1001,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
                     <td style="padding: 8px 5px; font-weight: 500; border-right: 1px solid rgba(255,255,255,0.05);">${monthShortNames[month]} ${year}</td>
                     
-                    <td style="padding: 8px 5px; text-align: right; color: #94a3b8;">${currentOldBP}</td>
-                    <td style="padding: 8px 5px; text-align: right; color: #94a3b8;">${daOld}%</td>
-                    <td style="padding: 8px 5px; text-align: right; color: #94a3b8;">${oldDAVal}</td>
-                    <td style="padding: 8px 5px; text-align: right; color: #94a3b8;">${oldHRAVal}</td>
-                    <td style="padding: 8px 5px; text-align: right; font-weight: 600; border-right: 1px solid rgba(255,255,255,0.1);">${oldGross}</td>
-                    
                     <td style="padding: 8px 5px; text-align: right; color: #3b82f6;">${currentNewBP}</td>
                     <td style="padding: 8px 5px; text-align: right; color: #3b82f6;">${daRev}%</td>
                     <td style="padding: 8px 5px; text-align: right; color: #3b82f6;">${newDAVal}</td>
                     <td style="padding: 8px 5px; text-align: right; color: #3b82f6;">${newHRAVal}</td>
                     <td style="padding: 8px 5px; text-align: right; font-weight: 600; border-right: 1px solid rgba(255,255,255,0.1); color: #fff;">${newGross}</td>
+                    
+                    <td style="padding: 8px 5px; text-align: right; color: #94a3b8;">${currentOldBP}</td>
+                    <td style="padding: 8px 5px; text-align: right; color: #94a3b8;">${daOld}%</td>
+                    <td style="padding: 8px 5px; text-align: right; color: #94a3b8;">${oldDAVal}</td>
+                    <td style="padding: 8px 5px; text-align: right; color: #94a3b8;">${oldHRAVal}</td>
+                    <td style="padding: 8px 5px; text-align: right; font-weight: 600; border-right: 1px solid rgba(255,255,255,0.1);">${oldGross}</td>
                     
                     <td style="padding: 8px 5px; text-align: right; font-weight: 800; color: ${monthlyArrear >= 0 ? '#10b981' : '#ef4444'};">
                         ${monthlyArrear.toLocaleString()}
@@ -1301,7 +1301,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 doc.autoTable({
                     startY: 25,
-                    head: [['Month', 'Old BP', 'DA%', 'DA', 'HRA', 'OldTotal', 'New BP', 'DA%', 'DA', 'HRA', 'NewTotal', 'Arrear']],
+                    head: [['Month', 'New BP', 'DA%', 'DA', 'HRA', 'NewTotal', 'Old BP', 'DA%', 'DA', 'HRA', 'OldTotal', 'Arrear']],
                     body: arrearRows,
                     theme: 'grid',
                     headStyles: { fillColor: [59, 130, 246], fontSize: 7 },
