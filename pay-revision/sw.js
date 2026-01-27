@@ -1,32 +1,27 @@
-const CACHE_NAME = 'nithara-pay-rev-v1.7';
+const CACHE_NAME = 'nithara-pay-rev-v3.0';
 const CACHE_PREFIX = 'nithara-pay-rev-';
-const ASSETS = [
-    'index.html',
-    'style.css',
-    'script.js',
-    'manifest.json',
-    '../icon-192.png',
-    '../pdf-helper.js',
-    '../jspdf.umd.min.js',
-    '../jspdf.plugin.autotable.min.js'
+const ASSETS_TO_CACHE = [
+    './',
+    './index.html',
+    './style.css',
+    './script.js',
+    './manifest.json',
+    '../icon-192.png'
 ];
 
-
 self.addEventListener('install', (event) => {
+    self.skipWaiting();
     event.waitUntil(
-        caches.open(CACHE_NAME)
-            .then((cache) => cache.addAll(ASSETS))
+        caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS_TO_CACHE))
     );
 });
 
-// Activate Event
 self.addEventListener('activate', (event) => {
     event.waitUntil(
         caches.keys().then((cacheNames) => {
             return Promise.all(
                 cacheNames.map((cacheName) => {
                     if (cacheName.startsWith(CACHE_PREFIX) && cacheName !== CACHE_NAME) {
-                        console.log('Pay-Rev SW: Deleting old cache:', cacheName);
                         return caches.delete(cacheName);
                     }
                 })
@@ -37,14 +32,21 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-    event.respondWith(
-        caches.match(event.request)
-            .then((response) => response || fetch(event.request))
-    );
-});
+    if (event.request.method !== 'GET') return;
 
-self.addEventListener('message', (event) => {
-  if (event.data && event.data.action === 'skipWaiting') {
-    self.skipWaiting();
-  }
+    event.respondWith(
+        fetch(event.request)
+            .then((networkResponse) => {
+                if (networkResponse && networkResponse.status === 200) {
+                    const responseToCache = networkResponse.clone();
+                    caches.open(CACHE_NAME).then((cache) => {
+                        cache.put(event.request, responseToCache);
+                    });
+                }
+                return networkResponse;
+            })
+            .catch(() => {
+                return caches.match(event.request);
+            })
+    );
 });

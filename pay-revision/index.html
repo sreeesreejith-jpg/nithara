@@ -459,9 +459,14 @@
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('sw.js').catch(err => console.log('SW fail', err));
             });
+            let refreshing;
+            navigator.serviceWorker.addEventListener('controllerchange', () => {
+                if (refreshing) return;
+                window.location.reload();
+                refreshing = true;
+            });
         }
     </script>
-    <script src="../update-notification.js"></script>
 </body>
 
 </html>

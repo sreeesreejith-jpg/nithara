@@ -24,6 +24,13 @@
             navigator.serviceWorker.register('sw.js')
                 .then(() => console.log('Service Worker Registered'))
                 .catch((error) => console.log('Service Worker Registration Failed:', error));
+
+            let refreshing;
+            navigator.serviceWorker.addEventListener('controllerchange', () => {
+                if (refreshing) return;
+                window.location.reload();
+                refreshing = true;
+            });
         }
     </script>
     <div class="background-blobs">
@@ -127,7 +134,6 @@
     </div>
 
     <script src="script.js?v=2.0"></script>
-    <script src="../update-notification.js"></script>
 </body>
 
 </html>

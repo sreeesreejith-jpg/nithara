@@ -1,37 +1,28 @@
-const CACHE_NAME = 'nithara-reset-final';
-const CACHE_PREFIX = 'nithara-emi-calc-';
-const ASSETS = [
+const CACHE_NAME = 'nithara-emi-v3.0';
+const CACHE_PREFIX = 'nithara-emi-';
+const ASSETS_TO_CACHE = [
     './',
     './index.html',
     './style.css',
     './script.js',
-    './icon-1024.jpg',
-    './icon-512.png',
-    './icon-192.png',
     './manifest.json',
-    './screenshot.png',
-    '../js/pdf-helper.js',
-    '../js/jspdf.umd.min.js',
-    '../js/jspdf.plugin.autotable.min.js'
+    './icon-192.png'
 ];
 
-
-self.addEventListener('install', (e) => {
-    e.waitUntil(
-        caches.open(CACHE_NAME).then((cache) => {
-            return cache.addAll(ASSETS);
-        })
+self.addEventListener('install', (event) => {
+    self.skipWaiting();
+    event.waitUntil(
+        caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS_TO_CACHE))
     );
 });
 
-// Activate Event
 self.addEventListener('activate', (event) => {
     event.waitUntil(
-        caches.keys().then((keys) => {
+        caches.keys().then((cacheNames) => {
             return Promise.all(
-                keys.map((key) => {
-                    if (key.startsWith(CACHE_PREFIX) && key !== CACHE_NAME) {
-                        return caches.delete(key);
+                cacheNames.map((cacheName) => {
+                    if (cacheName.startsWith(CACHE_PREFIX) && cacheName !== CACHE_NAME) {
+                        return caches.delete(cacheName);
                     }
                 })
             );
@@ -40,16 +31,22 @@ self.addEventListener('activate', (event) => {
     self.clients.claim();
 });
 
-self.addEventListener('fetch', (e) => {
-    e.respondWith(
-        caches.match(e.request).then((response) => {
-            return response || fetch(e.request);
-        })
-    );
-});
+self.addEventListener('fetch', (event) => {
+    if (event.request.method !== 'GET') return;
 
-self.addEventListener('message', (event) => {
-  if (event.data && event.data.action === 'skipWaiting') {
-    self.skipWaiting();
-  }
+    event.respondWith(
+        fetch(event.request)
+            .then((networkResponse) => {
+                if (networkResponse && networkResponse.status === 200) {
+                    const responseToCache = networkResponse.clone();
+                    caches.open(CACHE_NAME).then((cache) => {
+                        cache.put(event.request, responseToCache);
+                    });
+                }
+                return networkResponse;
+            })
+            .catch(() => {
+                return caches.match(event.request);
+            })
+    );
 });

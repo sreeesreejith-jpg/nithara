@@ -25,6 +25,12 @@
                     .then(reg => console.log('SW Registered'))
                     .catch(err => console.log('SW Error', err));
             });
+            let refreshing;
+            navigator.serviceWorker.addEventListener('controllerchange', () => {
+                if (refreshing) return;
+                window.location.reload();
+                refreshing = true;
+            });
         }
     </script>
     <script src="../capacitor.js"></script>
@@ -206,7 +212,6 @@
 
     </div>
     <script src="script.js?v=2.0"></script>
-    <script src="../update-notification.js"></script>
 </body>
 
 </html>

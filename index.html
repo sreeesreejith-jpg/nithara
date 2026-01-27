@@ -17,6 +17,12 @@
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./service-worker.js');
             });
+            let refreshing;
+            navigator.serviceWorker.addEventListener('controllerchange', () => {
+                if (refreshing) return;
+                window.location.reload();
+                refreshing = true;
+            });
         }
     </script>
 
@@ -59,7 +65,6 @@
     <div class="footer-email" style="display: flex; flex-direction: column; gap: 0.5rem; align-items: center;">
         <div>email: sreee.sreejith@gmail.com</div>
     </div>
-    <script src="update-notification.js"></script>
 </body>
 
 </html>
