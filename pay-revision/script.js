@@ -990,7 +990,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const oldGross = currentOldBP + oldDAVal + oldHRAVal + othersVal;
 
             const newDAVal = Math.round(currentNewBP * (daRev / 100));
-            const newHRAVal = Math.round(currentNewBP * (hraNewPerc / 100));
+            // AS REQUESTED: HRA of revised salary is same as that we calculated from pre-revised salary
+            const newHRAVal = oldHRAVal;
             const newGross = currentNewBP + newDAVal + newHRAVal + othersVal;
 
             const monthlyArrear = newGross - oldGross;
@@ -998,12 +999,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
             arrearHTML += `
                 <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
-                    <td style="padding: 10px 8px; font-weight: 500;">${monthShortNames[month]} ${year}</td>
-                    <td style="padding: 10px 8px; text-align: right;">${currentOldBP.toLocaleString()}</td>
-                    <td style="padding: 10px 8px; text-align: right;">${oldGross.toLocaleString()}</td>
-                    <td style="padding: 10px 8px; text-align: right;">${currentNewBP.toLocaleString()}</td>
-                    <td style="padding: 10px 8px; text-align: right;">${newGross.toLocaleString()}</td>
-                    <td style="padding: 10px 8px; text-align: right; font-weight: 700; color: ${monthlyArrear >= 0 ? '#10b981' : '#ef4444'};">
+                    <td style="padding: 8px 5px; font-weight: 500; border-right: 1px solid rgba(255,255,255,0.05);">${monthShortNames[month]} ${year}</td>
+                    
+                    <td style="padding: 8px 5px; text-align: right; color: #94a3b8;">${currentOldBP}</td>
+                    <td style="padding: 8px 5px; text-align: right; color: #94a3b8;">${daOld}%</td>
+                    <td style="padding: 8px 5px; text-align: right; color: #94a3b8;">${oldDAVal}</td>
+                    <td style="padding: 8px 5px; text-align: right; color: #94a3b8;">${oldHRAVal}</td>
+                    <td style="padding: 8px 5px; text-align: right; font-weight: 600; border-right: 1px solid rgba(255,255,255,0.1);">${oldGross}</td>
+                    
+                    <td style="padding: 8px 5px; text-align: right; color: #3b82f6;">${currentNewBP}</td>
+                    <td style="padding: 8px 5px; text-align: right; color: #3b82f6;">${daRev}%</td>
+                    <td style="padding: 8px 5px; text-align: right; color: #3b82f6;">${newDAVal}</td>
+                    <td style="padding: 8px 5px; text-align: right; color: #3b82f6;">${newHRAVal}</td>
+                    <td style="padding: 8px 5px; text-align: right; font-weight: 600; border-right: 1px solid rgba(255,255,255,0.1); color: #fff;">${newGross}</td>
+                    
+                    <td style="padding: 8px 5px; text-align: right; font-weight: 800; color: ${monthlyArrear >= 0 ? '#10b981' : '#ef4444'};">
                         ${monthlyArrear.toLocaleString()}
                     </td>
                 </tr>
@@ -1276,15 +1286,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const rows = document.querySelectorAll('#arrear-tbody tr');
             rows.forEach(row => {
                 const cells = row.querySelectorAll('td');
-                if (cells.length >= 6) {
-                    arrearRows.push([
-                        cells[0].textContent,
-                        cells[1].textContent,
-                        cells[2].textContent,
-                        cells[3].textContent,
-                        cells[4].textContent,
-                        cells[5].textContent
-                    ]);
+                if (cells.length >= 11) {
+                    const rowData = [];
+                    cells.forEach(c => rowData.push(c.textContent.trim()));
+                    arrearRows.push(rowData);
                 }
             });
 
@@ -1296,18 +1301,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 doc.autoTable({
                     startY: 25,
-                    head: [['Month', 'Old BP', 'Old Gross', 'New BP', 'New Gross', 'Arrear']],
+                    head: [['Month', 'Old BP', 'DA%', 'DA', 'HRA', 'OldTotal', 'New BP', 'DA%', 'DA', 'HRA', 'NewTotal', 'Arrear']],
                     body: arrearRows,
-                    theme: 'striped',
-                    headStyles: { fillColor: [59, 130, 246] },
-                    styles: { fontSize: 8 },
+                    theme: 'grid',
+                    headStyles: { fillColor: [59, 130, 246], fontSize: 7 },
+                    styles: { fontSize: 7, cellPadding: 2 },
                     columnStyles: {
-                        0: { halign: 'left' },
-                        1: { halign: 'right' },
-                        2: { halign: 'right' },
-                        3: { halign: 'right' },
-                        4: { halign: 'right' },
-                        5: { halign: 'right', fontStyle: 'bold' }
+                        0: { halign: 'left', cellWidth: 20 },
+                        11: { halign: 'right', fontStyle: 'bold', fillColor: [240, 253, 244] }
                     }
                 });
 

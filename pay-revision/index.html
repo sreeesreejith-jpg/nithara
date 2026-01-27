@@ -351,15 +351,36 @@
                     <table style="width: 100%; border-collapse: collapse; font-size: 0.75rem; min-width: 600px;">
                         <thead>
                             <tr
-                                style="background: rgba(0,0,0,0.2); text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid rgba(255,255,255,0.1);">
-                                <th style="padding: 12px 8px; text-align: left; color: #94a3b8;">Month</th>
-                                <th style="padding: 12px 8px; text-align: right; color: #94a3b8;">Old BP</th>
-                                <th style="padding: 12px 8px; text-align: right; color: #94a3b8;">Old Gross</th>
-                                <th style="padding: 12px 8px; text-align: right; color: #94a3b8;">New BP</th>
-                                <th style="padding: 12px 8px; text-align: right; color: #94a3b8;">New Gross</th>
-                                <th style="padding: 12px 8px; text-align: right; color: #3b82f6; font-weight: 800;">
-                                    Arrear
-                                </th>
+                                style="background: rgba(0,0,0,0.3); text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid rgba(255,255,255,0.1);">
+                                <th rowspan="2"
+                                    style="padding: 10px 5px; text-align: left; color: #94a3b8; border-right: 1px solid rgba(255,255,255,0.1);">
+                                    Month</th>
+                                <th colspan="5"
+                                    style="padding: 8px; text-align: center; color: #f8fafc; border-right: 1px solid rgba(255,255,255,0.1); background: rgba(100, 116, 139, 0.2);">
+                                    Drawn (Pre-Revised)</th>
+                                <th colspan="5"
+                                    style="padding: 8px; text-align: center; color: #3b82f6; border-right: 1px solid rgba(255,255,255,0.1); background: rgba(59, 130, 246, 0.1);">
+                                    Revised Salary</th>
+                                <th rowspan="2"
+                                    style="padding: 10px 5px; text-align: right; color: #10b981; font-weight: 900;">
+                                    Arrear</th>
+                            </tr>
+                            <tr
+                                style="background: rgba(0,0,0,0.2); font-size: 0.65rem; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                                <th style="padding: 5px; text-align: right; color: #94a3b8;">BP</th>
+                                <th style="padding: 5px; text-align: right; color: #94a3b8;">DA%</th>
+                                <th style="padding: 5px; text-align: right; color: #94a3b8;">DA</th>
+                                <th style="padding: 5px; text-align: right; color: #94a3b8;">HRA</th>
+                                <th
+                                    style="padding: 5px; text-align: right; color: #f1f5f9; border-right: 1px solid rgba(255,255,255,0.1);">
+                                    Total</th>
+                                <th style="padding: 5px; text-align: right; color: #94a3b8;">BP</th>
+                                <th style="padding: 5px; text-align: right; color: #94a3b8;">DA%</th>
+                                <th style="padding: 5px; text-align: right; color: #94a3b8;">DA</th>
+                                <th style="padding: 5px; text-align: right; color: #94a3b8;">HRA</th>
+                                <th
+                                    style="padding: 5px; text-align: right; color: #3b82f6; border-right: 1px solid rgba(255,255,255,0.1);">
+                                    Total</th>
                             </tr>
                         </thead>
                         <tbody id="arrear-tbody" style="color: #f1f5f9;">
