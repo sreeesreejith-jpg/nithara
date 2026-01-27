@@ -1317,7 +1317,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     startY: 25,
                     head: [['Month', 'New BP', 'DA%', 'DA', 'HRA', 'NewTotal', 'Old BP', 'DA%', 'DA', 'HRA', 'OldTotal', 'Arrear']],
                     body: arrearRows,
-                    foot: [[{ content: 'arrear', colSpan: 11, styles: { halign: 'right', fontStyle: 'bold' } }, { content: totalArrearText, styles: { halign: 'right', fontStyle: 'bold', textColor: [16, 185, 129] } }]],
+                    foot: [[{ content: 'Total Arrear', colSpan: 11, styles: { halign: 'right', fontStyle: 'bold' } }, { content: totalArrearText, styles: { halign: 'right', fontStyle: 'bold' } }]],
                     theme: 'grid',
                     headStyles: { fillColor: [59, 130, 246], fontSize: 7 },
                     footStyles: { fillColor: [240, 253, 244], fontSize: 8 },
