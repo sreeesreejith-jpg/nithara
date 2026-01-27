@@ -1324,7 +1324,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const totalArrearText = document.getElementById('total-arrear-header')?.textContent || "₹0";
                 doc.setFontSize(12);
                 doc.setTextColor(16, 185, 129);
-                doc.text(`Grand Total Arrear: ${totalArrearText}`, 14, doc.lastAutoTable.finalY + 10);
+                doc.text(`arrear: ${totalArrearText}`, 14, doc.lastAutoTable.finalY + 10);
             }
 
             // 8. Footer
