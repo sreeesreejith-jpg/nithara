@@ -115,7 +115,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const calMonthSelect = document.getElementById('cal-month-select');
     const calDays = document.getElementById('calendar-days');
 
-    const minDate = new Date("2024-07-02");
+    const minDate = new Date(2024, 6, 2); // July 2, 2024 (Local Time)
     const today = new Date();
     const yearsAllowed = [2024, 2025, 2026];
 
@@ -494,6 +494,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const hraInput = document.getElementById('hra-perc');
     const hraDropdown = document.getElementById('hra-dropdown');
     const hraList = [4, 6, 8, 10];
+
+    const hraOptions = [
+        { rate: 4, label: "4% (Rural / Village)" },
+        { rate: 6, label: "6% (Municipality)" },
+        { rate: 8, label: "8% (Major Municipality / Kochi)" },
+        { rate: 10, label: "10% (Corporations)" }
+    ];
 
     function renderHRADropdown() {
         hraDropdown.innerHTML = "";
@@ -995,6 +1002,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('res-bp-current').textContent = bpCurrent;
         document.getElementById('res-bal-da').textContent = balDaVal;
         document.getElementById('res-hra-new').textContent = hraNewVal;
+
         document.getElementById('res-others').textContent = othersVal;
         document.getElementById('res-gross-new').textContent = grossNew;
 
@@ -1007,6 +1015,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let currentOldIndex = baseIndex;
         let currentNewIndex = baseIndex;
 
+        let rowCounter = 1;
         while (monthLoop <= today) {
             const year = monthLoop.getFullYear();
             const month = monthLoop.getMonth(); // 0-11
@@ -1107,6 +1116,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
             arrearHTML += `
                 <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                    <td style="padding: 8px 5px; font-weight: 500; border-right: 1px solid rgba(255,255,255,0.05); text-align: left;">
+                        ${rowCounter++}
+                    </td>
                     <td style="padding: 8px 5px; font-weight: 500; border-right: 1px solid rgba(255,255,255,0.05);">
                         ${monthShortNames[month]} ${year}${isProRataMonth ? ' <span style="font-size: 0.6rem; color: #8b5cf6;">(Avg)</span>' : ''}
                     </td>
@@ -1208,7 +1220,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // 1. Header & Title
             doc.setFillColor(59, 130, 246);
-            doc.rect(0, 0, 210, 40, 'F');
+            doc.rect(0, 0, 210, 45, 'F');
             doc.setFontSize(8);
             doc.setTextColor(255);
             doc.text("* NOTE: Calculations are approximate and for informational purposes only.", 14, 12);
@@ -1374,6 +1386,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 currentY = 20;
             }
 
+            doc.setFontSize(14);
+            doc.setTextColor(59, 130, 246);
+            doc.setFont("helvetica", "bold");
             doc.text(`Present Salary Details (${currentMonthYear})`, 14, currentY);
 
             const balDaP = document.getElementById('bal-da-perc')?.value || "0";
@@ -1390,11 +1405,15 @@ document.addEventListener('DOMContentLoaded', () => {
                     ['Dearness Allowance (DA)', balDaP + '%', 'Rs. ' + balDaV],
                     ['House Rent Allowance (HRA)', hraP + '%', 'Rs. ' + hraV],
                     ['Others', '-', 'Rs. ' + othersV],
-                    ['Total Monthly Gross', currentMonthYear, 'Rs. ' + newGross]
+                    [{ content: 'Total Monthly Gross', styles: { fontStyle: 'bold' } }, currentMonthYear, { content: 'Rs. ' + newGross, styles: { fontStyle: 'bold' } }]
                 ],
                 theme: 'grid',
-                headStyles: { fillColor: [16, 185, 129] },
-                columnStyles: { 2: { halign: 'right' } },
+                headStyles: { fillColor: [16, 185, 129], fontSize: 10, halign: 'left' },
+                columnStyles: {
+                    0: { cellWidth: 'auto' },
+                    1: { halign: 'center', cellWidth: 50 },
+                    2: { halign: 'right', cellWidth: 50 }
+                },
                 didParseCell: function (data) {
                     if (data.section === 'head' && data.column.index === 2) {
                         data.cell.styles.halign = 'right';
@@ -1407,7 +1426,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const rows = document.querySelectorAll('#arrear-tbody tr');
             rows.forEach(row => {
                 const cells = row.querySelectorAll('td');
-                if (cells.length >= 11) {
+                if (cells.length >= 12) {
                     const rowData = [];
                     cells.forEach(c => rowData.push(c.textContent.trim()));
                     arrearRows.push(rowData);
@@ -1418,25 +1437,32 @@ document.addEventListener('DOMContentLoaded', () => {
                 let totalArrearsVal = document.getElementById('total-arrear-header')?.textContent || "0";
                 totalArrearsVal = totalArrearsVal.replace('₹', 'Rs. ');
 
-                doc.setFontSize(14);
+                // Always start Arrear Statement on a new page for clarity and to avoid overlaps
+                doc.addPage();
+
+                doc.setFontSize(16);
                 doc.setTextColor(59, 130, 246);
+                doc.setFont("helvetica", "bold");
                 doc.text(`Arrear Statement (Jul 2024 - Present)`, 14, 20);
+
                 doc.setFontSize(11);
                 doc.setTextColor(100);
-                doc.text(`Total Calculation: ${totalArrearsVal}`, 14, 26);
+                doc.setFont("helvetica", "normal");
+                doc.text(`Total Calculation: ${totalArrearsVal}`, 14, 28);
 
                 doc.autoTable({
-                    startY: 32,
-                    head: [['Month', 'New BP', 'DA%', 'DA', 'HRA', 'NewTotal', 'Old BP', 'DA%', 'DA', 'HRA', 'OldTotal', 'Arrear']],
+                    startY: 35,
+                    head: [['Sl', 'Month', 'New BP', 'DA%', 'DA', 'HRA', 'NewTotal', 'Old BP', 'DA%', 'DA', 'HRA', 'OldTotal', 'Arrear']],
                     body: arrearRows,
-                    foot: [[{ content: 'TOTAL ARREAR', colSpan: 11, styles: { halign: 'right', fontStyle: 'bold', fontSize: 8 } }, { content: totalArrearsVal, styles: { halign: 'right', fontStyle: 'bold', fontSize: 8 } }]],
+                    foot: [[{ content: 'TOTAL ARREAR', colSpan: 12, styles: { halign: 'right', fontStyle: 'bold', fontSize: 8 } }, { content: totalArrearsVal, styles: { halign: 'right', fontStyle: 'bold', fontSize: 8 } }]],
                     theme: 'grid',
-                    headStyles: { fillColor: [59, 130, 246], fontSize: 7 },
+                    headStyles: { fillColor: [59, 130, 246], fontSize: 7, halign: 'center' },
                     footStyles: { fillColor: [235, 245, 255], textColor: [0, 0, 0] },
-                    styles: { fontSize: 7, cellPadding: 2 },
+                    styles: { fontSize: 7, cellPadding: 2, valign: 'middle' },
                     columnStyles: {
-                        0: { halign: 'left', cellWidth: 20 },
-                        11: { halign: 'right', fontStyle: 'bold', fillColor: [235, 245, 255] }
+                        0: { halign: 'center', cellWidth: 8 },
+                        1: { halign: 'left', cellWidth: 20 },
+                        12: { halign: 'right', fontStyle: 'bold', fillColor: [235, 245, 255] }
                     }
                 });
             }
