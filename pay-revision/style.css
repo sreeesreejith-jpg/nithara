@@ -517,6 +517,7 @@ input[type=number] {
     -moz-appearance: textfield;
     appearance: textfield;
 }
+
 /* Date Input Styling */
 input[type="date"] {
     position: relative;
@@ -534,7 +535,8 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     right: 0;
     top: 0;
     width: auto;
-    filter: invert(1); /* Makes icon white on dark background */
+    filter: invert(1);
+    /* Makes icon white on dark background */
 }
 
 /* Custom indicator for Firefox */
@@ -596,6 +598,97 @@ input[type="date"]::-moz-calendar-picker-indicator {
     font-weight: 900;
     transform: scale(1.05);
     transition: transform 0.1s ease;
+}
+
+/* Custom Calendar Picker */
+.custom-calendar-popup {
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 250px;
+    background: #0f172a;
+    border: 2px solid #3b82f6;
+    border-radius: 1rem;
+    padding: 10px;
+    z-index: 2000;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+    display: none;
+    margin-bottom: 10px;
+}
+
+.custom-calendar-popup.show {
+    display: block;
+}
+
+.calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    color: #fff;
+    font-weight: 700;
+}
+
+.calendar-header button {
+    background: transparent;
+    border: none;
+    color: #3b82f6;
+    cursor: pointer;
+    font-size: 1.2rem;
+    padding: 5px 10px;
+}
+
+.calendar-header button:disabled {
+    color: #334155;
+    cursor: default;
+}
+
+.calendar-weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    text-align: center;
+    font-size: 0.75rem;
+    color: #94a3b8;
+    margin-bottom: 5px;
+}
+
+.calendar-days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+}
+
+.calendar-day {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 0.85rem;
+    border-radius: 0.4rem;
+    color: #cbd5e1;
+    transition: all 0.1s;
+}
+
+.calendar-day:hover:not(.disabled) {
+    background: rgba(59, 130, 246, 0.3);
+    color: #fff;
+}
+
+.calendar-day.active {
+    background: #3b82f6;
+    color: #fff;
+    font-weight: 800;
+}
+
+.calendar-day.disabled {
+    color: #334155;
+    cursor: default;
+}
+
+.calendar-day.today {
+    border: 1px solid #10b981;
 }
 
 /* Add a visual indicator for the middle of the scroll area on mobile */
