@@ -517,6 +517,30 @@ input[type=number] {
     -moz-appearance: textfield;
     appearance: textfield;
 }
+/* Date Input Styling */
+input[type="date"] {
+    position: relative;
+    padding: 0 10px;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+    background: transparent;
+    bottom: 0;
+    color: transparent;
+    cursor: pointer;
+    height: auto;
+    left: 0;
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: auto;
+    filter: invert(1); /* Makes icon white on dark background */
+}
+
+/* Custom indicator for Firefox */
+input[type="date"]::-moz-calendar-picker-indicator {
+    filter: invert(1);
+}
 
 /* --- Custom Dropdown Styles --- */
 .input-wrapper {

@@ -108,6 +108,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const gradeCheck = document.getElementById('grade-check');
     const gradeDetailsContainer = document.getElementById('grade-details-container');
+    const gradeDateText = document.getElementById('grade-date');
+    const gradeDatePicker = document.getElementById('grade-date-picker');
 
     if (gradeCheck && gradeDetailsContainer) {
         gradeCheck.addEventListener('change', () => {
@@ -116,15 +118,58 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    if (gradeDateText && gradeDatePicker) {
+        const todayStr = new Date().toISOString().split('T')[0];
+        gradeDatePicker.max = todayStr;
+        gradeDatePicker.min = "2024-07-02";
+
+        // Auto-format DD/MM/YYYY as user types
+        gradeDateText.addEventListener('input', function (e) {
+            let val = this.value.replace(/\D/g, '');
+            if (val.length > 2) val = val.slice(0, 2) + '/' + val.slice(2);
+            if (val.length > 5) val = val.slice(0, 5) + '/' + val.slice(5, 9);
+            this.value = val;
+
+            // Sync to picker if complete
+            if (val.length === 10) {
+                const parts = val.split('/');
+                const iso = `${parts[2]}-${parts[1]}-${parts[0]}`;
+                if (!isNaN(Date.parse(iso))) {
+                    gradeDatePicker.value = iso;
+                    calculate();
+                }
+            }
+        });
+
+        // Sync hidden picker to text box
+        gradeDatePicker.addEventListener('input', function () { // Changed change to input for faster response
+            if (this.value) {
+                const parts = this.value.split('-');
+                gradeDateText.value = `${parts[2]}/${parts[1]}/${parts[0]}`;
+                calculate();
+            }
+        });
+
+        gradeDateText.addEventListener('blur', function () {
+            if (this.value && this.value.length < 10 && this.value.length > 0) {
+                alert("Please use DD/MM/YYYY format.");
+                this.value = "";
+            } else if (this.value.length === 10) {
+                const parts = this.value.split('/');
+                const iso = `${parts[2]}-${parts[1]}-${parts[0]}`;
+                if (iso < gradeDatePicker.min || iso > gradeDatePicker.max) {
+                    alert("Date must be between 02/07/2024 and Today.");
+                    this.value = "";
+                    calculate();
+                }
+            }
+        });
+    }
+
     // Increment Month Conditional Display Logic
     const incrementMonthInput = document.getElementById('increment-month');
     const incrementMonthDisplay = document.getElementById('increment-month-display');
     const incrementMonthDropdown = document.getElementById('increment-month-dropdown');
-
-    // Grade Month Logic
-    const gradeMonthInput = document.getElementById('grade-month');
-    const gradeMonthDisplay = document.getElementById('grade-month-display');
-    const gradeMonthDropdown = document.getElementById('grade-month-dropdown');
 
     const revisedBpContainer = document.getElementById('revised-bp-container');
     const presentBpContainer = document.getElementById('present-bp-container');
@@ -322,17 +367,6 @@ document.addEventListener('DOMContentLoaded', () => {
         setupMonthDropdown(incrementMonthInput, incrementMonthDisplay, incrementMonthDropdown);
     }
 
-    if (gradeMonthInput && gradeMonthDisplay && gradeMonthDropdown) {
-        setupMonthDropdown(gradeMonthInput, gradeMonthDisplay, gradeMonthDropdown);
-    }
-
-    const gradeYearInput = document.getElementById('grade-year');
-    const gradeYearDisplay = document.getElementById('grade-year-display');
-    const gradeYearDropdown = document.getElementById('grade-year-dropdown');
-
-    if (gradeYearInput && gradeYearDisplay && gradeYearDropdown) {
-        setupYearDropdown(gradeYearInput, gradeYearDisplay, gradeYearDropdown);
-    }
 
     // Overload syncSelectionOnScroll to handle Month dropdowns (value vs text)
     // We'll modify the existing one below or create a new one. Let's modify the existing one to be more flexible.
@@ -715,14 +749,21 @@ document.addEventListener('DOMContentLoaded', () => {
         const incMonthVal = document.getElementById('increment-month').value;
         const incMonth = incMonthVal !== "" ? parseInt(incMonthVal) : null;
 
+        const hasGrade = document.getElementById('grade-check')?.checked;
+
         // Validation: Ensure BP and Increment Month are selected
         if (!bp || incMonth === null) {
             return;
         }
 
-        const hasGrade = document.getElementById('grade-check')?.checked;
-        const gradeMonth = parseInt(document.getElementById('grade-month').value);
-        const gradeYear = parseInt(document.getElementById('grade-year').value);
+        const gradeDateVal = document.getElementById('grade-date')?.value;
+        let gradeYear = null, gradeMonth = null, gradeDay = null;
+        if (hasGrade && gradeDateVal && gradeDateVal.length === 10) {
+            const parts = gradeDateVal.split('/');
+            gradeDay = parseInt(parts[0]);
+            gradeMonth = parseInt(parts[1]) - 1;
+            gradeYear = parseInt(parts[2]);
+        }
 
         // --- DYNAMIC PROGRESSION CALCULATION (TIMELINE) ---
         const startDate = new Date(2024, 6, 1); // July 1, 2024
@@ -751,17 +792,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     steps: 1
                 });
             }
-            // Check for Grade (Must be AFTER July 2024)
-            const gradeThreshold = new Date(2024, 7, 1); // August 1, 2024
-            if (hasGrade && checkDate.getMonth() === gradeMonth && checkDate.getFullYear() === gradeYear) {
-                if (checkDate >= gradeThreshold) {
-                    events.push({
-                        type: 'grade',
-                        date: new Date(checkDate),
-                        label: `If got Grade after 1/7/24 (${monthShortNames[checkDate.getMonth()]} ${checkDate.getFullYear()})`,
-                        steps: 2
-                    });
-                }
+            // Check for Grade (Must be AFTER July 2024 per user request)
+            if (hasGrade && gradeMonth !== null && checkDate.getMonth() === gradeMonth && checkDate.getFullYear() === gradeYear) {
+                events.push({
+                    type: 'grade',
+                    date: new Date(checkDate.getFullYear(), checkDate.getMonth(), gradeDay),
+                    label: `Grade on ${gradeDay}/${monthShortNames[checkDate.getMonth()]}/${checkDate.getFullYear()}`,
+                    steps: 2
+                });
             }
             checkDate.setMonth(checkDate.getMonth() + 1);
         }
@@ -938,10 +976,13 @@ document.addEventListener('DOMContentLoaded', () => {
         while (monthLoop <= today) {
             const year = monthLoop.getFullYear();
             const month = monthLoop.getMonth(); // 0-11
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-            // 1. Process Increments & Grades (Apply after the start month)
+            let activeOldBP = currentOldBP;
+            let activeNewBP = currentNewBP;
+
+            // 1. Process Annual Increment (Applies to WHOLE month from the 1st)
             if (monthLoop.getTime() !== startDate.getTime()) {
-                // Annual Increment
                 if (incMonth !== null && month === incMonth) {
                     currentOldIndex++;
                     currentNewIndex++;
@@ -949,19 +990,57 @@ document.addEventListener('DOMContentLoaded', () => {
                     currentNewIndex = Math.min(currentNewIndex, revisedScale.length - 1);
                     currentOldBP = payStagesList[currentOldIndex];
                     currentNewBP = revisedScale[currentNewIndex];
-                }
-                // Grade
-                if (hasGrade && year === gradeYear && month === gradeMonth) {
-                    currentOldIndex += 2;
-                    currentNewIndex += 2;
-                    currentOldIndex = Math.min(currentOldIndex, payStagesList.length - 1);
-                    currentNewIndex = Math.min(currentNewIndex, revisedScale.length - 1);
-                    currentOldBP = payStagesList[currentOldIndex];
-                    currentNewBP = revisedScale[currentNewIndex];
+
+                    // Since Increment is from the 1st, it applies to the whole month
+                    activeOldBP = currentOldBP;
+                    activeNewBP = currentNewBP;
                 }
             }
 
-            // 2. Get DA Rates for this month
+            // 2. Process Grade (Mid-Month Pro-Rata Average)
+            let isProRataMonth = false;
+            if (hasGrade && year === gradeYear && month === gradeMonth && gradeDay > 1) {
+                isProRataMonth = true;
+
+                const bpBeforeGradeOld = activeOldBP;
+                const bpBeforeGradeNew = activeNewBP;
+
+                // Move stages for Grade
+                currentOldIndex += 2;
+                currentNewIndex += 2;
+                currentOldIndex = Math.min(currentOldIndex, payStagesList.length - 1);
+                currentNewIndex = Math.min(currentNewIndex, revisedScale.length - 1);
+                currentOldBP = payStagesList[currentOldIndex];
+                currentNewBP = revisedScale[currentNewIndex];
+
+                const bpAfterGradeOld = currentOldBP;
+                const bpAfterGradeNew = currentNewBP;
+
+                // PRO-RATA CALCULATION: (BP1 * days1 + BP2 * days2) / totalDays
+                // Days before grade = gradeDay - 1
+                // Days including and after grade = totalDays - (gradeDay - 1)
+                const daysBefore = gradeDay - 1;
+                const daysAfter = daysInMonth - daysBefore;
+
+                activeOldBP = Math.round((bpBeforeGradeOld * daysBefore + bpAfterGradeOld * daysAfter) / daysInMonth);
+                activeNewBP = Math.round((bpBeforeGradeNew * daysBefore + bpAfterGradeNew * daysAfter) / daysInMonth);
+            } else if (hasGrade && year === gradeYear && month === gradeMonth && gradeDay === 1) {
+                // Grade on 1st - just update the persistent BP for the whole month
+                currentOldIndex += 2;
+                currentNewIndex += 2;
+                currentOldIndex = Math.min(currentOldIndex, payStagesList.length - 1);
+                currentNewIndex = Math.min(currentNewIndex, revisedScale.length - 1);
+                currentOldBP = payStagesList[currentOldIndex];
+                currentNewBP = revisedScale[currentNewIndex];
+                activeOldBP = currentOldBP;
+                activeNewBP = currentNewBP;
+            } else if (hasGrade && ((year > gradeYear) || (year === gradeYear && month > gradeMonth))) {
+                // Already got Grade in a previous month, so currentOldBP/currentNewBP are already updated
+                activeOldBP = currentOldBP;
+                activeNewBP = currentNewBP;
+            }
+
+            // 3. Get DA Rates for this month
             let daOld = 0;
             if (year === 2024) {
                 if (month >= 6 && month <= 8) daOld = 9; // Jul-Sep
@@ -971,47 +1050,43 @@ document.addEventListener('DOMContentLoaded', () => {
                 else if (month >= 3 && month <= 6) daOld = 15; // Apr-Jul
                 else if (month >= 7 && month <= 8) daOld = 18; // Aug-Sep
                 else daOld = 22; // Oct onwards
-            } else {
-                daOld = 22; // 2026 onwards
-            }
+            } else { daOld = 22; }
 
             let daRev = 0;
-            if (year === 2024) daRev = 0; // Jul-Dec
+            if (year === 2024) daRev = 0;
             else if (year === 2025) {
-                if (month <= 5) daRev = 2; // Jan-Jun
-                else daRev = 4; // Jul-Dec
-            } else {
-                daRev = 4; // UPDATED: Jan 2026 onwards is 4% (same as Dec 2025)
-            }
+                if (month <= 5) daRev = 2;
+                else daRev = 4;
+            } else { daRev = 4; }
 
-            // 3. Calculate Monthly Totals
-            const oldDAVal = Math.round(currentOldBP * (daOld / 100));
-            const oldHRAVal = Math.round(currentOldBP * (hraNewPerc / 100));
-            const oldGross = currentOldBP + oldDAVal + oldHRAVal + othersVal;
+            // 4. Calculate Monthly Totals using the "Active" (potentially averaged) BP
+            const oldDAVal = Math.round(activeOldBP * (daOld / 100));
+            const oldHRAVal = Math.round(activeOldBP * (hraNewPerc / 100));
+            const oldGross = activeOldBP + oldDAVal + oldHRAVal + othersVal;
 
-            const newDAVal = Math.round(currentNewBP * (daRev / 100));
-            // AS REQUESTED: HRA of revised salary is same as that we calculated from pre-revised salary
+            const newDAVal = Math.round(activeNewBP * (daRev / 100));
             const newHRAVal = oldHRAVal;
-            const newGross = currentNewBP + newDAVal + newHRAVal + othersVal;
+            const newGross = activeNewBP + newDAVal + newHRAVal + othersVal;
 
             const monthlyArrear = newGross - oldGross;
             totalArrear += monthlyArrear;
 
             arrearHTML += `
                 <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
-                    <td style="padding: 8px 5px; font-weight: 500; border-right: 1px solid rgba(255,255,255,0.05);">${monthShortNames[month]} ${year}</td>
-                    
-                    <td style="padding: 8px 5px; text-align: right; color: #3b82f6;">${currentNewBP}</td>
+                    <td style="padding: 8px 5px; font-weight: 500; border-right: 1px solid rgba(255,255,255,0.05);">
+                        ${monthShortNames[month]} ${year}${isProRataMonth ? ' <span style="font-size: 0.6rem; color: #8b5cf6;">(Avg)</span>' : ''}
+                    </td>
+                    <td style="padding: 8px 5px; text-align: right; color: #3b82f6;">${activeNewBP.toLocaleString()}</td>
                     <td style="padding: 8px 5px; text-align: right; color: #3b82f6;">${daRev}%</td>
-                    <td style="padding: 8px 5px; text-align: right; color: #3b82f6;">${newDAVal}</td>
-                    <td style="padding: 8px 5px; text-align: right; color: #3b82f6;">${newHRAVal}</td>
-                    <td style="padding: 8px 5px; text-align: right; font-weight: 600; border-right: 1px solid rgba(255,255,255,0.1); color: #fff;">${newGross}</td>
+                    <td style="padding: 8px 5px; text-align: right; color: #3b82f6;">${newDAVal.toLocaleString()}</td>
+                    <td style="padding: 8px 5px; text-align: right; color: #3b82f6;">${newHRAVal.toLocaleString()}</td>
+                    <td style="padding: 8px 5px; text-align: right; font-weight: 600; border-right: 1px solid rgba(255,255,255,0.1); color: #fff;">${newGross.toLocaleString()}</td>
                     
-                    <td style="padding: 8px 5px; text-align: right; color: #94a3b8;">${currentOldBP}</td>
+                    <td style="padding: 8px 5px; text-align: right; color: #94a3b8;">${activeOldBP.toLocaleString()}</td>
                     <td style="padding: 8px 5px; text-align: right; color: #94a3b8;">${daOld}%</td>
-                    <td style="padding: 8px 5px; text-align: right; color: #94a3b8;">${oldDAVal}</td>
-                    <td style="padding: 8px 5px; text-align: right; color: #94a3b8;">${oldHRAVal}</td>
-                    <td style="padding: 8px 5px; text-align: right; font-weight: 600; border-right: 1px solid rgba(255,255,255,0.1);">${oldGross}</td>
+                    <td style="padding: 8px 5px; text-align: right; color: #94a3b8;">${oldDAVal.toLocaleString()}</td>
+                    <td style="padding: 8px 5px; text-align: right; color: #94a3b8;">${oldHRAVal.toLocaleString()}</td>
+                    <td style="padding: 8px 5px; text-align: right; font-weight: 600; border-right: 1px solid rgba(255,255,255,0.1);">${oldGross.toLocaleString()}</td>
                     
                     <td style="padding: 8px 5px; text-align: right; font-weight: 800; color: ${monthlyArrear >= 0 ? '#10b981' : '#ef4444'};">
                         ${monthlyArrear.toLocaleString()}
@@ -1063,8 +1138,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 serviceYears: yearsService,
                 hasGrade: hasGrade || false,
                 incMonth: incMonth,
-                gradeMonth: gradeMonth || "",
-                gradeYear: gradeYear || "",
+                gradeDate: gradeDateVal,
                 balDA: balDaPerc,
                 hra: hraNewPerc,
                 others: othersVal,
@@ -1307,24 +1381,28 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             if (arrearRows.length > 0) {
-                doc.addPage();
-                doc.setFontSize(16);
-                doc.setTextColor(59, 130, 246);
-                doc.text("Arrear Statement (Jul 2024 - Present)", 14, 20);
+                let totalArrearsVal = document.getElementById('total-arrear-header')?.textContent || "0";
+                totalArrearsVal = totalArrearsVal.replace('₹', 'Rs. ');
 
-                const totalArrearText = document.getElementById('total-arrear-header')?.textContent || "₹0";
+                doc.setFontSize(14);
+                doc.setTextColor(59, 130, 246);
+                doc.text(`Arrear Statement (Jul 2024 - Present)`, 14, 20);
+                doc.setFontSize(11);
+                doc.setTextColor(100);
+                doc.text(`Total Calculation: ${totalArrearsVal}`, 14, 26);
+
                 doc.autoTable({
-                    startY: 25,
+                    startY: 32,
                     head: [['Month', 'New BP', 'DA%', 'DA', 'HRA', 'NewTotal', 'Old BP', 'DA%', 'DA', 'HRA', 'OldTotal', 'Arrear']],
                     body: arrearRows,
-                    foot: [[{ content: 'Total Arrear', colSpan: 11, styles: { halign: 'right', fontStyle: 'bold' } }, { content: totalArrearText, styles: { halign: 'right', fontStyle: 'bold' } }]],
+                    foot: [[{ content: 'TOTAL ARREAR', colSpan: 11, styles: { halign: 'right', fontStyle: 'bold', fontSize: 8 } }, { content: totalArrearsVal, styles: { halign: 'right', fontStyle: 'bold', fontSize: 8 } }]],
                     theme: 'grid',
                     headStyles: { fillColor: [59, 130, 246], fontSize: 7 },
-                    footStyles: { fillColor: [240, 253, 244], fontSize: 8 },
+                    footStyles: { fillColor: [235, 245, 255], textColor: [0, 0, 0] },
                     styles: { fontSize: 7, cellPadding: 2 },
                     columnStyles: {
                         0: { halign: 'left', cellWidth: 20 },
-                        11: { halign: 'right', fontStyle: 'bold', fillColor: [240, 253, 244] }
+                        11: { halign: 'right', fontStyle: 'bold', fillColor: [235, 245, 255] }
                     }
                 });
             }
@@ -1450,8 +1528,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 serviceYears: document.getElementById('years-service').value,
                 hasGrade: document.getElementById('grade-check')?.checked || false,
                 incMonth: incMonth,
-                gradeMonth: document.getElementById('grade-month').value,
-                gradeYear: document.getElementById('grade-year').value,
+                gradeDate: document.getElementById('grade-date').value,
                 balDA: document.getElementById('bal-da-perc').value,
                 hra: document.getElementById('hra-perc').value,
                 others: document.getElementById('others-val').value,
