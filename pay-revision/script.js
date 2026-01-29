@@ -1159,6 +1159,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             // Render Rows
+            rows.reverse();
             rows.forEach(row => {
                 const tr = document.createElement('tr');
                 tr.style.borderBottom = "1px solid rgba(255,255,255,0.05)";
