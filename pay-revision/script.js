@@ -960,6 +960,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const hasGrade = document.getElementById('grade-check')?.checked;
 
+        // HRA Logic (Global)
+        const globalHraPerc = parseFloat(document.getElementById('hra-percentage-select')?.value) || 4;
+
+        // Update "Present Salary Details" HRA input to match global selection
+        const presentHraInput = document.getElementById('hra-perc');
+        if (presentHraInput) {
+            // Only update if different to avoid cursor jumping if user was typing (though we only want global control now)
+            if (parseFloat(presentHraInput.value) !== globalHraPerc) {
+                presentHraInput.value = globalHraPerc;
+            }
+        }
+
         // Validation: Ensure BP and Increment Month are selected
         if (!bp || incMonth === null) {
             return;
@@ -973,6 +985,8 @@ document.addEventListener('DOMContentLoaded', () => {
             gradeMonth = parseInt(parts[1]) - 1;
             gradeYear = parseInt(parts[2]);
         }
+
+
 
         // --- DYNAMIC PROGRESSION CALCULATION (TIMELINE) ---
         const startDate = new Date(2024, 6, 1); // July 1, 2024
@@ -1027,7 +1041,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Static Percentages
         const daMergedPerc = 31;
         const balDaPerc = parseFloat(document.getElementById('bal-da-perc').value) || 0;
-        const hraNewPerc = parseFloat(document.getElementById('hra-perc').value) || 0;
+        const hraNewPerc = globalHraPerc;
 
         // 1. GENERATE DYNAMIC MASTER SCALE
         // This calculates the revised BP for EVERY stage in the old scale
@@ -1521,7 +1535,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const oldGross = activeOldBP + oldDAVal + oldHRAVal + othersVal;
 
             const newDAVal = Math.round(activeNewBP * (daRev / 100));
-            const newHRAVal = oldHRAVal;
+            const newHRAVal = Math.round(activeNewBP * (hraNewPerc / 100));
             const newGross = activeNewBP + newDAVal + newHRAVal + othersVal;
 
             const monthlyArrear = newGross - oldGross;
