@@ -410,22 +410,23 @@
                     <h2 style="margin: 0; font-size: 1rem; display: flex; flex-direction: column; gap: 0.2rem;">
                         <span style="display: flex; align-items: center; gap: 0.5rem;">📈 DA Arrear (Mar 2021 - Jun
                             2024)</span>
-                        <span style="font-size: 0.75rem; font-weight: 400; opacity: 0.9;">Edit with your own
-                            details</span>
+                        <span style="font-size: 0.75rem; font-weight: 400; opacity: 0.9;">Edit BP / Due DA / Drawn DA /
+                            Delete Months</span>
                     </h2>
                 </div>
-                <div style="overflow-x: auto; -webkit-overflow-scrolling: touch; max-height: 400px;">
-                    <table style="width: 100%; border-collapse: collapse; font-size: 0.75rem; min-width: 500px;">
+                <div style="overflow-x: auto; -webkit-overflow-scrolling: touch; max-height: 480px;">
+                    <table style="width: 100%; border-collapse: collapse; font-size: 0.75rem; min-width: 600px;">
                         <thead style="position: sticky; top: 0; background: #0f172a; z-index: 10;">
                             <tr style="border-bottom: 2px solid rgba(255,255,255,0.1); color: #cbd5e1;">
                                 <th style="padding: 10px 5px; text-align: center; width: 40px;">Sl</th>
-                                <th style="padding: 10px 5px; text-align: left;">Month</th>
-                                <th style="padding: 10px 5px; text-align: right;">BP</th>
-                                <th style="padding: 10px 5px; text-align: center;">Due %</th>
-                                <th style="padding: 10px 5px; text-align: center;">Drawn %</th>
-                                <th style="padding: 10px 5px; text-align: right;">Diff %</th>
-                                <th style="padding: 10px 5px; text-align: right; color: #10b981;">Arrear</th>
-                                <th style="padding: 10px 5px; text-align: center;">Actions</th>
+                                <th style="padding: 10px 5px; text-align: left; width: 100px;">Month</th>
+                                <th style="padding: 10px 5px; text-align: right; width: 90px;">BP</th>
+                                <th style="padding: 10px 5px; text-align: center; width: 70px;">Due %</th>
+                                <th style="padding: 10px 5px; text-align: center; width: 70px;">Drawn %</th>
+                                <th style="padding: 10px 5px; text-align: right; width: 60px;">Diff %</th>
+                                <th style="padding: 10px 5px; text-align: right; color: #10b981; width: 80px;">Arrear
+                                </th>
+                                <th style="padding: 10px 5px; text-align: center; width: 50px;">Act</th>
                             </tr>
                         </thead>
                         <tbody id="da-arrear-tbody" style="color: #f1f5f9;">
@@ -435,12 +436,12 @@
                             style="background: rgba(5, 150, 105, 0.1); border-top: 2px solid #059669; position: sticky; bottom: 0;">
                             <tr>
                                 <td colspan="6"
-                                    style="padding: 15px 10px; text-align: right; font-weight: 800; color: #fff;">
-                                    Total
-                                    DA Arrear</td>
+                                    style="padding: 12px 10px; text-align: right; font-weight: 800; color: #fff; font-size: 0.8rem;">
+                                    Total DA Arrear</td>
                                 <td id="total-da-arrear-val"
-                                    style="padding: 15px 10px; text-align: right; font-weight: 900; color: #10b981; font-size: 1rem;">
+                                    style="padding: 12px 10px; text-align: right; font-weight: 900; color: #10b981; font-size: 0.95rem; white-space: nowrap;">
                                     ₹0</td>
+                                <td></td>
                             </tr>
                         </tfoot>
                     </table>

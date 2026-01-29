@@ -140,21 +140,30 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     // Global handler for DA Row Recalculation
-    // Global handler for DA Row Recalculation
     window.recalcDaRow = function (input) {
         const row = input.closest('tr');
         if (!row) return;
 
-        const newBp = parseInt(input.value) || 0;
-        const diffDa = parseFloat(input.dataset.diff) || 0;
+        const bpInput = row.querySelector('.da-bp-input');
+        const dueInput = row.querySelector('.due-da-input');
+        const drawnInput = row.querySelector('.drawn-da-input');
+
+        const bp = parseInt(bpInput.value) || 0;
+        const due = parseFloat(dueInput.value) || 0;
+        const drawn = parseFloat(drawnInput.value) || 0;
+        const diff = due - drawn;
+
+        // Update Diff Cell (Index 5)
+        const diffCell = row.children[5];
+        if (diffCell) diffCell.textContent = diff.toFixed(1) + "%";
 
         // Calculate Arrear
-        const arrear = Math.round(newBp * (diffDa / 100));
+        const arrear = diff > 0 ? Math.round(bp * (diff / 100)) : 0;
 
-        // Update Arrear Cell (Index 6, considering Sl, Month, BP, Due, Drawn, Diff, Arrear)
+        // Update Arrear Cell (Index 6)
         const arrearCell = row.children[6];
         if (arrearCell) {
-            arrearCell.textContent = arrear;
+            arrearCell.textContent = arrear.toLocaleString();
             arrearCell.style.color = arrear > 0 ? '#10b981' : '#ef4444';
         }
 
@@ -196,19 +205,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const newBpInput = row.querySelector('.new-bp-input');
         const oldBpInput = row.querySelector('.old-bp-input');
+        const newDaRateInput = row.querySelector('.new-da-rate-input');
+        const oldDaRateInput = row.querySelector('.old-da-rate-input');
 
         const newBp = parseInt(newBpInput.value) || 0;
         const oldBp = parseInt(oldBpInput.value) || 0;
 
-        const daRev = parseFloat(newBpInput.dataset.da) || 0;
-        const daOld = parseFloat(oldBpInput.dataset.da) || 0;
-        const hraRev = parseFloat(newBpInput.dataset.hra) || 0;
-        const hraOld = parseFloat(oldBpInput.dataset.hra) || 0;
+        const daRev = parseFloat(newDaRateInput.value) || 0;
+        const daOld = parseFloat(oldDaRateInput.value) || 0;
+
+        // HRA % is still stored in data attributes of BP inputs from initial render
+        const hraRev = parseFloat(newBpInput.dataset.hra) || 4;
+        const hraOld = parseFloat(oldBpInput.dataset.hra) || 4;
         const others = parseFloat(newBpInput.dataset.others) || 0;
 
         // Calc New Side (Revised)
         const newDaVal = Math.round(newBp * (daRev / 100));
-        // Recalc HRA Amount based on NEW BP (Assuming HRA % applies to new BP)
+        // Recalc HRA Amount based on NEW BP
         const newHraVal = Math.round(newBp * (hraRev / 100));
         const newGross = newBp + newDaVal + newHraVal + others;
 
@@ -1403,18 +1416,24 @@ document.addEventListener('DOMContentLoaded', () => {
                 const tr = document.createElement('tr');
                 tr.style.borderBottom = "1px solid rgba(255,255,255,0.05)";
                 tr.innerHTML = `
-                <td style="padding: 10px 5px; text-align: center; color: #64748b;">${slNo}</td>
-                <td style="padding: 10px 5px;">${mNames[currM]} ${currY}</td>
+                <td style="padding: 10px 5px; text-align: center; color: #64748b; font-size: 0.7rem;">${slNo}</td>
+                <td style="padding: 10px 5px; font-weight: 500;">${mNames[currM]} ${currY}</td>
                 <td style="padding: 10px 5px; text-align: right;">
-                    <input type="number" class="da-bp-input" value="${currentBp}" data-diff="${diffDA}" oninput="recalcDaRow(this)"
-                        style="width: 80px; background: rgba(0,0,0,0.3); border: 1px solid #475569; color: #fff; padding: 4px; border-radius: 4px; text-align: right; font-weight: bold;">
+                    <input type="number" class="da-bp-input" value="${currentBp}" oninput="recalcDaRow(this)"
+                        style="width: 75px; background: rgba(0,0,0,0.3); border: 1px solid #3b82f6; color: #fff; padding: 4px; border-radius: 4px; text-align: right; font-weight: bold; font-size: 0.75rem;">
                 </td>
-                <td style="padding: 10px 5px; text-align: center;">${dueDA}%</td>
-                <td style="padding: 10px 5px; text-align: center;">${drawnDA}%</td>
-                <td style="padding: 10px 5px; text-align: right; font-weight: 700;">${diffDA}%</td>
-                <td style="padding: 10px 5px; text-align: right; color: #10b981; font-weight: 700;">${arrearAmount}</td>
                 <td style="padding: 10px 5px; text-align: center;">
-                    <button onclick="deleteDaRow(this)" style="background: none; border: none; cursor: pointer; font-size: 0.9rem;">🗑️</button>
+                    <input type="number" class="due-da-input" value="${dueDA}" step="0.1" oninput="recalcDaRow(this)"
+                        style="width: 45px; background: rgba(0,0,0,0.3); border: 1px solid #3b82f6; color: #fff; padding: 4px; border-radius: 4px; text-align: center; font-size: 0.75rem;">
+                </td>
+                <td style="padding: 10px 5px; text-align: center;">
+                    <input type="number" class="drawn-da-input" value="${drawnDA}" step="0.1" oninput="recalcDaRow(this)"
+                        style="width: 45px; background: rgba(0,0,0,0.3); border: 1px solid #64748b; color: #fff; padding: 4px; border-radius: 4px; text-align: center; font-size: 0.75rem;">
+                </td>
+                <td style="padding: 10px 5px; text-align: right; font-weight: 700;">${diffDA.toFixed(1)}%</td>
+                <td style="padding: 10px 5px; text-align: right; color: #10b981; font-weight: 800; font-size: 0.8rem;">${arrearAmount.toLocaleString()}</td>
+                <td style="padding: 10px 5px; text-align: center;">
+                    <button onclick="deleteDaRow(this)" style="background: none; border: none; cursor: pointer; font-size: 0.8rem; opacity: 0.7; hover: {opacity: 1};">🗑️</button>
                 </td>
             `;
                 tbody.appendChild(tr);
@@ -1556,7 +1575,10 @@ document.addEventListener('DOMContentLoaded', () => {
                            oninput="recalcPayRevRow(this)"
                            style="width: 70px; background: rgba(0,0,0,0.3); border: 1px solid #3b82f6; color: #fff; padding: 4px; border-radius: 4px; text-align: right; font-weight: bold;">
                     </td>
-                    <td style="padding: 8px 5px; text-align: right; color: #3b82f6;">${daRev}%</td>
+                    <td style="padding: 8px 5px; text-align: right;">
+                        <input type="number" class="new-da-rate-input" value="${daRev}" step="0.1" oninput="recalcPayRevRow(this)"
+                           style="width: 45px; background: rgba(0,0,0,0.3); border: 1px solid #3b82f6; color: #fff; padding: 4px; border-radius: 4px; text-align: center; font-size: 0.75rem;">%
+                    </td>
                     <td style="padding: 8px 5px; text-align: right; color: #3b82f6;">${newDAVal.toLocaleString()}</td>
                     <td style="padding: 8px 5px; text-align: right; color: #3b82f6;">${newHRAVal.toLocaleString()}</td>
                     <td style="padding: 8px 5px; text-align: right; font-weight: 600; border-right: 1px solid rgba(255,255,255,0.1); color: #fff;">${newGross.toLocaleString()}</td>
@@ -1565,9 +1587,12 @@ document.addEventListener('DOMContentLoaded', () => {
                         <input type="number" class="old-bp-input" value="${activeOldBP}" 
                            data-da="${daOld}" data-hra="${hraNewPerc}" data-others="${othersVal}"
                            oninput="recalcPayRevRow(this)"
-                           style="width: 70px; background: rgba(0,0,0,0.3); border: 1px solid #94a3b8; color: #fff; padding: 4px; border-radius: 4px; text-align: right;" >
+                           style="width: 70px; background: rgba(0,0,0,0.3); border: 1px solid #94a3b8; color: #fff; padding: 4px; border-radius: 4px; text-align: right; font-size: 0.75rem;" >
                     </td>
-                    <td style="padding: 8px 5px; text-align: right; color: #94a3b8;">${daOld}%</td>
+                    <td style="padding: 8px 5px; text-align: right;">
+                        <input type="number" class="old-da-rate-input" value="${daOld}" step="0.1" oninput="recalcPayRevRow(this)"
+                           style="width: 45px; background: rgba(0,0,0,0.3); border: 1px solid #94a3b8; color: #fff; padding: 4px; border-radius: 4px; text-align: center; font-size: 0.75rem;">%
+                    </td>
                     <td style="padding: 8px 5px; text-align: right; color: #94a3b8;">${oldDAVal.toLocaleString()}</td>
                     <td style="padding: 8px 5px; text-align: right; color: #94a3b8;">${oldHRAVal.toLocaleString()}</td>
                     <td style="padding: 8px 5px; text-align: right; font-weight: 600; border-right: 1px solid rgba(255,255,255,0.1);">${oldGross.toLocaleString()}</td>
