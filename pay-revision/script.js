@@ -1994,7 +1994,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 doc.setFontSize(16);
                 doc.setTextColor(59, 130, 246);
                 doc.setFont("helvetica", "bold");
-                doc.text(`Arrear Statement (Jul 2024 - Present)`, 14, 20);
+                doc.text(`Pay Revision Arrear Statement (Jul 2024 - Present)`, 14, 20);
 
                 doc.setFontSize(11);
                 doc.setTextColor(100);
