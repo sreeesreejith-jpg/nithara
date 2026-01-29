@@ -61,6 +61,7 @@ document.addEventListener('DOMContentLoaded', () => {
         'fitment-perc',
         'bal-da-perc',
         'hra-perc',
+        'hra-percentage-select',
         'years-service',
         'increment-month',
         'grade-check',
@@ -1652,6 +1653,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    window.calculate = calculate;
     // Initial calculation
     calculate();
 
