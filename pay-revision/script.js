@@ -1114,6 +1114,131 @@ document.addEventListener('DOMContentLoaded', () => {
         // Call the history calculation
         calculatePayHistory(bp, incMonth);
 
+        // --- DA Arrear Calculation (Mar 2021 - Jun 2024) ---
+        function calculateDAArrear(bp, incMonth) {
+            const container = document.getElementById('da-arrear-container');
+            const tbody = document.getElementById('da-arrear-tbody');
+            const totalEl = document.getElementById('total-da-arrear-val');
+
+            if (!container || !tbody || !totalEl) return;
+
+            if (!bp || incMonth === null) {
+                container.style.display = 'none';
+                return;
+            }
+
+            const currentIndex = payStagesList.indexOf(bp);
+            if (currentIndex === -1) return;
+
+            container.style.display = 'block';
+            tbody.innerHTML = '';
+
+            // 1. Determine Pay Stages with Dates
+            // Same logic as history calculation to determine start/end of each BP stage
+            const lastIncYear = (incMonth > 6) ? 2023 : 2024;
+
+            // Helper to check if a Month/Year is ON or AFTER a start Month/Year
+            const isAfterOrSame = (m, y, startM, startY) => {
+                if (y > startY) return true;
+                if (y === startY && m >= startM) return true;
+                return false;
+            };
+
+            // Determine BP for a given month/year
+            function getBpForDate(m, y) {
+                // Stage 1: Current Pre-Revision Pay (From [IncMonth, LastIncYear])
+                if (isAfterOrSame(m, y, incMonth, lastIncYear)) {
+                    return payStagesList[currentIndex];
+                }
+                // Stage 2: Previous Year Pay (From [IncMonth, LastIncYear-1])
+                if (currentIndex - 1 >= 0 && isAfterOrSame(m, y, incMonth, lastIncYear - 1)) {
+                    return payStagesList[currentIndex - 1];
+                }
+                // Stage 3: 2 Years Back (From [IncMonth, LastIncYear-2])
+                if (currentIndex - 2 >= 0 && isAfterOrSame(m, y, incMonth, lastIncYear - 2)) {
+                    return payStagesList[currentIndex - 2];
+                }
+                // Stage 4: Base (From everything before that, up to Mar 2021)
+                if (currentIndex - 3 >= 0) {
+                    return payStagesList[currentIndex - 3];
+                }
+                return 0; // Should not happen given the range
+            }
+
+
+            // 2. Define DA Rates
+            // Format: startM, startY, endM, endY, dueRate
+            // Drawn Rate is simpler: 7% until Mar 2024, 9% from Apr 2024.
+            const daRates = [
+                { sm: 2, sy: 2021, em: 5, ey: 2021, rate: 9 },   // Mar 21 - Jun 21
+                { sm: 6, sy: 2021, em: 11, ey: 2021, rate: 12 }, // Jul 21 - Dec 21
+                { sm: 0, sy: 2022, em: 5, ey: 2022, rate: 15 },  // Jan 22 - Jun 22
+                { sm: 6, sy: 2022, em: 11, ey: 2022, rate: 18 }, // Jul 22 - Dec 22
+                { sm: 0, sy: 2023, em: 5, ey: 2023, rate: 22 },  // Jan 23 - Jun 23
+                { sm: 6, sy: 2023, em: 11, ey: 2023, rate: 25 }, // Jul 23 - Dec 23
+                { sm: 0, sy: 2024, em: 5, ey: 2024, rate: 28 }   // Jan 24 - Jun 24
+            ];
+
+            let grandTotal = 0;
+            const mNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+            // Loop from Mar 2021 (Month 2, 2021) to Jun 2024 (Month 5, 2024)
+            let currM = 2; // March
+            let currY = 2021;
+            const endM = 5; // June
+            const endY = 2024;
+
+            while (currY < endY || (currY === endY && currM <= endM)) {
+                const currentBp = getBpForDate(currM, currY);
+
+                // Determine Due DA
+                let dueDA = 0;
+                const period = daRates.find(d => {
+                    const afterStart = (currY > d.sy) || (currY === d.sy && currM >= d.sm);
+                    const beforeEnd = (currY < d.ey) || (currY === d.ey && currM <= d.em);
+                    return afterStart && beforeEnd;
+                });
+                if (period) dueDA = period.rate;
+
+                // Determine Drawn DA
+                // 7% until March 2024.
+                // Apr 2024 onwards is 9%.
+                let drawnDA = 7;
+                if (currY === 2024 && currM >= 3) { // April is Month 3
+                    drawnDA = 9;
+                }
+
+                const diffDA = dueDA - drawnDA;
+                const arrearAmount = diffDA > 0 ? Math.round(currentBp * (diffDA / 100)) : 0;
+
+                grandTotal += arrearAmount;
+
+                // Render Row
+                const tr = document.createElement('tr');
+                tr.style.borderBottom = "1px solid rgba(255,255,255,0.05)";
+                tr.innerHTML = `
+                <td style="padding: 10px 5px;">${mNames[currM]} ${currY}</td>
+                <td style="padding: 10px 5px; text-align: right; color: #94a3b8;">${currentBp}</td>
+                <td style="padding: 10px 5px; text-align: center;">${dueDA}%</td>
+                <td style="padding: 10px 5px; text-align: center;">${drawnDA}%</td>
+                <td style="padding: 10px 5px; text-align: right; font-weight: 700;">${diffDA}%</td>
+                <td style="padding: 10px 5px; text-align: right; color: #10b981; font-weight: 700;">${arrearAmount}</td>
+            `;
+                tbody.appendChild(tr);
+
+                // Increment Month
+                currM++;
+                if (currM > 11) {
+                    currM = 0;
+                    currY++;
+                }
+            }
+
+            totalEl.textContent = "₹" + grandTotal.toLocaleString('en-IN');
+        }
+
+        calculateDAArrear(bp, incMonth);
+
         // --- ARREAR CALCULATION (July 2024 to Present) ---
         let totalArrear = 0;
         let arrearHTML = '';
