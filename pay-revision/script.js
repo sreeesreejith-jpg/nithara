@@ -126,6 +126,19 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Toggle Listener for Pay History
+    const historyHeader = document.getElementById('history-header');
+    const historyContent = document.getElementById('history-content');
+    const historyToggleIcon = document.getElementById('history-toggle-icon');
+
+    if (historyHeader && historyContent && historyToggleIcon) {
+        historyHeader.addEventListener('click', () => {
+            const isHidden = historyContent.style.display === 'none';
+            historyContent.style.display = isHidden ? 'block' : 'none';
+            historyToggleIcon.textContent = isHidden ? '-' : '+';
+        });
+    }
+
     function initPopupSelectors() {
         calYearSelect.innerHTML = yearsAllowed.map(y => `<option value="${y}">${y}</option>`).join('');
         calMonthSelect.innerHTML = monthNames.map((m, i) => `<option value="${i}">${m}</option>`).join('');
@@ -1187,6 +1200,7 @@ document.addEventListener('DOMContentLoaded', () => {
             let currY = 2021;
             const endM = 5; // June
             const endY = 2024;
+            let slNo = 1;
 
             while (currY < endY || (currY === endY && currM <= endM)) {
                 const currentBp = getBpForDate(currM, currY);
@@ -1217,6 +1231,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const tr = document.createElement('tr');
                 tr.style.borderBottom = "1px solid rgba(255,255,255,0.05)";
                 tr.innerHTML = `
+                <td style="padding: 10px 5px; text-align: center; color: #64748b;">${slNo}</td>
                 <td style="padding: 10px 5px;">${mNames[currM]} ${currY}</td>
                 <td style="padding: 10px 5px; text-align: right; color: #94a3b8;">${currentBp}</td>
                 <td style="padding: 10px 5px; text-align: center;">${dueDA}%</td>
@@ -1232,12 +1247,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     currM = 0;
                     currY++;
                 }
+                slNo++;
             }
 
             totalEl.textContent = "₹" + grandTotal.toLocaleString('en-IN');
+            return grandTotal;
         }
 
-        calculateDAArrear(bp, incMonth);
+        window.lastDaArrearTotal = calculateDAArrear(bp, incMonth);
 
         // --- ARREAR CALCULATION (July 2024 to Present) ---
         let totalArrear = 0;
@@ -1394,6 +1411,22 @@ document.addEventListener('DOMContentLoaded', () => {
             if (summaryArrear && summaryArrearCont) {
                 summaryArrear.textContent = formattedTotal;
                 summaryArrearCont.style.display = totalArrear > 0 ? 'flex' : 'none';
+            }
+
+            // --- GRAND TOTAL (DA + Pay Revision) ---
+            const grandTotalHeader = document.getElementById('grand-arrear-header');
+            const grandTotalVal = document.getElementById('grand-arrear-val');
+
+            if (grandTotalHeader && grandTotalVal) {
+                // Ensure daArrearTotal is available (it was defined in the outer scope)
+                const combinedTotal = (window.lastDaArrearTotal || 0) + totalArrear;
+
+                if (combinedTotal > 0) {
+                    grandTotalHeader.style.display = 'flex';
+                    grandTotalVal.textContent = "₹" + combinedTotal.toLocaleString('en-IN');
+                } else {
+                    grandTotalHeader.style.display = 'none';
+                }
             }
         }
 
