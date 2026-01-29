@@ -300,6 +300,31 @@
                 </div>
             </div>
 
+            <!-- Section: Past Pay History (Reverse Calculation) -->
+            <section class="revision-section history-card" id="history-container"
+                style="margin-bottom: 1.5rem; background: var(--card-bg); border-radius: 1rem; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.4); display: none;">
+                <div class="section-header"
+                    style="padding: 1rem; background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%); color: white;">
+                    <h2 style="margin: 0; font-size: 1.1rem; display: flex; align-items: center; gap: 0.5rem;">
+                        <span>📜</span> Pay History (Mar 2021 - Jun 2024)
+                    </h2>
+                </div>
+                <div style="overflow-x: auto; -webkit-overflow-scrolling: touch; padding: 1rem;">
+                    <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem;">
+                        <thead>
+                            <tr style="border-bottom: 2px solid rgba(255,255,255,0.1); color: #cbd5e1;">
+                                <th style="padding: 8px; text-align: left;">Period</th>
+                                <th style="padding: 8px; text-align: right;">Basic Pay</th>
+                                <th style="padding: 8px; text-align: right;">Remarks</th>
+                            </tr>
+                        </thead>
+                        <tbody id="history-tbody" style="color: #f1f5f9;">
+                            <!-- Injected by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
             <!-- Right Side: Present Salary Details (Conditional) -->
             <section id="present-salary-container" class="revision-section after"
                 style="display: none; flex-direction: column;">

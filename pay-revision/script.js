@@ -1006,12 +1006,119 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('res-others').textContent = othersVal;
         document.getElementById('res-gross-new').textContent = grossNew;
 
-        // --- ARREAR CALCULATION (MONTH-BY-MONTH) ---
+        // --- Pay History (Reverse Calculation) ---
+        function calculatePayHistory(bp, incMonth) {
+            const historyContainer = document.getElementById('history-container');
+            const historyTbody = document.getElementById('history-tbody');
+
+            if (!historyContainer || !historyTbody) return;
+
+            if (!bp || incMonth === null) {
+                historyContainer.style.display = 'none';
+                return;
+            }
+
+            // Only show if we found the BP in the list
+            const currentIndex = payStagesList.indexOf(bp);
+            if (currentIndex === -1) {
+                historyContainer.style.display = 'none';
+                return;
+            }
+
+            historyContainer.style.display = 'block';
+            historyTbody.innerHTML = '';
+
+            const mNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+            // Determine the year of the most recent increment on/before July 1, 2024
+            // If Increment Month is after July (e.g. Aug-Dec), the last one was in 2023.
+            // If Increment Month is on or before July (e.g. Jan-Jul), the last one was in 2024.
+            const lastIncYear = (incMonth > 6) ? 2023 : 2024;
+
+            const rows = [];
+
+            // Helper: Get previous month index (handles wrapping)
+            const prevMonth = (m) => (m === 0 ? 11 : m - 1);
+
+            // Helper: Format string
+            const fmt = (m, y) => `${mNames[m]} ${y}`;
+
+            // 1. Current Period (Most Recent Increment -> June 2024)
+            rows.push({
+                period: `${fmt(incMonth, lastIncYear)} - Jun 2024`,
+                bp: payStagesList[currentIndex],
+                remarks: "Pre-Revision Pay (as on 01/07/2024)"
+            });
+
+            // 2. Previous Period (Year - 1)
+            if (currentIndex - 1 >= 0) {
+                const startM = incMonth;
+                const startY = lastIncYear - 1;
+
+                // End is just before the current period started
+                const endM = prevMonth(incMonth);
+                const endY = (incMonth === 0) ? lastIncYear - 1 : lastIncYear;
+
+                rows.push({
+                    period: `${fmt(startM, startY)} - ${fmt(endM, endY)}`,
+                    bp: payStagesList[currentIndex - 1],
+                    remarks: "Previous Year"
+                });
+            }
+
+            // 3. Two Years Back (Year - 2)
+            if (currentIndex - 2 >= 0) {
+                const startM = incMonth;
+                const startY = lastIncYear - 2;
+
+                const endM = prevMonth(incMonth);
+                const endY = (incMonth === 0) ? lastIncYear - 2 : lastIncYear - 1;
+
+                rows.push({
+                    period: `${fmt(startM, startY)} - ${fmt(endM, endY)}`,
+                    bp: payStagesList[currentIndex - 2],
+                    remarks: "2 Years Back"
+                });
+            }
+
+            // 4. Base Period (Mar 2021 -> End of previous period)
+            if (currentIndex - 3 >= 0) {
+                const startM = 2; // March
+                const startY = 2021;
+
+                // Ends just before "Two Years Back" period started
+                const endM = prevMonth(incMonth);
+                const endY = (incMonth === 0) ? lastIncYear - 3 : lastIncYear - 2;
+
+                rows.push({
+                    period: `Mar 2021 - ${fmt(endM, endY)}`,
+                    bp: payStagesList[currentIndex - 3],
+                    remarks: "Base Period (start of 2019 Revision)"
+                });
+            }
+
+            // Render Rows
+            rows.forEach(row => {
+                const tr = document.createElement('tr');
+                tr.style.borderBottom = "1px solid rgba(255,255,255,0.05)";
+
+                tr.innerHTML = `
+                <td style="padding: 10px 8px; font-weight: 500;">${row.period}</td>
+                <td style="padding: 10px 8px; text-align: right; color: #3b82f6; font-weight: 700;">${row.bp}</td>
+                <td style="padding: 10px 8px; text-align: right; font-size: 0.75rem; color: #94a3b8;">${row.remarks}</td>
+            `;
+                historyTbody.appendChild(tr);
+            });
+        }
+
+        // Call the history calculation
+        calculatePayHistory(bp, incMonth);
+
+        // --- ARREAR CALCULATION (July 2024 to Present) ---
         let totalArrear = 0;
         let arrearHTML = '';
         let monthLoop = new Date(startDate); // July 1, 2024
         let currentOldBP = bp;
-        let currentNewBP = bpFixed;
         let currentOldIndex = baseIndex;
         let currentNewIndex = baseIndex;
 
