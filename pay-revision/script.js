@@ -116,9 +116,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const calMonthSelect = document.getElementById('cal-month-select');
     const calDays = document.getElementById('calendar-days');
 
-    const minDate = new Date(2024, 6, 2); // July 2, 2024 (Local Time)
+    const minDate = new Date(2021, 2, 1); // March 1, 2021 (Local Time)
     const today = new Date();
-    const yearsAllowed = [2024, 2025, 2026];
+    const yearsAllowed = [2021, 2022, 2023, 2024, 2025, 2026];
 
     if (gradeCheck && gradeDetailsContainer) {
         gradeCheck.addEventListener('change', () => {
@@ -398,7 +398,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const [d, m, y] = this.value.split('/').map(Number);
                 const checkDate = new Date(y, m - 1, d);
                 if (isNaN(checkDate.getTime()) || checkDate < minDate || checkDate > today) {
-                    alert("Date must be between 02/07/2024 and Today.");
+                    alert("Date must be between 01/03/2021 and Today.");
                     this.value = "";
                 }
             }
@@ -451,7 +451,11 @@ document.addEventListener('DOMContentLoaded', () => {
             monthNames.forEach((month, index) => {
                 // Filter logic for Grade selection
                 if (isGradeMonth && selectedYear) {
+                    // For 2021-2023, allow all months (March onwards for 2021)
+                    if (selectedYear === 2021 && index < 2) return; // March onwards for 2021
+                    // For 2024, only July onwards
                     if (selectedYear === 2024 && index < 6) return; // July onwards
+                    // For current year, not past today
                     if (selectedYear === currentYear && index > currentMonth) return; // Not past today
                 }
 
@@ -495,7 +499,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Generic Year Dropdown Logic with Search
     function setupYearDropdown(inputEl, displayEl, dropdownEl) {
-        const yearList = ["2024", "2025", "2026"];
+        const yearList = ["2021", "2022", "2023", "2024", "2025", "2026"];
 
         function renderYears(filterText = "") {
             dropdownEl.innerHTML = "";
@@ -993,11 +997,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const gradeDateVal = document.getElementById('grade-date')?.value;
         let gradeYear = null, gradeMonth = null, gradeDay = null;
+        let isPreRevisedGrade = false;
         if (hasGrade && gradeDateVal && gradeDateVal.length === 10) {
             const parts = gradeDateVal.split('/');
             gradeDay = parseInt(parts[0]);
             gradeMonth = parseInt(parts[1]) - 1;
             gradeYear = parseInt(parts[2]);
+
+            // Detect if grade is in Pre-Revised period (before 02/07/2024)
+            const gradeDate = new Date(gradeYear, gradeMonth, gradeDay);
+            const revisionDate = new Date(2024, 6, 2); // July 2, 2024
+            isPreRevisedGrade = gradeDate < revisionDate;
         }
 
 
@@ -1017,7 +1027,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let incrementsCount = 0;
         let checkDate = new Date(startDate);
 
-        // 1. Identify all events between 07/2024 and Benchmark Date
+        // 1. Identify all events starting from 01/07/2024 onwards
         while (checkDate <= today) {
             // Check for Annual Increment
             if (incMonth !== null && checkDate.getMonth() === incMonth && checkDate.getTime() !== startDate.getTime()) {
@@ -1029,14 +1039,18 @@ document.addEventListener('DOMContentLoaded', () => {
                     steps: 1
                 });
             }
-            // Check for Grade (Must be AFTER July 2024 per user request)
+            // Check for Grade (ONLY if it is ON or AFTER 02/07/2024)
             if (hasGrade && gradeMonth !== null && checkDate.getMonth() === gradeMonth && checkDate.getFullYear() === gradeYear) {
-                events.push({
-                    type: 'grade',
-                    date: new Date(checkDate.getFullYear(), checkDate.getMonth(), gradeDay),
-                    label: `Grade on ${gradeDay}/${monthShortNames[checkDate.getMonth()]}/${checkDate.getFullYear()}`,
-                    steps: 2
-                });
+                const revisionDate = new Date(2024, 6, 2);
+                const gDate = new Date(gradeYear, gradeMonth, gradeDay);
+                if (gDate >= revisionDate) {
+                    events.push({
+                        type: 'grade',
+                        date: new Date(checkDate.getFullYear(), checkDate.getMonth(), gradeDay),
+                        label: `Grade on ${gradeDay}/${monthShortNames[checkDate.getMonth()]}/${checkDate.getFullYear()}`,
+                        steps: 2
+                    });
+                }
             }
             checkDate.setMonth(checkDate.getMonth() + 1);
         }
@@ -1108,19 +1122,20 @@ document.addEventListener('DOMContentLoaded', () => {
         let timelineHTML = '';
 
         if (baseIndex !== -1) {
+            // ALWAYS start timeline from Revised BP on July 1, 2024
             timelineHTML += `
-                    <div class="timeline-item">
-                        <span class="label">Revised BP On 01/07/2024</span>
-                        <span class="value">Rs. ${bpFixed}</span>
-                    </div>
-                `;
+                <div class="timeline-item">
+                    <span class="label">Revised BP On 01/07/2024</span>
+                    <span class="value">Rs. ${bpFixed}</span>
+                </div>
+            `;
 
+            // Display forward events (increments and future grades in revised scale)
             events.forEach(event => {
                 currentIndex += event.steps;
                 currentIndex = Math.min(currentIndex, revisedScale.length - 1);
                 const stepPay = revisedScale[currentIndex];
 
-                // Labels as requested by user
                 const month = monthShortNames[event.date.getMonth()];
                 const year = event.date.getFullYear();
                 let localizedLabel = "";
@@ -1203,7 +1218,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('res-others').textContent = othersVal;
         document.getElementById('res-gross-new').textContent = grossNew;
 
-        // --- Pay History (Reverse Calculation) ---
+        // --- Pay History (Reverse Calculation 2021-2024) ---
         function calculatePayHistory(bp, incMonth) {
             const historyContainer = document.getElementById('history-container');
             const historyTbody = document.getElementById('history-tbody');
@@ -1215,96 +1230,70 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            // Only show if we found the BP in the list
-            const currentIndex = payStagesList.indexOf(bp);
-            if (currentIndex === -1) {
-                historyContainer.style.display = 'none';
-                return;
-            }
-
             historyContainer.style.display = 'block';
             historyTbody.innerHTML = '';
 
             const mNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+            let walkingBP = bp; // BP as on 01/07/2024
+            let stages = [];
 
-            // Determine the year of the most recent increment on/before July 1, 2024
-            // If Increment Month is after July (e.g. Aug-Dec), the last one was in 2023.
-            // If Increment Month is on or before July (e.g. Jan-Jul), the last one was in 2024.
-            const lastIncYear = (incMonth > 6) ? 2023 : 2024;
+            // Walk backward from June 2024 to March 2021 to identify BP changes
+            let currentPeriodEnd = "Jun 2024";
 
-            const rows = [];
+            for (let y = 2024; y >= 2021; y--) {
+                let startM = (y === 2024) ? 5 : 11;
+                let endM = (y === 2021) ? 2 : 0;
 
-            // Helper: Get previous month index (handles wrapping)
-            const prevMonth = (m) => (m === 0 ? 11 : m - 1);
+                for (let m = startM; m >= endM; m--) {
+                    let changed = false;
+                    let oldBP = walkingBP;
 
-            // Helper: Format string
-            const fmt = (m, y) => `${mNames[m]} ${y}`;
+                    // A. Check for Grade change (Reverse)
+                    if (isPreRevisedGrade && y === gradeYear && m === gradeMonth) {
+                        let idx = payStagesList.indexOf(walkingBP);
+                        walkingBP = payStagesList[Math.max(0, idx - 2)];
+                        changed = true;
+                    }
 
-            // 1. Current Period (Most Recent Increment -> June 2024)
-            rows.push({
-                period: `${fmt(incMonth, lastIncYear)} - Jun 2024`,
-                bp: payStagesList[currentIndex],
-                remarks: "Pre-Revision Pay (as on 01/07/2024)"
-            });
+                    // B. Check for Increment change (Reverse)
+                    if (incMonth !== null && m === incMonth && !(isPreRevisedGrade && y === gradeYear && m === gradeMonth)) {
+                        let idx = payStagesList.indexOf(walkingBP);
+                        walkingBP = payStagesList[Math.max(0, idx - 1)];
+                        changed = true;
+                    }
 
-            // 2. Previous Period (Year - 1)
-            if (currentIndex - 1 >= 0) {
-                const startM = incMonth;
-                const startY = lastIncYear - 1;
+                    // If BP changed or we reached the start (Mar 2021), record the period
+                    if (changed || (y === 2021 && m === 2)) {
+                        let startMonth = mNames[m];
+                        let startYear = y;
 
-                // End is just before the current period started
-                const endM = prevMonth(incMonth);
-                const endY = (incMonth === 0) ? lastIncYear - 1 : lastIncYear;
+                        // If it's the very first record (Mar 2021), it starts from Mar 2021
+                        let periodStart = `${startMonth} ${startYear}`;
 
-                rows.push({
-                    period: `${fmt(startM, startY)} - ${fmt(endM, endY)}`,
-                    bp: payStagesList[currentIndex - 1],
-                    remarks: "Previous Year"
-                });
+                        stages.push({
+                            period: `${periodStart} - ${currentPeriodEnd}`,
+                            bp: oldBP,
+                            remarks: (oldBP === bp) ? "Pre-Revision Pay (as on 01/07/2024)" : ""
+                        });
+
+                        // Update the end date for the next (earlier) period
+                        let prevM = (m === 0) ? 11 : m - 1;
+                        let prevY = (m === 0) ? y - 1 : y;
+                        currentPeriodEnd = `${mNames[prevM]} ${prevY}`;
+                    }
+                }
             }
 
-            // 3. Two Years Back (Year - 2)
-            if (currentIndex - 2 >= 0) {
-                const startM = incMonth;
-                const startY = lastIncYear - 2;
-
-                const endM = prevMonth(incMonth);
-                const endY = (incMonth === 0) ? lastIncYear - 2 : lastIncYear - 1;
-
-                rows.push({
-                    period: `${fmt(startM, startY)} - ${fmt(endM, endY)}`,
-                    bp: payStagesList[currentIndex - 2],
-                    remarks: "2 Years Back"
-                });
-            }
-
-            // 4. Base Period (Mar 2021 -> End of previous period)
-            if (currentIndex - 3 >= 0) {
-                const startM = 2; // March
-                const startY = 2021;
-
-                // Ends just before "Two Years Back" period started
-                const endM = prevMonth(incMonth);
-                const endY = (incMonth === 0) ? lastIncYear - 3 : lastIncYear - 2;
-
-                rows.push({
-                    period: `Mar 2021 - ${fmt(endM, endY)}`,
-                    bp: payStagesList[currentIndex - 3],
-                    remarks: "Base Period (start of 2019 Revision)"
-                });
-            }
-
-            // Render Rows
-            rows.reverse();
-            rows.forEach(row => {
+            // Render Rows (Reverse the array to show chronological order: oldest to newest)
+            stages.reverse().forEach(row => {
                 const tr = document.createElement('tr');
                 tr.style.borderBottom = "1px solid rgba(255,255,255,0.05)";
 
                 tr.innerHTML = `
-                <td style="padding: 10px 8px; font-weight: 500;">${row.period}</td>
-                <td style="padding: 10px 8px; text-align: right; color: #3b82f6; font-weight: 700;">${row.bp}</td>
-                <td style="padding: 10px 8px; text-align: right; font-size: 0.75rem; color: #94a3b8;">${row.remarks}</td>
-            `;
+                    <td style="padding: 10px 8px; font-weight: 500;">${row.period}</td>
+                    <td style="padding: 10px 8px; text-align: right; color: #3b82f6; font-weight: 700;">${row.bp}</td>
+                    <td style="padding: 10px 8px; text-align: right; font-size: 0.75rem; color: #94a3b8;">${row.remarks}</td>
+                `;
                 historyTbody.appendChild(tr);
             });
         }
@@ -1331,42 +1320,56 @@ document.addEventListener('DOMContentLoaded', () => {
             container.style.display = 'block';
             tbody.innerHTML = '';
 
-            // 1. Determine Pay Stages with Dates
-            // Same logic as history calculation to determine start/end of each BP stage
-            const lastIncYear = (incMonth > 6) ? 2023 : 2024;
+            // 1. Determine Pay Stages with Dates (REVERSE TRACKING LOGIC)
+            const mNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+            let walkingBP = bp; // The BP as on 01/07/2024
+            let monthRecords = [];
 
-            // Helper to check if a Month/Year is ON or AFTER a start Month/Year
-            const isAfterOrSame = (m, y, startM, startY) => {
-                if (y > startY) return true;
-                if (y === startY && m >= startM) return true;
-                return false;
-            };
+            // Walk backward from June 2024 down to March 2021
+            for (let y = 2024; y >= 2021; y--) {
+                let startM = (y === 2024) ? 5 : 11; // Start from June in 2024, or Dec in other years
+                let endM = (y === 2021) ? 2 : 0;    // End at March in 2021, or Jan in other years
 
-            // Determine BP for a given month/year
-            function getBpForDate(m, y) {
-                // Stage 1: Current Pre-Revision Pay (From [IncMonth, LastIncYear])
-                if (isAfterOrSame(m, y, incMonth, lastIncYear)) {
-                    return payStagesList[currentIndex];
+                for (let m = startM; m >= endM; m--) {
+                    let daysInMonth = new Date(y, m + 1, 0).getDate();
+                    let bpForThisMonth = walkingBP;
+                    let isAvg = false;
+
+                    // A. Check if this is the Grade Month
+                    if (isPreRevisedGrade && y === gradeYear && m === gradeMonth) {
+                        isAvg = true;
+                        let p_after = walkingBP;
+                        let idx = payStagesList.indexOf(p_after);
+                        let p_before = payStagesList[Math.max(0, idx - 2)]; // 2 stages less before grade
+
+                        // User formula: (p_before * (gradeDay - 1) + p_after * (daysInMonth - (gradeDay - 1))) / daysInMonth
+                        bpForThisMonth = Math.round((p_before * (gradeDay - 1) + p_after * (daysInMonth - gradeDay + 1)) / daysInMonth);
+
+                        // Update walkingBP to the stage BEFORE grade for further backward tracking
+                        walkingBP = p_before;
+                    }
+
+                    // B. Check if this month has an Annual Increment (always on the 1st)
+                    // If we are moving backward, the BP we have is AFTER the increment.
+                    // So for months BEFORE this, we must subtract 1 stage.
+                    if (incMonth !== null && m === incMonth) {
+                        let idx = payStagesList.indexOf(walkingBP);
+                        walkingBP = payStagesList[Math.max(0, idx - 1)];
+                    }
+
+                    monthRecords.push({
+                        month: m,
+                        year: y,
+                        bp: bpForThisMonth,
+                        isAveraged: isAvg
+                    });
                 }
-                // Stage 2: Previous Year Pay (From [IncMonth, LastIncYear-1])
-                if (currentIndex - 1 >= 0 && isAfterOrSame(m, y, incMonth, lastIncYear - 1)) {
-                    return payStagesList[currentIndex - 1];
-                }
-                // Stage 3: 2 Years Back (From [IncMonth, LastIncYear-2])
-                if (currentIndex - 2 >= 0 && isAfterOrSame(m, y, incMonth, lastIncYear - 2)) {
-                    return payStagesList[currentIndex - 2];
-                }
-                // Stage 4: Base (From everything before that, up to Mar 2021)
-                if (currentIndex - 3 >= 0) {
-                    return payStagesList[currentIndex - 3];
-                }
-                return 0; // Should not happen given the range
             }
 
+            // Reverse the records to show them from March 2021 to June 2024
+            monthRecords.reverse();
 
             // 2. Define DA Rates
-            // Format: startM, startY, endM, endY, dueRate
-            // Drawn Rate is simpler: 7% until Mar 2024, 9% from Apr 2024.
             const daRates = [
                 { sm: 2, sy: 2021, em: 5, ey: 2021, rate: 9 },   // Mar 21 - Jun 21
                 { sm: 6, sy: 2021, em: 11, ey: 2021, rate: 12 }, // Jul 21 - Dec 21
@@ -1378,17 +1381,12 @@ document.addEventListener('DOMContentLoaded', () => {
             ];
 
             let grandTotal = 0;
-            const mNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-
-            // Loop from Mar 2021 (Month 2, 2021) to Jun 2024 (Month 5, 2024)
-            let currM = 2; // March
-            let currY = 2021;
-            const endM = 5; // June
-            const endY = 2024;
             let slNo = 1;
 
-            while (currY < endY || (currY === endY && currM <= endM)) {
-                const currentBp = getBpForDate(currM, currY);
+            monthRecords.forEach(rec => {
+                const currentBp = rec.bp;
+                const currM = rec.month;
+                const currY = rec.year;
 
                 // Determine Due DA
                 let dueDA = 0;
@@ -1400,8 +1398,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (period) dueDA = period.rate;
 
                 // Determine Drawn DA
-                // 7% until March 2024.
-                // Apr 2024 onwards is 9%.
                 let drawnDA = 7;
                 if (currY === 2024 && currM >= 3) { // April is Month 3
                     drawnDA = 9;
@@ -1409,43 +1405,35 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 const diffDA = dueDA - drawnDA;
                 const arrearAmount = diffDA > 0 ? Math.round(currentBp * (diffDA / 100)) : 0;
-
                 grandTotal += arrearAmount;
 
                 // Render Row
                 const tr = document.createElement('tr');
                 tr.style.borderBottom = "1px solid rgba(255,255,255,0.05)";
                 tr.innerHTML = `
-                <td style="padding: 10px 5px; text-align: center; color: #64748b; font-size: 0.7rem;">${slNo}</td>
-                <td style="padding: 10px 5px; font-weight: 500;">${mNames[currM]} ${currY}</td>
-                <td style="padding: 10px 5px; text-align: right;">
-                    <input type="number" class="da-bp-input" value="${currentBp}" oninput="recalcDaRow(this)"
-                        style="width: 75px; background: rgba(0,0,0,0.3); border: 1px solid #3b82f6; color: #fff; padding: 4px; border-radius: 4px; text-align: right; font-weight: bold; font-size: 0.75rem;">
-                </td>
-                <td style="padding: 10px 5px; text-align: center;">
-                    <input type="number" class="due-da-input" value="${dueDA}" step="0.1" oninput="recalcDaRow(this)"
-                        style="width: 45px; background: rgba(0,0,0,0.3); border: 1px solid #3b82f6; color: #fff; padding: 4px; border-radius: 4px; text-align: center; font-size: 0.75rem;">
-                </td>
-                <td style="padding: 10px 5px; text-align: center;">
-                    <input type="number" class="drawn-da-input" value="${drawnDA}" step="0.1" oninput="recalcDaRow(this)"
-                        style="width: 45px; background: rgba(0,0,0,0.3); border: 1px solid #64748b; color: #fff; padding: 4px; border-radius: 4px; text-align: center; font-size: 0.75rem;">
-                </td>
-                <td style="padding: 10px 5px; text-align: right; font-weight: 700;">${diffDA.toFixed(1)}%</td>
-                <td style="padding: 10px 5px; text-align: right; color: #10b981; font-weight: 800; font-size: 0.8rem;">${arrearAmount.toLocaleString()}</td>
-                <td style="padding: 10px 5px; text-align: center;">
-                    <button onclick="deleteDaRow(this)" style="background: none; border: none; cursor: pointer; font-size: 0.8rem; opacity: 0.7; hover: {opacity: 1};">🗑️</button>
-                </td>
-            `;
+                    <td style="padding: 10px 5px; text-align: center; color: #64748b; font-size: 0.7rem;">${slNo}</td>
+                    <td style="padding: 10px 5px; font-weight: 500;">${mNames[currM]} ${currY}${rec.isAveraged ? ' <span style="font-size: 0.6rem; color: #8b5cf6;">(Avg)</span>' : ''}</td>
+                    <td style="padding: 10px 5px; text-align: right;">
+                        <input type="number" class="da-bp-input" value="${currentBp}" oninput="recalcDaRow(this)"
+                            style="width: 75px; background: rgba(0,0,0,0.3); border: 1px solid #3b82f6; color: #fff; padding: 4px; border-radius: 4px; text-align: right; font-weight: bold; font-size: 0.75rem;">
+                    </td>
+                    <td style="padding: 10px 5px; text-align: center;">
+                        <input type="number" class="due-da-input" value="${dueDA}" step="0.1" oninput="recalcDaRow(this)"
+                            style="width: 45px; background: rgba(0,0,0,0.3); border: 1px solid #3b82f6; color: #fff; padding: 4px; border-radius: 4px; text-align: center; font-size: 0.75rem;">
+                    </td>
+                    <td style="padding: 10px 5px; text-align: center;">
+                        <input type="number" class="drawn-da-input" value="${drawnDA}" step="0.1" oninput="recalcDaRow(this)"
+                            style="width: 45px; background: rgba(0,0,0,0.3); border: 1px solid #64748b; color: #fff; padding: 4px; border-radius: 4px; text-align: center; font-size: 0.75rem;">
+                    </td>
+                    <td style="padding: 10px 5px; text-align: right; font-weight: 700;">${diffDA.toFixed(1)}%</td>
+                    <td style="padding: 10px 5px; text-align: right; color: #10b981; font-weight: 800; font-size: 0.8rem;">${arrearAmount.toLocaleString()}</td>
+                    <td style="padding: 10px 5px; text-align: center;">
+                        <button onclick="deleteDaRow(this)" style="background: none; border: none; cursor: pointer; font-size: 0.8rem; opacity: 0.7; hover: {opacity: 1};">🗑️</button>
+                    </td>
+                `;
                 tbody.appendChild(tr);
-
-                // Increment Month
-                currM++;
-                if (currM > 11) {
-                    currM = 0;
-                    currY++;
-                }
                 slNo++;
-            }
+            });
 
             totalEl.textContent = "₹" + grandTotal.toLocaleString('en-IN');
             return grandTotal;
