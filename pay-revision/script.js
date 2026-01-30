@@ -116,8 +116,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const calMonthSelect = document.getElementById('cal-month-select');
     const calDays = document.getElementById('calendar-days');
 
-    const minDate = new Date(2021, 0, 1); // January 1, 2021 (Local Time)
-    const today = new Date();
+    const minDate = new Date(2021, 2, 1); // March 1, 2021 (Local Time)
+    const maxDate = new Date(2026, 3, 1); // April 1, 2026 (Local Time)
     const yearsAllowed = [2021, 2022, 2023, 2024, 2025, 2026];
 
     if (gradeCheck && gradeDetailsContainer) {
@@ -340,7 +340,7 @@ document.addEventListener('DOMContentLoaded', () => {
             div.className = 'calendar-day';
             div.textContent = d;
 
-            const isOutOfRange = dateObj < minDate || dateObj > today;
+            const isOutOfRange = dateObj < minDate || dateObj > maxDate;
             if (isOutOfRange) {
                 div.classList.add('disabled');
             } else {
@@ -1235,64 +1235,52 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const mNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
             let walkingBP = bp; // BP as on 01/07/2024
-            let stages = [];
+            let events = []; // Store individual events instead of periods
 
             // Walk backward from June 2024 to March 2021 to identify BP changes
-            let currentPeriodEnd = "Jun 2024";
-
             for (let y = 2024; y >= 2021; y--) {
                 let startM = (y === 2024) ? 5 : 11;
-                let endM = 0; // End at Jan in all years (including 2021)
+                let endM = (y === 2021) ? 2 : 0; // End at March 2021 (month 2), Jan for other years
 
                 for (let m = startM; m >= endM; m--) {
-                    let changed = false;
-                    let oldBP = walkingBP;
+                    let eventLabel = null;
+                    let eventBP = walkingBP;
 
                     // A. Check for Grade change (Reverse)
                     if (isPreRevisedGrade && y === gradeYear && m === gradeMonth) {
+                        const dayStr = gradeDay.toString().padStart(2, '0');
+                        eventLabel = `Grade on ${dayStr}/${mNames[m]}/${y}`;
                         let idx = payStagesList.indexOf(walkingBP);
                         walkingBP = payStagesList[Math.max(0, idx - 2)];
-                        changed = true;
+                        events.push({ label: eventLabel, bp: eventBP, date: new Date(y, m, gradeDay) });
                     }
-
                     // B. Check for Increment change (Reverse)
-                    if (incMonth !== null && m === incMonth && !(isPreRevisedGrade && y === gradeYear && m === gradeMonth)) {
+                    else if (incMonth !== null && m === incMonth) {
+                        eventLabel = `Increment on ${mNames[m]} ${y}`;
                         let idx = payStagesList.indexOf(walkingBP);
                         walkingBP = payStagesList[Math.max(0, idx - 1)];
-                        changed = true;
+                        events.push({ label: eventLabel, bp: eventBP, date: new Date(y, m, 1) });
                     }
-
-                    // If BP changed or we reached the start (Mar 2021), record the period
-                    if (changed || (y === 2021 && m === 2)) {
-                        let startMonth = mNames[m];
-                        let startYear = y;
-
-                        // If it's the very first record (Mar 2021), it starts from Mar 2021
-                        let periodStart = `${startMonth} ${startYear}`;
-
-                        stages.push({
-                            period: `${periodStart} - ${currentPeriodEnd}`,
-                            bp: oldBP,
-                            remarks: (oldBP === bp) ? "Pre-Revision Pay (as on 01/07/2024)" : ""
-                        });
-
-                        // Update the end date for the next (earlier) period
-                        let prevM = (m === 0) ? 11 : m - 1;
-                        let prevY = (m === 0) ? y - 1 : y;
-                        currentPeriodEnd = `${mNames[prevM]} ${prevY}`;
+                    // C. Record the starting BP in March 2021
+                    else if (y === 2021 && m === 2) {
+                        eventLabel = `BP on ${mNames[m]} ${y}`;
+                        events.push({ label: eventLabel, bp: walkingBP, date: new Date(y, m, 1) });
                     }
                 }
             }
 
-            // Render Rows (Reverse the array to show chronological order: oldest to newest)
-            stages.reverse().forEach(row => {
+            // Reverse the events array to show chronological order (oldest to newest)
+            events.reverse();
+
+            // Render Rows - now showing individual stages instead of periods
+            events.forEach(event => {
                 const tr = document.createElement('tr');
                 tr.style.borderBottom = "1px solid rgba(255,255,255,0.05)";
 
                 tr.innerHTML = `
-                    <td style="padding: 10px 8px; font-weight: 500;">${row.period}</td>
-                    <td style="padding: 10px 8px; text-align: right; color: #3b82f6; font-weight: 700;">${row.bp}</td>
-                    <td style="padding: 10px 8px; text-align: right; font-size: 0.75rem; color: #94a3b8;">${row.remarks}</td>
+                    <td style="padding: 10px 8px; font-weight: 500;">${event.label}</td>
+                    <td style="padding: 10px 8px; text-align: right; color: #3b82f6; font-weight: 700;">Rs. ${event.bp}</td>
+                    <td style="padding: 10px 8px; text-align: right; font-size: 0.75rem; color: #94a3b8;">${event.bp === bp ? 'Pre-Revision Pay (as on 01/07/2024)' : ''}</td>
                 `;
                 historyTbody.appendChild(tr);
             });
@@ -1328,7 +1316,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Walk backward from June 2024 down to March 2021
             for (let y = 2024; y >= 2021; y--) {
                 let startM = (y === 2024) ? 5 : 11; // Start from June in 2024, or Dec in other years
-                let endM = 0;    // End at Jan in all years (including 2021)
+                let endM = (y === 2021) ? 2 : 0;    // End at March 2021 (month 2), Jan for other years
 
                 for (let m = startM; m >= endM; m--) {
                     let daysInMonth = new Date(y, m + 1, 0).getDate();
