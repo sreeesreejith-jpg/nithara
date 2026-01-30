@@ -116,7 +116,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const calMonthSelect = document.getElementById('cal-month-select');
     const calDays = document.getElementById('calendar-days');
 
-    const minDate = new Date(2021, 2, 1); // March 1, 2021 (Local Time)
+    const minDate = new Date(2021, 0, 1); // January 1, 2021 (Local Time)
     const today = new Date();
     const yearsAllowed = [2021, 2022, 2023, 2024, 2025, 2026];
 
@@ -398,7 +398,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const [d, m, y] = this.value.split('/').map(Number);
                 const checkDate = new Date(y, m - 1, d);
                 if (isNaN(checkDate.getTime()) || checkDate < minDate || checkDate > today) {
-                    alert("Date must be between 01/03/2021 and Today.");
+                    alert("Date must be between 01/01/2021 and 31/01/2026.");
                     this.value = "";
                 }
             }
@@ -451,8 +451,8 @@ document.addEventListener('DOMContentLoaded', () => {
             monthNames.forEach((month, index) => {
                 // Filter logic for Grade selection
                 if (isGradeMonth && selectedYear) {
-                    // For 2021-2023, allow all months (March onwards for 2021)
-                    if (selectedYear === 2021 && index < 2) return; // March onwards for 2021
+                    // For 2021-2023, allow all months
+                    // For 2024, only July onwards for revised scale (handled by calculation logic)
                     // For 2024, only July onwards
                     if (selectedYear === 2024 && index < 6) return; // July onwards
                     // For current year, not past today
@@ -1242,7 +1242,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             for (let y = 2024; y >= 2021; y--) {
                 let startM = (y === 2024) ? 5 : 11;
-                let endM = (y === 2021) ? 2 : 0;
+                let endM = 0; // End at Jan in all years (including 2021)
 
                 for (let m = startM; m >= endM; m--) {
                     let changed = false;
@@ -1328,7 +1328,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Walk backward from June 2024 down to March 2021
             for (let y = 2024; y >= 2021; y--) {
                 let startM = (y === 2024) ? 5 : 11; // Start from June in 2024, or Dec in other years
-                let endM = (y === 2021) ? 2 : 0;    // End at March in 2021, or Jan in other years
+                let endM = 0;    // End at Jan in all years (including 2021)
 
                 for (let m = startM; m >= endM; m--) {
                     let daysInMonth = new Date(y, m + 1, 0).getDate();
@@ -1371,7 +1371,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // 2. Define DA Rates
             const daRates = [
-                { sm: 2, sy: 2021, em: 5, ey: 2021, rate: 9 },   // Mar 21 - Jun 21
+                { sm: 0, sy: 2021, em: 5, ey: 2021, rate: 9 },   // Jan 21 - Jun 21
                 { sm: 6, sy: 2021, em: 11, ey: 2021, rate: 12 }, // Jul 21 - Dec 21
                 { sm: 0, sy: 2022, em: 5, ey: 2022, rate: 15 },  // Jan 22 - Jun 22
                 { sm: 6, sy: 2022, em: 11, ey: 2022, rate: 18 }, // Jul 22 - Dec 22
