@@ -361,12 +361,20 @@ document.addEventListener('DOMContentLoaded', () => {
         initPopupSelectors();
 
         // 1. Manual Entry Formatting
-        gradeDateInput.addEventListener('input', function () {
+        gradeDateInput.addEventListener('input', function (e) {
+            // If deleting, do not force format (fixes backspace being stuck)
+            if (e.inputType === 'deleteContentBackward' || e.inputType === 'deleteContentForward') {
+                calculate(); // Still recalc to clear grade if invalid
+                return;
+            }
+
             let val = this.value.replace(/\D/g, '');
             if (val.length > 2) val = val.slice(0, 2) + '/' + val.slice(2);
             if (val.length > 5) val = val.slice(0, 5) + '/' + val.slice(5, 9);
             this.value = val;
-            if (val.length === 10) calculate();
+
+            // Always calculate to show/hide grade in timeline dynamically
+            calculate();
         });
 
         // 2. Open Calendar
