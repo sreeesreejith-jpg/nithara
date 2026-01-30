@@ -2010,17 +2010,15 @@ document.addEventListener('DOMContentLoaded', () => {
                         finalY = 20;
                     }
 
-                    doc.setFillColor(15, 23, 42); // Dark background
-                    doc.rect(14, finalY, 182, 25, 'F');
-
-                    doc.setFontSize(10);
-                    doc.setTextColor(148, 163, 184); // Gray text
+                    // Simple, clean text summary instead of black box
+                    doc.setFontSize(11);
+                    doc.setTextColor(59, 130, 246); // Blue color
                     doc.setFont("helvetica", "bold");
-                    doc.text("TOTAL COMBINED ARREAR (DA + Pay Revision)", 105, finalY + 8, { align: "center" });
+                    doc.text("TOTAL COMBINED ARREAR (DA + Pay Revision)", 196, finalY + 10, { align: "right" });
 
-                    doc.setFontSize(18);
-                    doc.setTextColor(255, 255, 255); // White text
-                    doc.text("Rs. " + grandTotalArrear.toLocaleString('en-IN'), 105, finalY + 18, { align: "center" });
+                    doc.setFontSize(16);
+                    doc.setTextColor(15, 23, 42); // Dark color
+                    doc.text("Rs. " + grandTotalArrear.toLocaleString('en-IN'), 196, finalY + 18, { align: "right" });
                 }
             }
 
