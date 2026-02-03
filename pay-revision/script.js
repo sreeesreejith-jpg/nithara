@@ -1001,6 +1001,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const gradeDateVal = document.getElementById('grade-date')?.value;
         const hasGrade = gradeDateVal && gradeDateVal.length === 10;
 
+        // Dynamic Warning for July Grade
+        const julyWarning = document.getElementById('july-grade-warning');
+        if (julyWarning) {
+            const isJuly2024Grade = hasGrade && gradeDateVal.includes('/07/2024');
+            julyWarning.style.display = isJuly2024Grade ? 'block' : 'none';
+        }
+
         let gradeYear = null, gradeMonth = null, gradeDay = null;
         let isPreRevisedGrade = false;
         if (hasGrade) {
