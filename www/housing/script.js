@@ -192,7 +192,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const finalY = doc.lastAutoTable.finalY + 20;
             doc.setFontSize(10);
             doc.setTextColor(150);
-            doc.text("Email: sreee.sreejith@gmail.com", 14, finalY);
+            doc.text("", 14, finalY);
 
             // 6. Output Management
             const cap = window.Capacitor;

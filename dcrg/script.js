@@ -430,7 +430,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const finalY = doc.lastAutoTable.finalY + 15;
             doc.setFontSize(10);
             doc.setTextColor(100);
-            doc.text("Email: sreee.sreejith@gmail.com", 14, finalY);
+            doc.text("", 14, finalY);
 
             cleanupAfterPDF(); // Cleanup UI changes if any
 

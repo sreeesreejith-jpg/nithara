@@ -975,7 +975,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 doc.setFontSize(10);
                 doc.setTextColor(150);
-                doc.text("Email: sreee.sreejith@gmail.com", 14, finalY + 8);
+                doc.text("", 14, finalY + 8);
             }
 
             return { blob: doc.output('blob'), title: reportTitle };

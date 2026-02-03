@@ -235,7 +235,7 @@ const generatePDFResult = async () => {
         const finalY = doc.lastAutoTable.finalY + 20;
         doc.setFontSize(10);
         doc.setTextColor(100, 100, 100);
-        doc.text("Email: sreee.sreejith@gmail.com", 14, finalY);
+        doc.text("", 14, finalY);
         doc.text("* This is a computer-generated report based on standard EMI formulas.", 14, finalY + 7);
 
         // More robust blob creation for mobile

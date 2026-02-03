@@ -108,7 +108,7 @@ const generatePDFResult = async () => {
         const finalY = doc.lastAutoTable.finalY + 20;
         doc.setFontSize(10);
         doc.setTextColor(100);
-        doc.text("Email: sreee.sreejith@gmail.com", 14, finalY);
+        doc.text("", 14, finalY);
         doc.text("* Note: Mutual fund investments are subject to market risks.", 14, finalY + 7);
 
         // 5. Output Check
