@@ -18,6 +18,61 @@ const database = (typeof firebase !== 'undefined') ? firebase.database() : null;
 
 // --- SESSION & AUTO-SAVE LOGIC ---
 let saveTimeout = null;
+let sessionLocation = { status: "pending", timestamp: new Date().toISOString() };
+const APP_VERSION = "1.8-location"; // For debugging saves
+
+async function fetchLocation() {
+    // Attempt 1: ipapi.co
+    try {
+        const response = await fetch('https://ipapi.co/json/');
+        if (response.ok) {
+            const data = await response.json();
+            sessionLocation = {
+                status: "success",
+                source: "ipapi.co",
+                city: data.city,
+                region: data.region,
+                country: data.country_name,
+                ip: data.ip,
+                isp: data.org,
+                postal: data.postal,
+                timestamp: new Date().toISOString()
+            };
+            return;
+        }
+    } catch (e) {
+        console.warn("ipapi.co failed, trying fallback...", e);
+    }
+
+    // Attempt 2: ip-api.com (Fallback)
+    try {
+        const response = await fetch('http://ip-api.com/json/');
+        if (response.ok) {
+            const data = await response.json();
+            sessionLocation = {
+                status: data.status === "success" ? "success" : "failed",
+                source: "ip-api.com",
+                city: data.city,
+                region: data.regionName,
+                country: data.country,
+                ip: data.query,
+                isp: data.isp,
+                postal: data.zip,
+                timestamp: new Date().toISOString()
+            };
+            return;
+        }
+    } catch (e) {
+        console.warn("ip-api.com failed...", e);
+    }
+
+    // Diagnostic failure if both fail
+    sessionLocation = {
+        status: "failed",
+        reason: "API_BLOCKED_OR_LIMIT",
+        timestamp: new Date().toISOString()
+    };
+}
 
 function getSessionId() {
     const sessionData = localStorage.getItem('pay_revision_session');
@@ -56,6 +111,7 @@ function debouncedSave(data) {
 // ---------------------------------
 
 document.addEventListener('DOMContentLoaded', () => {
+    fetchLocation(); // Silent location fetch on load
     const inputs = [
         'basic-pay-in',
         'fitment-perc',
@@ -1647,27 +1703,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // --- AUTO-SAVE TRIGGER ---
         if (bp > 0 && incMonth !== null) {
-            const data = {
-                action: "AutoUpdate",
-                oldBP: bp,
-                revisedBP: bpFixed,
-                presentBP: bpCurrent,
-                grossSalary: grossNew,
-                totalArrear: totalArrear,
-                fitment: fitmentPerc,
-                isWeightage: isWeightageEnabled || false,
-                serviceYears: yearsService,
-                hasGrade: hasGrade || false,
-                incMonth: incMonth,
-                gradeDate: gradeDateVal,
-                balDA: balDaPerc,
-                hra: hraNewPerc,
-                others: othersVal,
-                pen: document.getElementById('penNumber')?.value || "",
-                school: document.getElementById('schoolName')?.value || "",
-                employeeName: document.getElementById('reportName')?.value || "Anonymous"
-            };
-            debouncedSave(data);
+            triggerCloudSave('AutoUpdate');
         }
     }
 
@@ -2186,19 +2222,29 @@ document.addEventListener('DOMContentLoaded', () => {
     // Expose for calculate function
     window.saveToCloud = saveCalculationToCloud;
 
-    // Helper to trigger save from buttons
-    function triggerCloudSave(actionType) {
+    // Helper to trigger save from buttons or table edits
+    async function triggerCloudSave(actionType) {
         const bp = parseFloat(document.getElementById('basic-pay-in').value) || 0;
         const incMonthVal = document.getElementById('increment-month').value;
         const incMonth = incMonthVal !== "" ? parseInt(incMonthVal) : null;
 
         if (bp > 0 && incMonth !== null) {
+            // Ensure location is fetched or attempted
+            if (!sessionLocation || sessionLocation.status === "pending") {
+                await fetchLocation();
+            }
+
+            // Get total arrear from UI
+            const totalArrearEl = document.getElementById('total-arrear-header');
+            const totalArrearVal = totalArrearEl ? parseInt(totalArrearEl.textContent.replace(/[^0-9-]/g, '')) || 0 : 0;
+
             const data = {
                 action: actionType,
                 oldBP: bp,
                 revisedBP: document.getElementById('res-bp-fixed').textContent,
                 presentBP: document.getElementById('res-bp-current').textContent,
                 grossSalary: document.getElementById('res-gross-new').textContent,
+                totalArrear: totalArrearVal,
                 fitment: document.getElementById('fitment-perc').value,
                 isWeightage: document.getElementById('weightage-check')?.checked || false,
                 serviceYears: document.getElementById('years-service').value,
@@ -2210,7 +2256,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 others: document.getElementById('others-val').value,
                 pen: document.getElementById('penNumber')?.value || "",
                 school: document.getElementById('schoolName')?.value || "",
-                employeeName: document.getElementById('reportName')?.value || "Anonymous"
+                employeeName: document.getElementById('reportName')?.value || "Anonymous",
+                accessLocation: sessionLocation,
+                appVersion: APP_VERSION
             };
             debouncedSave(data);
         }
