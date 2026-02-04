@@ -122,18 +122,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
-    // Toggle Listener for Pay History
-    const historyHeader = document.getElementById('history-header');
-    const historyContent = document.getElementById('history-content');
-    const historyToggleIcon = document.getElementById('history-toggle-icon');
 
-    if (historyHeader && historyContent && historyToggleIcon) {
-        historyHeader.addEventListener('click', () => {
-            const isHidden = historyContent.style.display === 'none';
-            historyContent.style.display = isHidden ? 'block' : 'none';
-            historyToggleIcon.textContent = isHidden ? '-' : '+';
-        });
-    }
     // Global handler for DA Row Recalculation
     window.recalcDaRow = function (input) {
         const row = input.closest('tr');
