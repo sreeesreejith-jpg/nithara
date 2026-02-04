@@ -1597,7 +1597,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const dashboard = document.getElementById('results-summary-dashboard');
 
             if (combinedTotal > 0 && dashboard) {
-                dashboard.style.display = 'grid';
+                dashboard.style.display = 'flex';
                 const elFixed = document.getElementById('dash-fixed-bp');
                 const elCurrent = document.getElementById('dash-current-bp');
                 const elArrear = document.getElementById('dash-total-arrear');
