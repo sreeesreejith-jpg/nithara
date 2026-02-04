@@ -1985,7 +1985,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         4: { halign: 'center' },
                         5: { halign: 'center' },
                         6: { halign: 'right', fontStyle: 'bold' }
-                    }
+                    },
+                    showFoot: 'lastPage'
                 });
             }
 
@@ -2040,7 +2041,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         0: { halign: 'center', cellWidth: 8 },
                         1: { halign: 'left', cellWidth: 20 },
                         12: { halign: 'right', fontStyle: 'bold', fillColor: [235, 245, 255] }
-                    }
+                    },
+                    showFoot: 'lastPage'
                 });
             }
 
