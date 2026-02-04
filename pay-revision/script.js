@@ -1603,9 +1603,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 const elArrear = document.getElementById('dash-total-arrear');
                 const elCurrentLabel = document.getElementById('dash-current-label');
 
+                const elDaArrear = document.getElementById('dash-da-arrear');
+                const elPayRevArrear = document.getElementById('dash-pay-rev-arrear');
+
                 const newValFixed = "₹" + bpFixed.toLocaleString('en-IN');
                 const newValCurrent = "₹" + bpCurrent.toLocaleString('en-IN');
-                const newValArrear = "₹" + combinedTotal.toLocaleString('en-IN');
+                const newValDaArrear = "₹" + (window.lastDaArrearTotal || 0).toLocaleString('en-IN');
+                const newValPayRevArrear = "₹" + totalArrear.toLocaleString('en-IN');
+                const newValTotalArrear = "₹" + combinedTotal.toLocaleString('en-IN');
 
                 // Dynamic Label for Dashboard Current BP
                 if (elCurrentLabel) {
@@ -1615,24 +1620,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 // Update values with pulse animation only if changed
-                if (elFixed.textContent !== newValFixed) {
-                    elFixed.textContent = newValFixed;
-                    elFixed.classList.remove('update-pulse');
-                    void elFixed.offsetWidth; // trigger reflow
-                    elFixed.classList.add('update-pulse');
-                }
-                if (elCurrent.textContent !== newValCurrent) {
-                    elCurrent.textContent = newValCurrent;
-                    elCurrent.classList.remove('update-pulse');
-                    void elCurrent.offsetWidth;
-                    elCurrent.classList.add('update-pulse');
-                }
-                if (elArrear.textContent !== newValArrear) {
-                    elArrear.textContent = newValArrear;
-                    elArrear.classList.remove('update-pulse');
-                    void elArrear.offsetWidth;
-                    elArrear.classList.add('update-pulse');
-                }
+                const updatePulse = (el, val) => {
+                    if (el && el.textContent !== val) {
+                        el.textContent = val;
+                        el.classList.remove('update-pulse');
+                        void el.offsetWidth; // trigger reflow
+                        el.classList.add('update-pulse');
+                    }
+                };
+
+                updatePulse(elFixed, newValFixed);
+                updatePulse(elCurrent, newValCurrent);
+                updatePulse(elDaArrear, newValDaArrear);
+                updatePulse(elPayRevArrear, newValPayRevArrear);
+                updatePulse(elArrear, newValTotalArrear);
             } else if (dashboard) {
                 dashboard.style.display = 'none';
             }
@@ -1788,10 +1789,36 @@ document.addEventListener('DOMContentLoaded', () => {
                 columnStyles: { 2: { halign: 'right' } }
             });
 
-            // 5. Timeline Summary (Moved Up)
+            // 5. Arrear Summary (New Section)
+            let arrearSumY = doc.lastAutoTable.finalY + 15;
+            doc.setFontSize(14);
+            doc.setTextColor(16, 185, 129); // Green color
+            doc.text("Arrear Summary Highlights", 14, arrearSumY);
+
+            const daArrText = document.getElementById('dash-da-arrear')?.textContent || "₹0";
+            const payRevArrText = document.getElementById('dash-pay-rev-arrear')?.textContent || "₹0";
+            const totalArrText = document.getElementById('dash-total-arrear')?.textContent || "₹0";
+
+            doc.autoTable({
+                startY: arrearSumY + 5,
+                head: [['Benefit Component', 'Amount']],
+                body: [
+                    ['DA Arrear Total', daArrText],
+                    ['Pay Revision Arrear Total', payRevArrText],
+                    ['GRAND TOTAL ARREAR', totalArrText]
+                ],
+                theme: 'striped',
+                headStyles: { fillColor: [16, 185, 129] },
+                columnStyles: {
+                    1: { halign: 'right', fontStyle: 'bold' }
+                },
+                styles: { fontSize: 10 }
+            });
+
+            // 6. Timeline Summary (Moved Up)
             const timelineSteps = document.querySelectorAll('#timeline-steps > div');
             if (timelineSteps && timelineSteps.length > 0) {
-                let timelineY = doc.lastAutoTable ? doc.lastAutoTable.finalY + 15 : 240;
+                let timelineY = doc.lastAutoTable.finalY + 15;
 
                 // Check if we need a new page
                 const estimatedHeight = (timelineSteps.length * 8) + 30;
