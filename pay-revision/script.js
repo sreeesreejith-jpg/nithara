@@ -265,13 +265,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const totalEl = document.getElementById('total-arrear-header');
         if (totalEl) totalEl.textContent = "₹" + total.toLocaleString('en-IN');
 
-        const summaryArrear = document.getElementById('header-total-arrear');
-        const summaryArrearCont = document.getElementById('arrear-summary-container');
-        if (summaryArrear && summaryArrearCont) {
-            summaryArrear.textContent = "₹" + total.toLocaleString('en-IN');
-            summaryArrearCont.style.display = total > 0 ? 'flex' : 'none';
-        }
-
         updateCombinedGrandTotal();
     }
 
@@ -1597,13 +1590,7 @@ document.addEventListener('DOMContentLoaded', () => {
             arrearContainer.style.display = 'flex';
             arrearContainer.style.flexDirection = 'column';
 
-            // Update Summary Card
-            const summaryArrear = document.getElementById('header-total-arrear');
-            const summaryArrearCont = document.getElementById('arrear-summary-container');
-            if (summaryArrear && summaryArrearCont) {
-                summaryArrear.textContent = formattedTotal;
-                summaryArrearCont.style.display = totalArrear > 0 ? 'flex' : 'none';
-            }
+
 
             // --- GRAND TOTAL (DA + Pay Revision) ---
             const combinedTotal = (window.lastDaArrearTotal || 0) + totalArrear;
@@ -1651,11 +1638,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        // Summary Card BP
         document.getElementById('gross-new-val').textContent = grossNew;
-        document.getElementById('revised-bp-val').textContent = bp > 0 ? bpFixed : '';
-        const headerPresentBp = document.getElementById('header-present-bp');
-        if (headerPresentBp) headerPresentBp.textContent = bp > 0 ? bpCurrent : '';
 
         // --- AUTO-SAVE TRIGGER ---
         if (bp > 0 && incMonth !== null) {

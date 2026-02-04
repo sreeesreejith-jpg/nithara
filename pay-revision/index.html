@@ -56,62 +56,21 @@
         <!-- Professional Configuration Dashboard -->
         <div class="input-main-card"
             style="padding: 1.5rem; background: linear-gradient(145deg, rgba(30, 41, 59, 1), rgba(15, 23, 42, 1)); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 1.25rem; box-shadow: 0 12px 40px rgba(0,0,0,0.4);">
-            <div class="dashboard-header"
-                style="margin-bottom: 1.5rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 1rem; align-items: end;">
-                <!-- 1. Primary Input Group -->
-                <div
-                    style="display: flex; flex-direction: column; align-items: center; gap: 0.6rem; text-align: center;">
-                    <label
-                        style="font-size: 0.7rem; font-weight: 800; color: #ffffff; text-transform: uppercase; letter-spacing: 1px;">BP
-                        at start of day (01/07/2024) <span style="color: #ef4444; font-weight: 900;">*</span></label>
-                    <div class="input-wrapper" style="width: 100%; max-width: 180px;">
-                        <input type="number" id="basic-pay-in" placeholder="Select" autocomplete="off"
-                            style="width: 100%; font-size: 1.25rem; height: 50px; border-radius: 0.8rem; border: 3px solid #3b82f6; background: #0f172a; color: #fff; font-weight: 800; padding: 0 0.5rem; text-align: center; box-shadow: inset 0 2px 8px rgba(0,0,0,0.6), 0 0 15px rgba(59, 130, 246, 0.2);">
-                        <ul id="custom-dropdown" class="custom-dropdown"></ul>
-                    </div>
-                    <div id="july-grade-warning"
-                        style="display: none; font-size: 0.75rem; color: #f87171; font-weight: 700; margin-top: 0.4rem; background: rgba(239, 68, 68, 0.15); padding: 8px; border-radius: 6px; border: 1px solid rgba(239, 68, 68, 0.3); max-width: 200px; line-height: 1.4; text-align: left;">
-                        ⚠️ ശ്രദ്ധിക്കുക: ഗ്രേഡ് 01/07/2024-ന് ശേഷം (02/07/2024 മുതൽ 31/07/2024 വരെ) ആണെങ്കിൽ മുകളിലെ
-                        ബോക്സിൽ ഗ്രേഡിന് മുൻപുള്ള (Pre-Grade) ശമ്പളം തന്നെയാണോ നൽകിയിട്ടുള്ളതെന്ന് ഉറപ്പുവരുത്തുക.
-                    </div>
+            <!-- 1. Primary Input Group -->
+            <div
+                style="display: flex; flex-direction: column; align-items: center; gap: 0.6rem; text-align: center; margin-bottom: 2rem;">
+                <label
+                    style="font-size: 0.7rem; font-weight: 800; color: #ffffff; text-transform: uppercase; letter-spacing: 1px;">BP
+                    at start of day (01/07/2024) <span style="color: #ef4444; font-weight: 900;">*</span></label>
+                <div class="input-wrapper" style="width: 100%; max-width: 180px;">
+                    <input type="number" id="basic-pay-in" placeholder="Select" autocomplete="off"
+                        style="width: 100%; font-size: 1.25rem; height: 50px; border-radius: 0.8rem; border: 3px solid #3b82f6; background: #0f172a; color: #fff; font-weight: 800; padding: 0 0.5rem; text-align: center; box-shadow: inset 0 2px 8px rgba(0,0,0,0.6), 0 0 15px rgba(59, 130, 246, 0.2);">
+                    <ul id="custom-dropdown" class="custom-dropdown"></ul>
                 </div>
-
-                <!-- 2. Revised BP Preview (Conditional) - HIDDEN as per request -->
-                <div id="revised-bp-container"
-                    style="display: none !important; flex-direction: column; align-items: center; gap: 0.6rem; text-align: center;">
-                    <label
-                        style="font-size: 0.7rem; font-weight: 800; color: var(--primary); text-transform: uppercase; letter-spacing: 1px;">Revised
-                        BP on 01.07.2024</label>
-                    <div
-                        style="width: 100%; max-width: 180px; height: 50px; border-radius: 0.8rem; border: 1.5px solid rgba(255,255,255,0.08); background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; backdrop-filter: blur(4px);">
-                        <span id="revised-bp-val"
-                            style="font-size: 1.4rem; color: #fff; font-weight: 900; line-height: 1; text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);"></span>
-                    </div>
-                </div>
-
-                <!-- 3. Present Basic Pay (New) (Conditional) - HIDDEN as per request -->
-                <div id="present-bp-container"
-                    style="display: none !important; flex-direction: column; align-items: center; gap: 0.6rem; text-align: center;">
-                    <label id="present-bp-label"
-                        style="font-size: 0.7rem; font-weight: 800; color: var(--primary); text-transform: uppercase; letter-spacing: 1px;">Revised
-                        BP on</label>
-                    <div
-                        style="width: 100%; max-width: 180px; height: 50px; border-radius: 0.8rem; border: 1.5px solid rgba(255,255,255,0.08); background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; backdrop-filter: blur(4px);">
-                        <span id="header-present-bp"
-                            style="font-size: 1.4rem; color: #fff; font-weight: 900; line-height: 1; text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);"></span>
-                    </div>
-                </div>
-
-                <!-- 4. Total Arrear Summary (New) -->
-                <div id="arrear-summary-container"
-                    style="display: none; flex-direction: column; align-items: center; gap: 0.6rem; text-align: center;">
-                    <label
-                        style="font-size: 0.7rem; font-weight: 800; color: #10b981; text-transform: uppercase; letter-spacing: 1px;">arrear</label>
-                    <div
-                        style="width: 100%; max-width: 180px; height: 50px; border-radius: 0.8rem; border: 2px solid #10b981; background: rgba(16, 185, 129, 0.1); display: flex; align-items: center; justify-content: center; backdrop-filter: blur(4px);">
-                        <span id="header-total-arrear"
-                            style="font-size: 1.4rem; color: #10b981; font-weight: 900; line-height: 1; text-shadow: 0 0 10px rgba(16, 185, 129, 0.3);">₹0</span>
-                    </div>
+                <div id="july-grade-warning"
+                    style="display: none; font-size: 0.75rem; color: #f87171; font-weight: 700; margin-top: 0.4rem; background: rgba(239, 68, 68, 0.15); padding: 8px; border-radius: 6px; border: 1px solid rgba(239, 68, 68, 0.3); max-width: 200px; line-height: 1.4; text-align: left;">
+                    ⚠️ ശ്രദ്ധിക്കുക: ഗ്രേഡ് 01/07/2024-ന് ശേഷം (02/07/2024 മുതൽ 31/07/2024 വരെ) ആണെങ്കിൽ മുകളിലെ
+                    ബോക്സിൽ ഗ്രേഡിന് മുൻപുള്ള (Pre-Grade) ശമ്പളം തന്നെയാണോ നൽകിയിട്ടുള്ളതെന്ന് ഉറപ്പുവരുത്തുക.
                 </div>
             </div>
 
