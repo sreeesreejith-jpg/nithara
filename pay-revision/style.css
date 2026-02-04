@@ -1259,6 +1259,16 @@ body.pdf-mode .input-hint {
         /* Slightly smaller to fit more text */
     }
 }
+
+/* Desktop Optimization for Readability */
+@media (min-width: 1025px) {
+    html {
+        font-size: 115%; /* Scale up everything slightly */
+    }
+    .container {
+        max-width: 1350px; /* 150% of original 900px */
+    }
+}
 /* Update Animation */
 @keyframes update-pulse {
     0% { transform: scale(1); }
