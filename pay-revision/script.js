@@ -1789,31 +1789,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 columnStyles: { 2: { halign: 'right' } }
             });
 
-            // 5. Arrear Summary (New Section)
-            let arrearSumY = doc.lastAutoTable.finalY + 15;
-            doc.setFontSize(14);
-            doc.setTextColor(16, 185, 129); // Green color
-            doc.text("Arrear Summary Highlights", 14, arrearSumY);
 
-            const daArrText = document.getElementById('dash-da-arrear')?.textContent || "₹0";
-            const payRevArrText = document.getElementById('dash-pay-rev-arrear')?.textContent || "₹0";
-            const totalArrText = document.getElementById('dash-total-arrear')?.textContent || "₹0";
-
-            doc.autoTable({
-                startY: arrearSumY + 5,
-                head: [['Benefit Component', 'Amount']],
-                body: [
-                    ['DA Arrear Total', daArrText],
-                    ['Pay Revision Arrear Total', payRevArrText],
-                    ['GRAND TOTAL ARREAR', totalArrText]
-                ],
-                theme: 'striped',
-                headStyles: { fillColor: [16, 185, 129] },
-                columnStyles: {
-                    1: { halign: 'right', fontStyle: 'bold' }
-                },
-                styles: { fontSize: 10 }
-            });
 
             // 6. Timeline Summary (Moved Up)
             const timelineSteps = document.querySelectorAll('#timeline-steps > div');
@@ -1914,6 +1890,43 @@ document.addEventListener('DOMContentLoaded', () => {
                 },
                 didParseCell: function (data) {
                     if (data.section === 'head' && data.column.index === 2) {
+                        data.cell.styles.halign = 'right';
+                    }
+                }
+            });
+
+            // Arrear Summary Highlights (Moved here as requested)
+            let arrearSumY = doc.lastAutoTable.finalY + 15;
+            if (arrearSumY + 40 > 285) {
+                doc.addPage();
+                arrearSumY = 20;
+            }
+            doc.setFontSize(14);
+            doc.setTextColor(16, 185, 129); // Green color
+            doc.setFont("helvetica", "bold");
+            doc.text("Arrear Summary Highlights", 14, arrearSumY);
+
+            const daArrText = document.getElementById('dash-da-arrear')?.textContent.replace('₹', 'Rs. ') || "Rs. 0";
+            const payRevArrText = document.getElementById('dash-pay-rev-arrear')?.textContent.replace('₹', 'Rs. ') || "Rs. 0";
+            const totalArrText = document.getElementById('dash-total-arrear')?.textContent.replace('₹', 'Rs. ') || "Rs. 0";
+
+            doc.autoTable({
+                startY: arrearSumY + 5,
+                head: [['Benefit Component', 'Amount']],
+                body: [
+                    ['DA Arrear Total', daArrText],
+                    ['Pay Revision Arrear Total', payRevArrText],
+                    [{ content: 'GRAND TOTAL ARREAR', styles: { fontStyle: 'bold' } }, { content: totalArrText, styles: { fontStyle: 'bold' } }]
+                ],
+                theme: 'striped',
+                headStyles: { fillColor: [16, 185, 129], halign: 'left' },
+                columnStyles: {
+                    0: { cellWidth: 'auto' },
+                    1: { halign: 'right', cellWidth: 50 }
+                },
+                styles: { fontSize: 10 },
+                didParseCell: function (data) {
+                    if (data.section === 'head' && data.column.index === 1) {
                         data.cell.styles.halign = 'right';
                     }
                 }
