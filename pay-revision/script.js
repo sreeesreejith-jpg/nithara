@@ -1606,54 +1606,48 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             // --- GRAND TOTAL (DA + Pay Revision) ---
-            const grandTotalHeader = document.getElementById('grand-arrear-header');
-            const grandTotalVal = document.getElementById('grand-arrear-val');
+            const combinedTotal = (window.lastDaArrearTotal || 0) + totalArrear;
+            const dashboard = document.getElementById('results-summary-dashboard');
 
-            if (grandTotalHeader && grandTotalVal) {
-                // Ensure daArrearTotal is available (it was defined in the outer scope)
-                const combinedTotal = (window.lastDaArrearTotal || 0) + totalArrear;
+            if (combinedTotal > 0 && dashboard) {
+                dashboard.style.display = 'grid';
+                const elFixed = document.getElementById('dash-fixed-bp');
+                const elCurrent = document.getElementById('dash-current-bp');
+                const elArrear = document.getElementById('dash-total-arrear');
+                const elCurrentLabel = document.getElementById('dash-current-label');
 
-                if (combinedTotal > 0) {
-                    grandTotalHeader.style.display = 'flex';
-                    grandTotalVal.textContent = "₹" + combinedTotal.toLocaleString('en-IN');
+                const newValFixed = "₹" + bpFixed.toLocaleString('en-IN');
+                const newValCurrent = "₹" + bpCurrent.toLocaleString('en-IN');
+                const newValArrear = "₹" + combinedTotal.toLocaleString('en-IN');
 
-                    // Update New Summary Dashboard
-                    const dashboard = document.getElementById('results-summary-dashboard');
-                    if (dashboard) {
-                        dashboard.style.display = 'grid';
-                        const elFixed = document.getElementById('dash-fixed-bp');
-                        const elCurrent = document.getElementById('dash-current-bp');
-                        const elArrear = document.getElementById('dash-total-arrear');
-
-                        const newValFixed = "₹" + bpFixed.toLocaleString('en-IN');
-                        const newValCurrent = "₹" + bpCurrent.toLocaleString('en-IN');
-                        const newValArrear = "₹" + combinedTotal.toLocaleString('en-IN');
-
-                        // Only pulse if value actually changed
-                        if (elFixed.textContent !== newValFixed) {
-                            elFixed.textContent = newValFixed;
-                            elFixed.classList.remove('update-pulse');
-                            void elFixed.offsetWidth; // trigger reflow
-                            elFixed.classList.add('update-pulse');
-                        }
-                        if (elCurrent.textContent !== newValCurrent) {
-                            elCurrent.textContent = newValCurrent;
-                            elCurrent.classList.remove('update-pulse');
-                            void elCurrent.offsetWidth;
-                            elCurrent.classList.add('update-pulse');
-                        }
-                        if (elArrear.textContent !== newValArrear) {
-                            elArrear.textContent = newValArrear;
-                            elArrear.classList.remove('update-pulse');
-                            void elArrear.offsetWidth;
-                            elArrear.classList.add('update-pulse');
-                        }
-                    }
-                } else {
-                    grandTotalHeader.style.display = 'none';
-                    const dashboard = document.getElementById('results-summary-dashboard');
-                    if (dashboard) dashboard.style.display = 'none';
+                // Dynamic Label for Dashboard Current BP
+                if (elCurrentLabel) {
+                    const benchmarkMonth = monthShortNames[today.getMonth()];
+                    const benchmarkYear = today.getFullYear();
+                    elCurrentLabel.textContent = `Revised BP on ${benchmarkMonth} ${benchmarkYear}`;
                 }
+
+                // Update values with pulse animation only if changed
+                if (elFixed.textContent !== newValFixed) {
+                    elFixed.textContent = newValFixed;
+                    elFixed.classList.remove('update-pulse');
+                    void elFixed.offsetWidth; // trigger reflow
+                    elFixed.classList.add('update-pulse');
+                }
+                if (elCurrent.textContent !== newValCurrent) {
+                    elCurrent.textContent = newValCurrent;
+                    elCurrent.classList.remove('update-pulse');
+                    void elCurrent.offsetWidth;
+                    elCurrent.classList.add('update-pulse');
+                }
+                if (elArrear.textContent !== newValArrear) {
+                    elArrear.textContent = newValArrear;
+                    elArrear.classList.remove('update-pulse');
+                    void elArrear.offsetWidth;
+                    elArrear.classList.add('update-pulse');
+                }
+            } else if (dashboard) {
+                dashboard.style.display = 'none';
             }
         }
 
