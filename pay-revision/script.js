@@ -1695,7 +1695,7 @@ document.addEventListener('DOMContentLoaded', () => {
             doc.rect(0, 0, 210, 45, 'F');
             doc.setFontSize(8);
             doc.setTextColor(255);
-            doc.text("* NOTE: Calculations are approximate and for informational purposes only.", 14, 12);
+            doc.text("* Approx. values for info only.", 14, 12);
 
             doc.setFontSize(22);
             doc.setTextColor(255);
