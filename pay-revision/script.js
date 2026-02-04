@@ -1616,8 +1616,43 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (combinedTotal > 0) {
                     grandTotalHeader.style.display = 'flex';
                     grandTotalVal.textContent = "₹" + combinedTotal.toLocaleString('en-IN');
+
+                    // Update New Summary Dashboard
+                    const dashboard = document.getElementById('results-summary-dashboard');
+                    if (dashboard) {
+                        dashboard.style.display = 'grid';
+                        const elFixed = document.getElementById('dash-fixed-bp');
+                        const elCurrent = document.getElementById('dash-current-bp');
+                        const elArrear = document.getElementById('dash-total-arrear');
+
+                        const newValFixed = "₹" + bpFixed.toLocaleString('en-IN');
+                        const newValCurrent = "₹" + bpCurrent.toLocaleString('en-IN');
+                        const newValArrear = "₹" + combinedTotal.toLocaleString('en-IN');
+
+                        // Only pulse if value actually changed
+                        if (elFixed.textContent !== newValFixed) {
+                            elFixed.textContent = newValFixed;
+                            elFixed.classList.remove('update-pulse');
+                            void elFixed.offsetWidth; // trigger reflow
+                            elFixed.classList.add('update-pulse');
+                        }
+                        if (elCurrent.textContent !== newValCurrent) {
+                            elCurrent.textContent = newValCurrent;
+                            elCurrent.classList.remove('update-pulse');
+                            void elCurrent.offsetWidth;
+                            elCurrent.classList.add('update-pulse');
+                        }
+                        if (elArrear.textContent !== newValArrear) {
+                            elArrear.textContent = newValArrear;
+                            elArrear.classList.remove('update-pulse');
+                            void elArrear.offsetWidth;
+                            elArrear.classList.add('update-pulse');
+                        }
+                    }
                 } else {
                     grandTotalHeader.style.display = 'none';
+                    const dashboard = document.getElementById('results-summary-dashboard');
+                    if (dashboard) dashboard.style.display = 'none';
                 }
             }
         }

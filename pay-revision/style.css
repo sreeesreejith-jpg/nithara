@@ -1259,3 +1259,13 @@ body.pdf-mode .input-hint {
         /* Slightly smaller to fit more text */
     }
 }
+/* Update Animation */
+@keyframes update-pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); filter: brightness(1.2); }
+    100% { transform: scale(1); }
+}
+
+.update-pulse {
+    animation: update-pulse 0.4s ease-out;
+}
