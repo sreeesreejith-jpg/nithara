@@ -293,25 +293,7 @@
                 </div>
             </section>
 
-            <!-- 2. Section: Pay History (Prerevised Pay Stages) -->
-            <section class="revision-section history-card" id="history-container"
-                style="background: var(--card-bg); border-radius: 1rem; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.4); display: none;">
-                <div class="section-header" id="history-header"
-                    style="padding: 1rem; background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%); color: white; display: flex; justify-content: space-between; align-items: center;">
-                    <h2 style="margin: 0; font-size: 1rem; display: flex; flex-direction: column; gap: 0.2rem;">
-                        <span style="display: flex; align-items: center; gap: 0.5rem;">📜 Prerevised Pay Stages</span>
-                        <span style="font-size: 0.75rem; font-weight: 400; opacity: 0.9;">for DA Arrear
-                            Calculation</span>
-                    </h2>
-                </div>
-                <div id="history-content" style="display: block; padding: 0.75rem 1rem;">
-                    <div id="history-tbody" style="display: flex; flex-direction: column; gap: 0.4rem;">
-                        <!-- Injected by JS -->
-                    </div>
-                </div>
-            </section>
-
-            <!-- 3. Detailed Progression Results (Revised Pay Stages Timeline) -->
+            <!-- 2. Detailed Progression Results (Revised Pay Stages Timeline) -->
             <section id="progression-timeline" class="revision-section results-card"
                 style="width: 100%; display: none; flex-direction: column; background: var(--card-bg); border-radius: 1rem; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.4);">
                 <div class="section-header"
@@ -329,7 +311,7 @@
                 </div>
             </section>
 
-            <!-- 4. Present Salary Details (after pay revision) -->
+            <!-- 3. Present Salary Details (after pay revision) -->
             <section id="present-salary-container" class="revision-section after"
                 style="display: none; flex-direction: column;">
                 <div class="section-header after-header">
@@ -385,6 +367,24 @@
                     <span id="res-gross-new" class="total-val"
                         style="font-size: 1.8rem; font-weight: 800; color: var(--primary);">0</span>
                     <span id="gross-new-val" style="display: none;">0</span>
+                </div>
+            </section>
+
+            <!-- 4. Section: Pay History (Prerevised Pay Stages) -->
+            <section class="revision-section history-card" id="history-container"
+                style="background: var(--card-bg); border-radius: 1rem; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.4); display: none;">
+                <div class="section-header" id="history-header"
+                    style="padding: 1rem; background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%); color: white; display: flex; justify-content: space-between; align-items: center;">
+                    <h2 style="margin: 0; font-size: 1rem; display: flex; flex-direction: column; gap: 0.2rem;">
+                        <span style="display: flex; align-items: center; gap: 0.5rem;">📜 Prerevised Pay Stages</span>
+                        <span style="font-size: 0.75rem; font-weight: 400; opacity: 0.9;">for DA Arrear
+                            Calculation</span>
+                    </h2>
+                </div>
+                <div id="history-content" style="display: block; padding: 0.75rem 1rem;">
+                    <div id="history-tbody" style="display: flex; flex-direction: column; gap: 0.4rem;">
+                        <!-- Injected by JS -->
+                    </div>
                 </div>
             </section>
 
