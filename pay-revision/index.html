@@ -312,17 +312,22 @@
             </section>
 
             <!-- 3. Detailed Progression Results (Revised Pay Stages Timeline) -->
-            <div id="progression-timeline" style="width: 100%; display: none; flex-direction: column; gap: 0.5rem;">
-                <div
-                    style="background: var(--input-bg); border-left: 4px solid var(--primary); padding: 0.75rem 1rem; border-radius: 0.4rem;">
-                    <h4
-                        style="font-size: 0.75rem; color: #ffffff; text-transform: uppercase; margin-bottom: 0.5rem; letter-spacing: 0.5px;">
-                        Revised Pay Stages</h4>
+            <section id="progression-timeline" class="revision-section results-card"
+                style="width: 100%; display: none; flex-direction: column; background: var(--card-bg); border-radius: 1rem; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.4);">
+                <div class="section-header"
+                    style="padding: 1rem; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; display: flex; justify-content: space-between; align-items: center;">
+                    <h2 style="margin: 0; font-size: 1rem; display: flex; flex-direction: column; gap: 0.2rem;">
+                        <span style="display: flex; align-items: center; gap: 0.5rem;">📅 Revised Pay Stages</span>
+                        <span style="font-size: 0.75rem; font-weight: 400; opacity: 0.9;">Pay Progression
+                            (Detailed)</span>
+                    </h2>
+                </div>
+                <div id="history-content" style="display: block; padding: 0.75rem 1rem;">
                     <div id="timeline-steps" style="display: flex; flex-direction: column; gap: 0.4rem;">
                         <!-- Timeline items injected here -->
                     </div>
                 </div>
-            </div>
+            </section>
 
             <!-- 4. Present Salary Details (after pay revision) -->
             <section id="present-salary-container" class="revision-section after"
