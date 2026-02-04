@@ -255,47 +255,36 @@
         </div>
 
         <main class="revision-grid">
-            <!-- Left Side: Pay Fixation Details -->
-            <section class="revision-section before" style="display: flex; flex-direction: column;">
-                <div class="section-header before-header"
-                    style="border-bottom: 2px solid var(--text-muted); background: rgba(255, 255, 255, 0.02);">
-                    <h2 style="color: #ffffff;">Pay Fixation (01/07/2024)</h2>
+            <!-- 1. Section: Pay History (Prerevised Pay Stages) -->
+            <section class="revision-section history-card" id="history-container"
+                style="background: var(--card-bg); border-radius: 1rem; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.4); display: none;">
+                <div class="section-header" id="history-header"
+                    style="padding: 1rem; background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%); color: white; display: flex; justify-content: space-between; align-items: center;">
+                    <h2 style="margin: 0; font-size: 1rem; display: flex; flex-direction: column; gap: 0.2rem;">
+                        <span style="display: flex; align-items: center; gap: 0.5rem;">📜 Prerevised Pay Stages</span>
+                        <span style="font-size: 0.75rem; font-weight: 400; opacity: 0.9;">for DA Arrear
+                            Calculation</span>
+                    </h2>
                 </div>
-                <div class="input-group"
-                    style="padding: 1rem; display: flex; flex-direction: column; gap: 0.5rem; flex: 1;">
-                    <div class="result-row">
-                        <span class="label">Basic Pay</span>
-                        <span id="res-bp-new" class="value">0</span>
-                    </div>
-                    <div class="result-row">
-                        <span class="label">DA Merged (31%)</span>
-                        <span id="res-da-merged" class="value">0</span>
-                    </div>
-                    <div class="result-row">
-                        <span class="label" id="label-res-fitment">Fitment Amount</span>
-                        <span id="res-fitment" class="value">0</span>
-                    </div>
-                    <div class="result-row" id="res-weightage-row" style="display: none;">
-                        <span class="label" id="label-res-weightage">Service Weightage</span>
-                        <span id="res-weightage" class="value">0</span>
-                    </div>
-                    <div class="result-row highlight-row">
-                        <span class="label" style="font-weight: 700; color: #ffffff;">Actual Total</span>
-                        <span id="res-actual-total" class="value" style="font-weight: 800;">0</span>
-                    </div>
-                    <div class="result-row"
-                        style="background: rgba(59, 130, 246, 0.05); padding: 0.75rem 0.5rem; border-radius: 0.5rem; border: 1px dashed rgba(59, 130, 246, 0.3); grid-template-columns: 1fr 110px;">
-                        <span class="label" style="font-size: 0.75rem; color: #ffffff; font-weight: 700;">Fixed
-                            BP (01/07/24)</span>
-                        <span id="res-bp-fixed" class="value highlight"
-                            style="font-size: 1.15rem; font-weight: 800;">0</span>
-                    </div>
+                <div id="history-content"
+                    style="display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; padding: 1rem;">
+                    <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem;">
+                        <thead>
+                            <tr style="border-bottom: 2px solid rgba(255,255,255,0.1); color: #cbd5e1;">
+                                <th style="padding: 8px; text-align: left;">Event</th>
+                                <th style="padding: 8px; text-align: right;">Pay</th>
+                                <th style="padding: 8px; text-align: right;">Remarks</th>
+                            </tr>
+                        </thead>
+                        <tbody id="history-tbody" style="color: #f1f5f9;">
+                            <!-- Injected by JS -->
+                        </tbody>
+                    </table>
                 </div>
             </section>
 
-            <!-- Detailed Progression Results (Timeline) -->
-            <div id="progression-timeline"
-                style="margin: 0 0 1.25rem 0; width: 100%; display: none; flex-direction: column; gap: 0.5rem;">
+            <!-- 2. Detailed Progression Results (Revised Pay Stages Timeline) -->
+            <div id="progression-timeline" style="width: 100%; display: none; flex-direction: column; gap: 0.5rem;">
                 <div
                     style="background: var(--input-bg); border-left: 4px solid var(--primary); padding: 0.75rem 1rem; border-radius: 0.4rem;">
                     <h4
@@ -307,7 +296,7 @@
                 </div>
             </div>
 
-            <!-- Right Side: Present Salary Details (Conditional) -->
+            <!-- 3. Present Salary Details (after pay revision) -->
             <section id="present-salary-container" class="revision-section after"
                 style="display: none; flex-direction: column;">
                 <div class="section-header after-header">
@@ -366,37 +355,9 @@
                 </div>
             </section>
 
-            <!-- Section: Pay History (Moved Down & Always Visible) -->
-            <section class="revision-section history-card" id="history-container"
-                style="margin-top: 1.5rem; background: var(--card-bg); border-radius: 1rem; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.4); display: none;">
-                <div class="section-header" id="history-header"
-                    style="padding: 1rem; background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%); color: white; display: flex; justify-content: space-between; align-items: center;">
-                    <h2 style="margin: 0; font-size: 1rem; display: flex; flex-direction: column; gap: 0.2rem;">
-                         <span style="display: flex; align-items: center; gap: 0.5rem;">📜 Prerevised Pay Stages</span>
-                        <span style="font-size: 0.75rem; font-weight: 400; opacity: 0.9;">for DA Arrear
-                            Calculation</span>
-                    </h2>
-                </div>
-                <div id="history-content"
-                    style="display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; padding: 1rem;">
-                    <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem;">
-                        <thead>
-                            <tr style="border-bottom: 2px solid rgba(255,255,255,0.1); color: #cbd5e1;">
-                                <th style="padding: 8px; text-align: left;">Event</th>
-                                <th style="padding: 8px; text-align: right;">Pay</th>
-                                <th style="padding: 8px; text-align: right;">Remarks</th>
-                            </tr>
-                        </thead>
-                        <tbody id="history-tbody" style="color: #f1f5f9;">
-                            <!-- Injected by JS -->
-                        </tbody>
-                    </table>
-                </div>
-            </section>
-
-            <!-- Section: DA Arrear (Mar 2021 - Jun 2024) -->
+            <!-- 4. Section: DA Arrear (Mar 2021 - Jun 2024) -->
             <section class="revision-section da-arrear-card" id="da-arrear-container"
-                style="margin-top: 1.5rem; background: var(--card-bg); border-radius: 1rem; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.4); display: none;">
+                style="background: var(--card-bg); border-radius: 1rem; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.4); display: none;">
                 <div class="section-header"
                     style="padding: 1rem; background: linear-gradient(135deg, #059669 0%, #047857 100%); color: white;">
                     <h2 style="margin: 0; font-size: 1rem; display: flex; flex-direction: column; gap: 0.2rem;">
@@ -440,9 +401,9 @@
                 </div>
             </section>
 
-            <!-- Pay Revision Arrear Table (Below DA Arrear) -->
+            <!-- 5. Pay Revision Arrear Table (July 2024 - Present) -->
             <section class="revision-section arrear-card" id="arrear-container"
-                style="margin-top: 1.5rem; background: var(--card-bg); border-radius: 1rem; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.4);">
+                style="background: var(--card-bg); border-radius: 1rem; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.4);">
                 <div class="section-header"
                     style="padding: 1rem; background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); color: white;">
                     <h2 style="margin: 0; font-size: 1rem; display: flex; flex-direction: column; gap: 0.2rem;">
@@ -515,6 +476,44 @@
                 </div>
             </section>
 
+            <!-- Pay Fixation Details (Summary Table) -->
+            <section class="revision-section before" style="display: flex; flex-direction: column;">
+                <div class="section-header before-header"
+                    style="border-bottom: 2px solid var(--text-muted); background: rgba(255, 255, 255, 0.02);">
+                    <h2 style="color: #ffffff;">Pay Fixation (01/07/2024)</h2>
+                </div>
+                <div class="input-group"
+                    style="padding: 1rem; display: flex; flex-direction: column; gap: 0.5rem; flex: 1;">
+                    <div class="result-row">
+                        <span class="label">Basic Pay</span>
+                        <span id="res-bp-new" class="value">0</span>
+                    </div>
+                    <div class="result-row">
+                        <span class="label">DA Merged (31%)</span>
+                        <span id="res-da-merged" class="value">0</span>
+                    </div>
+                    <div class="result-row">
+                        <span class="label" id="label-res-fitment">Fitment Amount</span>
+                        <span id="res-fitment" class="value">0</span>
+                    </div>
+                    <div class="result-row" id="res-weightage-row" style="display: none;">
+                        <span class="label" id="label-res-weightage">Service Weightage</span>
+                        <span id="res-weightage" class="value">0</span>
+                    </div>
+                    <div class="result-row highlight-row">
+                        <span class="label" style="font-weight: 700; color: #ffffff;">Actual Total</span>
+                        <span id="res-actual-total" class="value" style="font-weight: 800;">0</span>
+                    </div>
+                    <div class="result-row"
+                        style="background: rgba(59, 130, 246, 0.05); padding: 0.75rem 0.5rem; border-radius: 0.5rem; border: 1px dashed rgba(59, 130, 246, 0.3); grid-template-columns: 1fr 110px;">
+                        <span class="label" style="font-size: 0.75rem; color: #ffffff; font-weight: 700;">Fixed
+                            BP (01/07/24)</span>
+                        <span id="res-bp-fixed" class="value highlight"
+                            style="font-size: 1.15rem; font-weight: 800;">0</span>
+                    </div>
+                </div>
+            </section>
+
             <!-- GRAND TOTAL ARREAR HEADER -->
             <div id="grand-arrear-header"
                 style="margin-top: 2rem; display: none; flex-direction: column; align-items: center; gap: 0.5rem; text-align: center; padding: 1.5rem; background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); border: 1px solid #3b82f6; border-radius: 1rem; box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);">
@@ -527,8 +526,6 @@
                 </div>
                 <div style="font-size: 0.8rem; color: #64748b; margin-top: 0.25rem;">(Pay Revision + DA Arrear)</div>
             </div>
-
-
         </main>
 
 
