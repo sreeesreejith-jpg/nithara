@@ -976,8 +976,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Validation: Ensure BP and Increment Month are selected
+        const resultsArea = document.getElementById('calculation-results-area');
         if (!bp || incMonth === null) {
+            if (resultsArea) resultsArea.style.display = 'none';
             return;
+        } else {
+            if (resultsArea) resultsArea.style.display = 'block';
         }
 
         const gradeDateVal = document.getElementById('grade-date')?.value;
