@@ -1275,15 +1275,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Render Rows - now showing individual stages instead of periods
             events.forEach(event => {
-                const tr = document.createElement('tr');
-                tr.style.borderBottom = "1px solid rgba(255,255,255,0.05)";
+                const item = document.createElement('div');
+                item.className = 'timeline-item';
 
-                tr.innerHTML = `
-                    <td style="padding: 10px 8px; font-weight: 500;">${event.label}</td>
-                    <td style="padding: 10px 8px; text-align: right; color: #3b82f6; font-weight: 700;">Rs. ${event.bp}</td>
-                    <td style="padding: 10px 8px; text-align: right; font-size: 0.75rem; color: #94a3b8;">${event.bp === bp ? 'Pre-Revision Pay (as on 01/07/2024)' : ''}</td>
+                item.innerHTML = `
+                    <span class="label">${event.label}</span>
+                    <span class="value">Rs. ${event.bp}</span>
                 `;
-                historyTbody.appendChild(tr);
+                historyTbody.appendChild(item);
             });
         }
 
