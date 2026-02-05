@@ -1086,10 +1086,11 @@ document.addEventListener('DOMContentLoaded', () => {
             // Check for Annual Increment
             if (incMonth !== null && checkDate.getMonth() === incMonth && checkDate.getTime() !== startDate.getTime()) {
                 incrementsCount++;
+                const mNum = (checkDate.getMonth() + 1).toString().padStart(2, '0');
                 events.push({
                     type: 'increment',
                     date: new Date(checkDate),
-                    label: `Annual Increment (${monthShortNames[checkDate.getMonth()]} ${checkDate.getFullYear()})`,
+                    label: `Increment on 01/${mNum}/${checkDate.getFullYear()}`,
                     steps: 1
                 });
             }
@@ -1098,10 +1099,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 const revisionDate = new Date(2024, 6, 2);
                 const gDate = new Date(gradeYear, gradeMonth, gradeDay);
                 if (gDate >= revisionDate) {
+                    const mNum = (gradeMonth + 1).toString().padStart(2, '0');
+                    const dStr = gradeDay.toString().padStart(2, '0');
                     events.push({
                         type: 'grade',
                         date: new Date(checkDate.getFullYear(), checkDate.getMonth(), gradeDay),
-                        label: `Grade Availed on ${gradeDay}/${monthShortNames[checkDate.getMonth()]}/${checkDate.getFullYear()}`,
+                        label: `grade availed on ${dStr}/${mNum}/${gradeYear}`,
                         steps: 2
                     });
                 }
@@ -1195,10 +1198,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 let localizedLabel = "";
 
                 if (event.type === 'increment') {
-                    localizedLabel = `Increment on ${month} ${year}`;
+                    const mNum = (event.date.getMonth() + 1).toString().padStart(2, '0');
+                    localizedLabel = `Increment on 01/${mNum}/${year}`;
                 } else {
-                    const dayStr = event.date.getDate().toString().padStart(2, '0');
-                    localizedLabel = `Grade Availed on ${dayStr}/${month}/${year}`;
+                    const dStr = event.date.getDate().toString().padStart(2, '0');
+                    const mNum = (event.date.getMonth() + 1).toString().padStart(2, '0');
+                    localizedLabel = `grade availed on ${dStr}/${mNum}/${year}`;
                 }
 
                 timelineHTML += `
@@ -1302,22 +1307,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     // A. Check for Grade change (Reverse)
                     if (isPreRevisedGrade && y === gradeYear && m === gradeMonth) {
-                        const dayStr = gradeDay.toString().padStart(2, '0');
-                        eventLabel = `Grade Availed on ${dayStr}/${mNames[m]}/${y}`;
+                        const dStr = gradeDay.toString().padStart(2, '0');
+                        const mNum = (gradeMonth + 1).toString().padStart(2, '0');
+                        eventLabel = `grade availed on ${dStr}/${mNum}/${y}`;
                         let idx = payStagesList.indexOf(walkingBP);
                         walkingBP = payStagesList[Math.max(0, idx - 2)];
                         events.push({ label: eventLabel, bp: eventBP, date: new Date(y, m, gradeDay) });
                     }
                     // B. Check for Increment change (Reverse)
                     else if (incMonth !== null && m === incMonth) {
-                        eventLabel = `Increment on ${mNames[m]} ${y}`;
+                        const mNum = (m + 1).toString().padStart(2, '0');
+                        eventLabel = `Increment on 01/${mNum}/${y}`;
                         let idx = payStagesList.indexOf(walkingBP);
                         walkingBP = payStagesList[Math.max(0, idx - 1)];
                         events.push({ label: eventLabel, bp: eventBP, date: new Date(y, m, 1) });
                     }
                     // C. Record the starting BP in March 2021
                     else if (y === 2021 && m === 2) {
-                        eventLabel = `BP on ${mNames[m]} ${y}`;
+                        const mNum = (m + 1).toString().padStart(2, '0');
+                        eventLabel = `BP on 01/${mNum}/${y}`;
                         events.push({ label: eventLabel, bp: walkingBP, date: new Date(y, m, 1) });
                     }
                 }
@@ -1761,8 +1769,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const newGross = document.getElementById('res-gross-new')?.textContent || "0";
 
             const now = new Date();
-            const curMonthLabel = localMonths[now.getMonth()] || "Month";
-            const currentMonthYear = curMonthLabel + " " + now.getFullYear();
+            const currentMonthYear = `01/${(now.getMonth() + 1).toString().padStart(2, '0')}/${now.getFullYear()}`;
 
             // 3. Main Summary Table (3 Stages)
             doc.setFontSize(14);
