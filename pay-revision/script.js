@@ -1912,7 +1912,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 doc.setFontSize(14);
                 doc.setTextColor(59, 130, 246); // Primary Color
                 doc.setFont("Outfit", "bold");
-                doc.text("Detailed Pay Progression Timeline", 14, timelineY);
+                doc.text("Revised Pay Stages (for Pay Revision Arrear Calculation)", 14, timelineY);
 
                 let timelineRows = [];
                 timelineSteps.forEach(step => {
