@@ -1740,7 +1740,7 @@ document.addEventListener('DOMContentLoaded', () => {
             doc.setFontSize(22);
             doc.setTextColor(255);
             doc.setFont("helvetica", "bold");
-            doc.text("Pay Revision Report", 14, 25);
+            doc.text("Pay Revision Report", 14, 22);
 
             doc.setFontSize(10);
             doc.setFont("helvetica", "normal");
@@ -1749,10 +1749,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const pen = document.getElementById('penNumber')?.value?.trim() || "";
             const school = document.getElementById('schoolName')?.value?.trim() || "";
 
-            let headerY = 28;
-            if (name) { doc.text(`Employee: ${name}`, 14, headerY); headerY += 5; }
-            if (pen) { doc.text(`PEN Number: ${pen}`, 14, headerY); headerY += 5; }
-            if (school) { doc.text(`School/Office: ${school}`, 14, headerY); headerY += 5; }
+            let headerY = 30;
+            if (name) { doc.text(`Employee: ${name}`, 14, headerY); headerY += 5.5; }
+            if (pen) { doc.text(`PEN Number: ${pen}`, 14, headerY); headerY += 5.5; }
+            if (school) { doc.text(`School/Office: ${school}`, 14, headerY); headerY += 5.5; }
 
             // 2. Data Extraction
             const bpInitial = document.getElementById('basic-pay-in')?.value || "0";
