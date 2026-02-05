@@ -1243,7 +1243,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Dynamic Label for Fitment
         const fitmentLabelEl = document.getElementById('label-res-fitment');
-        if (fitmentLabelEl) fitmentLabelEl.textContent = `Fitment Amount (${fitmentPerc}%)`;
+        if (fitmentLabelEl) fitmentLabelEl.innerHTML = `Fitment Amount (${fitmentPerc}%) <span style="font-size: 0.65em; font-weight: normal; font-style: italic; color: #fbbf24;">(Assumption)</span>`;
 
         const weightageRow = document.getElementById('res-weightage-row');
         if (weightageRow) weightageRow.style.display = isWeightageEnabled ? 'grid' : 'none';
