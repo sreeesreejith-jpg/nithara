@@ -153,7 +153,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (weightageCheck && weightageContainer) {
         weightageCheck.addEventListener('change', () => {
             if (weightageCheck.checked) {
-                weightageContainer.style.display = 'flex'; // Proper layout for input container (column)
+                weightageContainer.style.display = 'grid'; // Maintain grid layout for alignment
                 if (weightageResultRow) weightageResultRow.style.display = 'grid'; // Strict Grid for result row
             } else {
                 weightageContainer.style.display = 'none';
@@ -1101,7 +1101,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     events.push({
                         type: 'grade',
                         date: new Date(checkDate.getFullYear(), checkDate.getMonth(), gradeDay),
-                        label: `Grade on ${gradeDay}/${monthShortNames[checkDate.getMonth()]}/${checkDate.getFullYear()}`,
+                        label: `Grade Availed on ${gradeDay}/${monthShortNames[checkDate.getMonth()]}/${checkDate.getFullYear()}`,
                         steps: 2
                     });
                 }
@@ -1198,7 +1198,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     localizedLabel = `Increment on ${month} ${year}`;
                 } else {
                     const dayStr = event.date.getDate().toString().padStart(2, '0');
-                    localizedLabel = `Grade on ${dayStr}/${month}/${year}`;
+                    localizedLabel = `Grade Availed on ${dayStr}/${month}/${year}`;
                 }
 
                 timelineHTML += `
@@ -1303,7 +1303,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     // A. Check for Grade change (Reverse)
                     if (isPreRevisedGrade && y === gradeYear && m === gradeMonth) {
                         const dayStr = gradeDay.toString().padStart(2, '0');
-                        eventLabel = `Grade on ${dayStr}/${mNames[m]}/${y}`;
+                        eventLabel = `Grade Availed on ${dayStr}/${mNames[m]}/${y}`;
                         let idx = payStagesList.indexOf(walkingBP);
                         walkingBP = payStagesList[Math.max(0, idx - 2)];
                         events.push({ label: eventLabel, bp: eventBP, date: new Date(y, m, gradeDay) });
@@ -1734,8 +1734,8 @@ document.addEventListener('DOMContentLoaded', () => {
             doc.setFillColor(59, 130, 246);
             doc.rect(0, 0, 210, 45, 'F');
             doc.setFontSize(8);
-            doc.setTextColor(255);
-            doc.text("* Approx. values for info only.", 14, 12);
+            doc.setTextColor(239, 68, 68); // Red color for disclaimer
+            doc.text("* Approx. calculation for info only.", 14, 12);
 
             doc.setFontSize(22);
             doc.setTextColor(255);
@@ -1812,7 +1812,7 @@ document.addEventListener('DOMContentLoaded', () => {
             ];
 
             if (isWeightageChecked) {
-                fixationRows.push(['Service Weightage (if allowed)', yearsService + ' Yrs', 'Rs. ' + weightageV]);
+                fixationRows.push(['Service Weightage Benefit', yearsService + ' Yrs', 'Rs. ' + weightageV]);
             }
 
             fixationRows.push(

@@ -34,8 +34,8 @@
             <div class="header-content">
                 <a href="../index.html" class="home-icon" title="Go Home">🏠</a>
                 <div class="header-text">
-                    <p class="disclaimer" style="margin: 0; font-size: 0.7rem; color: rgba(255,255,255,0.6);">* Approx.
-                        values for info only.</p>
+                    <p class="disclaimer" style="margin: 0; font-size: 0.7rem; color: #ef4444; font-weight: 700;">*
+                        Approx. calculation for info only.</p>
                     <h1>Pay Revision</h1>
                 </div>
             </div>
@@ -90,8 +90,8 @@
                     <!-- 2. Grade Date -->
                     <div id="grade-details-container" class="input-field row-input"
                         style="display: grid; grid-template-columns: 1fr 140px; gap: 1rem; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 0.75rem;">
-                        <label style="font-size: 0.9rem; color: var(--text-main); font-weight: 700;">2. Grade Date (If
-                            after 01/03/2021)</label>
+                        <label style="font-size: 0.9rem; color: var(--text-main); font-weight: 700;">2. If Grade availed
+                            after 01/03/2021, select the date</label>
                         <div class="input-wrapper"
                             style="width: 100%; max-width: 140px; position: relative; display: flex; align-items: center;">
                             <input type="text" id="grade-date" placeholder="DD/MM/YYYY" maxlength="10"
@@ -116,7 +116,7 @@
 
                     <!-- 3. Increment Month -->
                     <div class="input-field row-input"
-                        style="display: grid; grid-template-columns: 1fr 140px; gap: 1rem; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 0.75rem;">
+                        style="display: grid; grid-template-columns: 1fr 140px; gap: 1rem; align-items: center; padding-bottom: 0.25rem;">
                         <label style="font-size: 0.9rem; color: var(--text-main); font-weight: 700;">3. Increment Month
                             <span style="color: #ef4444; font-weight: 900;">*</span></label>
                         <div class="input-wrapper" style="width: 100%; max-width: 140px;">
@@ -126,12 +126,16 @@
                             <ul id="increment-month-dropdown" class="custom-dropdown"></ul>
                         </div>
                     </div>
+                </div>
 
-                    <!-- 4. Fitment % -->
+                <!-- Secondary Configuration Dashboard Block (Predefined Settings) -->
+                <div class="config-group-card"
+                    style="background: rgba(59, 130, 246, 0.03); border-radius: 1rem; padding: 1.25rem; border: 1px dashed rgba(59, 130, 246, 0.2); display: flex; flex-direction: column; gap: 0.75rem;">
+
+                    <!-- Fitment % -->
                     <div class="input-field row-input"
                         style="display: grid; grid-template-columns: 1fr 140px; gap: 1rem; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 0.75rem;">
-                        <label style="color: var(--text-main); font-weight: 700; font-size: 0.9rem;">4. Fitment
-                            %</label>
+                        <label style="color: var(--text-main); font-weight: 700; font-size: 0.9rem;">Fitment %</label>
                         <div class="input-wrapper" style="width: 100%; max-width: 140px;">
                             <div class="input-with-val" style="margin: 0; width: 100%;">
                                 <input type="number" id="fitment-perc" value="7" step="0.5"
@@ -142,24 +146,24 @@
                         </div>
                     </div>
 
-                    <!-- 5. Service Weightage -->
+                    <!-- Service Weightage -->
                     <div class="input-field row-input"
                         style="display: grid; grid-template-columns: 1fr 140px; gap: 1rem; align-items: center; padding-bottom: 0.5rem;">
                         <label for="weightage-check"
-                            style="font-size: 0.9rem; color: var(--text-main); font-weight: 700;">5. Service
-                            Weightage?</label>
-                        <div style="display: flex; justify-content: flex-end; padding-right: 1.5rem;">
+                            style="font-size: 0.9rem; color: var(--text-main); font-weight: 700;">If Service Weightage
+                            allowed</label>
+                        <div style="display: flex; justify-content: flex-end; padding-right: 0.25rem;">
                             <input type="checkbox" id="weightage-check"
                                 style="width: 24px; height: 24px; accent-color: var(--primary); cursor: pointer;">
                         </div>
                     </div>
 
-                    <!-- Service Years (Sub-row of 5) -->
+                    <!-- Service Years (Sub-row) -->
                     <div id="weightage-container" class="input-field row-input"
-                        style="display: none; grid-template-columns: 1fr 140px; gap: 1rem; align-items: center; padding: 0.75rem; background: rgba(139, 92, 246, 0.1); border-radius: 0.75rem; border: 1px solid rgba(139, 92, 246, 0.2); margin-top: 0.25rem;">
+                        style="display: none; grid-template-columns: 1fr 140px; gap: 1rem; align-items: center; padding: 0.75rem 0.25rem 0.75rem 0.75rem; background: rgba(59, 130, 246, 0.08); border-radius: 0.75rem; border: 1px solid rgba(59, 130, 246, 0.15); margin-top: 0.25rem;">
                         <label style="font-size: 0.85rem; color: var(--text-main); font-weight: 700;">Completed Years of
                             Service</label>
-                        <div class="input-wrapper" style="width: 100%; max-width: 140px;">
+                        <div class="input-wrapper" style="width: 100%; max-width: 140px; justify-self: end;">
                             <div class="input-with-val" style="margin: 0; width: 100%;">
                                 <input type="number" id="years-service" placeholder="Years" step="1" min="0"
                                     autocomplete="off"
