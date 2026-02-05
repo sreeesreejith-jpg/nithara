@@ -1771,7 +1771,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const now = new Date();
             const currentMonthYear = `01/${(now.getMonth() + 1).toString().padStart(2, '0')}/${now.getFullYear()}`;
 
-            // 3. Main Summary Table (3 Stages)
+            // 3. Main Summary Table (3 Stages) - EXECUTIVE SUMMARY
             doc.setFontSize(14);
             doc.setTextColor(40);
             doc.text("Pay Summary Breakdown", 14, 50);
@@ -1799,8 +1799,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
 
-            // 4. Detailed Pay Fixation (01/07/2024)
+            // 4. Detailed Pay Fixation (The Formula bridge)
             let currentY = doc.lastAutoTable ? doc.lastAutoTable.finalY + 15 : 120;
+            doc.setFontSize(14);
+            doc.setTextColor(40);
             doc.text("Pay Fixation Details (01/07/2024)", 14, currentY);
 
             const daMerged = document.getElementById('res-da-merged')?.textContent || "0";
@@ -1836,73 +1838,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 columnStyles: { 2: { halign: 'right' } }
             });
 
-
-
-            // 5. Prerevised Pay Stages (Backward History)
-            const historySteps = document.querySelectorAll('#history-tbody > div');
-            if (historySteps && historySteps.length > 0) {
-                let historyY = doc.lastAutoTable.finalY + 15;
-
-                // Check if we need a new page
-                const estimatedHeight = (historySteps.length * 8) + 30;
-                if (historyY + estimatedHeight > 285) {
-                    doc.addPage();
-                    historyY = 20;
-                }
-
-                doc.setFontSize(14);
-                doc.setTextColor(139, 92, 246); // Purple Accent
-                doc.setFont("Outfit", "bold");
-                doc.text("Prerevised Pay Stages (for DA Arrear Calculation)", 14, historyY);
-
-                let historyRows = [];
-                historySteps.forEach(step => {
-                    const spans = step.querySelectorAll('span');
-                    if (spans.length >= 2) {
-                        let fullLabel = spans[0].textContent.replace('• ', '').trim();
-                        let eventType = fullLabel;
-                        let dateText = "-";
-
-                        if (fullLabel.toLowerCase().includes(" on ")) {
-                            const parts = fullLabel.split(/ on /i);
-                            eventType = parts[0].trim();
-                            dateText = parts[1].trim();
-                        }
-
-                        const valText = spans[1].textContent.trim() || "";
-                        historyRows.push([eventType, dateText, valText]);
-                    }
-                });
-
-                doc.autoTable({
-                    startY: historyY + 5,
-                    head: [['Progression Event', 'Date', 'Prerevised Pay Stage']],
-                    body: historyRows,
-                    theme: 'grid',
-                    headStyles: {
-                        fillColor: [139, 92, 246],
-                        halign: 'center',
-                        fontSize: 10
-                    },
-                    columnStyles: {
-                        0: { cellWidth: 'auto' },
-                        1: { halign: 'center', cellWidth: 50 },
-                        2: { halign: 'right', fontStyle: 'bold', cellWidth: 50 }
-                    },
-                    styles: {
-                        fontSize: 9,
-                        cellPadding: 4,
-                        valign: 'middle'
-                    }
-                });
-            }
-
-            // 6. Timeline Summary (Moved Up)
+            // 5. Revised Pay Stages Timeline (Forward)
             const timelineSteps = document.querySelectorAll('#timeline-steps > div');
             if (timelineSteps && timelineSteps.length > 0) {
                 let timelineY = doc.lastAutoTable.finalY + 15;
 
-                // Check if we need a new page
                 const estimatedHeight = (timelineSteps.length * 8) + 30;
                 if (timelineY + estimatedHeight > 285) {
                     doc.addPage();
@@ -1910,7 +1850,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 doc.setFontSize(14);
-                doc.setTextColor(59, 130, 246); // Primary Color
+                doc.setTextColor(59, 130, 246);
                 doc.setFont("Outfit", "bold");
                 doc.text("Revised Pay Stages (for Pay Revision Arrear Calculation)", 14, timelineY);
 
@@ -1921,14 +1861,11 @@ document.addEventListener('DOMContentLoaded', () => {
                         let fullLabel = spans[0].textContent.replace('• ', '').trim();
                         let eventType = fullLabel;
                         let dateText = "-";
-
-                        // Split "Event on Date" into two columns
                         if (fullLabel.toLowerCase().includes(" on ")) {
                             const parts = fullLabel.split(/ on /i);
                             eventType = parts[0].trim();
                             dateText = parts[1].trim();
                         }
-
                         const valText = spans[1].textContent.trim() || "";
                         timelineRows.push([eventType, dateText, valText]);
                     }
@@ -1939,28 +1876,16 @@ document.addEventListener('DOMContentLoaded', () => {
                     head: [['Progression Event', 'Date / Period', 'Revised Pay Stage']],
                     body: timelineRows,
                     theme: 'grid',
-                    headStyles: {
-                        fillColor: [59, 130, 246],
-                        halign: 'center',
-                        fontSize: 10
-                    },
-                    columnStyles: {
-                        0: { cellWidth: 'auto' },
-                        1: { halign: 'center', cellWidth: 50 },
-                        2: { halign: 'right', fontStyle: 'bold', cellWidth: 50 }
-                    },
-                    styles: {
-                        fontSize: 9,
-                        cellPadding: 4,
-                        valign: 'middle'
-                    }
+                    headStyles: { fillColor: [59, 130, 246], halign: 'center', fontSize: 10 },
+                    columnStyles: { 0: { cellWidth: 'auto' }, 1: { halign: 'center', cellWidth: 50 }, 2: { halign: 'right', fontStyle: 'bold', cellWidth: 50 } },
+                    styles: { fontSize: 9, cellPadding: 4, valign: 'middle' }
                 });
             }
 
-            // 6. Present Salary Breakdown (Dynamic Date) (Moved Down)
-            currentY = doc.lastAutoTable ? doc.lastAutoTable.finalY + 15 : 200;
+            // 6. Present Salary Breakdown (The NOW status result)
+            currentY = doc.lastAutoTable ? doc.lastAutoTable.finalY + 15 : 180;
 
-            // Check for page break before this section too, just in case
+            // Check for page break
             if (currentY + 60 > 285) {
                 doc.addPage();
                 currentY = 20;
@@ -1981,7 +1906,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 startY: currentY + 5,
                 head: [['Current Component', 'Rate/Info', 'Amount']],
                 body: [
-                    ['Current Basic Pay', 'From Progression', 'Rs. ' + currentBp],
+                    ['Revised Basic Pay', 'Current Stage', 'Rs. ' + currentBp],
                     ['Dearness Allowance (DA)', balDaP + '%', 'Rs. ' + balDaV],
                     ['House Rent Allowance (HRA)', hraP + '%', 'Rs. ' + hraV],
                     ['Others', '-', 'Rs. ' + othersV],
@@ -2001,102 +1926,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
 
-            // Arrear Summary Highlights (Moved here as requested)
-            let arrearSumY = doc.lastAutoTable.finalY + 15;
-            if (arrearSumY + 40 > 285) {
-                doc.addPage();
-                arrearSumY = 20;
-            }
-            doc.setFontSize(14);
-            doc.setTextColor(16, 185, 129); // Green color
-            doc.setFont("helvetica", "bold");
-            doc.text("Arrear Summary Highlights", 14, arrearSumY);
-
-            const daArrText = document.getElementById('dash-da-arrear')?.textContent.replace('₹', 'Rs. ') || "Rs. 0";
-            const payRevArrText = document.getElementById('dash-pay-rev-arrear')?.textContent.replace('₹', 'Rs. ') || "Rs. 0";
-            const totalArrText = document.getElementById('dash-total-arrear')?.textContent.replace('₹', 'Rs. ') || "Rs. 0";
-
-            doc.autoTable({
-                startY: arrearSumY + 5,
-                head: [['Benefit Component', 'Amount']],
-                body: [
-                    ['DA Arrear Total', daArrText],
-                    ['Pay Revision Arrear Total', payRevArrText],
-                    [{ content: 'GRAND TOTAL ARREAR', styles: { fontStyle: 'bold' } }, { content: totalArrText, styles: { fontStyle: 'bold' } }]
-                ],
-                theme: 'striped',
-                headStyles: { fillColor: [16, 185, 129], halign: 'left' },
-                columnStyles: {
-                    0: { cellWidth: 'auto' },
-                    1: { halign: 'right', cellWidth: 50 }
-                },
-                styles: { fontSize: 10 },
-                didParseCell: function (data) {
-                    if (data.section === 'head' && data.column.index === 1) {
-                        data.cell.styles.halign = 'right';
-                    }
-                }
-            });
-
-            // 7. DA Arrear Statement (Mar 2021 - Jun 2024)
-            const daArrearRows = [];
-            document.querySelectorAll('#da-arrear-tbody tr').forEach(row => {
-                const cells = row.querySelectorAll('td');
-                if (cells.length >= 7) {
-                    const rowData = [];
-                    // Extract values, skipping the delete button column
-                    for (let i = 0; i < 7; i++) {
-                        let text = cells[i].textContent.trim().replace('%', '').replace('(Avg)', '').trim();
-                        // If it's the BP input column (index 2), get input value
-                        if (i === 2) {
-                            text = row.querySelector('.da-bp-input')?.value || text;
-                        } else if (i === 3) {
-                            text = row.querySelector('.due-da-input')?.value || text;
-                        } else if (i === 4) {
-                            text = row.querySelector('.drawn-da-input')?.value || text;
-                        }
-                        rowData.push(text);
-                    }
-                    daArrearRows.push(rowData);
-                }
-            });
-
-            if (daArrearRows.length > 0) {
-                let daTotalVal = document.getElementById('total-da-arrear-val')?.textContent || "0";
-                daTotalVal = daTotalVal.replace('₹', 'Rs. ');
-
-                doc.addPage();
-                doc.setFontSize(16);
-                doc.setTextColor(5, 150, 105); // Green color for DA
-                doc.setFont("helvetica", "bold");
-                doc.text(`DA Arrear Statement (Mar 2021 - Jun 2024)`, 14, 20);
-
-                // Removed header total as per request, consistent with only showing footer total
-
-
-                doc.autoTable({
-                    startY: 35,
-                    head: [['Sl', 'Month', 'BP', 'Due%', 'Drawn%', 'Diff%', 'Arrear']],
-                    body: daArrearRows,
-                    foot: [[{ content: 'TOTAL DA ARREAR', colSpan: 6, styles: { halign: 'right', fontStyle: 'bold', fontSize: 9 } }, { content: daTotalVal, styles: { halign: 'right', fontStyle: 'bold', fontSize: 9 } }]],
-                    theme: 'grid',
-                    headStyles: { fillColor: [5, 150, 105], fontSize: 9, halign: 'center' },
-                    footStyles: { fillColor: [240, 253, 244], textColor: [0, 0, 0] },
-                    styles: { fontSize: 8, cellPadding: 3, valign: 'middle' },
-                    columnStyles: {
-                        0: { halign: 'center', cellWidth: 10 },
-                        1: { halign: 'left', cellWidth: 35 },
-                        2: { halign: 'right' },
-                        3: { halign: 'center' },
-                        4: { halign: 'center' },
-                        5: { halign: 'center' },
-                        6: { halign: 'right', fontStyle: 'bold' }
-                    },
-                    showFoot: 'lastPage'
-                });
-            }
-
-            // 8. Pay Revision Arrear Statement Table
+            // 6b. Detailed Pay Revision Arrear Statement
             const arrearRows = [];
             const pRows = document.querySelectorAll('#arrear-tbody tr');
             pRows.forEach(row => {
@@ -2151,6 +1981,143 @@ document.addEventListener('DOMContentLoaded', () => {
                     showFoot: 'lastPage'
                 });
             }
+
+            // 7. Prerevised Pay Stages (Backward)
+            const historySteps = document.querySelectorAll('#history-tbody > div');
+            if (historySteps && historySteps.length > 0) {
+                let historyY = doc.lastAutoTable.finalY + 15;
+
+                const estimatedHeight = (historySteps.length * 8) + 30;
+                if (historyY + estimatedHeight > 285) {
+                    doc.addPage();
+                    historyY = 20;
+                }
+
+                doc.setFontSize(14);
+                doc.setTextColor(139, 92, 246);
+                doc.setFont("Outfit", "bold");
+                doc.text("Prerevised Pay Stages (for DA Arrear Calculation)", 14, historyY);
+
+                let historyRows = [];
+                historySteps.forEach(step => {
+                    const spans = step.querySelectorAll('span');
+                    if (spans.length >= 2) {
+                        let fullLabel = spans[0].textContent.replace('• ', '').trim();
+                        let eventType = fullLabel;
+                        let dateText = "-";
+                        if (fullLabel.toLowerCase().includes(" on ")) {
+                            const parts = fullLabel.split(/ on /i);
+                            eventType = parts[0].trim();
+                            dateText = parts[1].trim();
+                        }
+                        const valText = spans[1].textContent.trim() || "";
+                        historyRows.push([eventType, dateText, valText]);
+                    }
+                });
+
+                doc.autoTable({
+                    startY: historyY + 5,
+                    head: [['Progression Event', 'Date', 'Prerevised Pay Stage']],
+                    body: historyRows,
+                    theme: 'grid',
+                    headStyles: { fillColor: [139, 92, 246], halign: 'center', fontSize: 10 },
+                    columnStyles: { 0: { cellWidth: 'auto' }, 1: { halign: 'center', cellWidth: 50 }, 2: { halign: 'right', fontStyle: 'bold', cellWidth: 50 } },
+                    styles: { fontSize: 9, cellPadding: 4, valign: 'middle' }
+                });
+            }
+
+            // 7b. DA Arrear Statement (Mar 2021 - Jun 2024)
+            const daArrearRows = [];
+            document.querySelectorAll('#da-arrear-tbody tr').forEach(row => {
+                const cells = row.querySelectorAll('td');
+                if (cells.length >= 7) {
+                    const rowData = [];
+                    // Extract values, skipping the delete button column
+                    for (let i = 0; i < 7; i++) {
+                        let text = cells[i].textContent.trim().replace('%', '').replace('(Avg)', '').trim();
+                        // If it's the BP input column (index 2), get input value
+                        if (i === 2) {
+                            text = row.querySelector('.da-bp-input')?.value || text;
+                        } else if (i === 3) {
+                            text = row.querySelector('.due-da-input')?.value || text;
+                        } else if (i === 4) {
+                            text = row.querySelector('.drawn-da-input')?.value || text;
+                        }
+                        rowData.push(text);
+                    }
+                    daArrearRows.push(rowData);
+                }
+            });
+
+            if (daArrearRows.length > 0) {
+                let daTotalVal = document.getElementById('total-da-arrear-val')?.textContent || "0";
+                daTotalVal = daTotalVal.replace('₹', 'Rs. ');
+
+                // Always start DA Arrear on a new page to avoid overlap
+                doc.addPage();
+
+                doc.setFontSize(16);
+                doc.setTextColor(5, 150, 105); // Green color for DA
+                doc.setFont("helvetica", "bold");
+                doc.text(`DA Arrear Statement (Mar 2021 - Jun 2024)`, 14, 20);
+
+                doc.autoTable({
+                    startY: 35,
+                    head: [['Sl', 'Month', 'BP', 'Due%', 'Drawn%', 'Diff%', 'Arrear']],
+                    body: daArrearRows,
+                    foot: [[{ content: 'TOTAL DA ARREAR', colSpan: 6, styles: { halign: 'right', fontStyle: 'bold', fontSize: 9 } }, { content: daTotalVal, styles: { halign: 'right', fontStyle: 'bold', fontSize: 9 } }]],
+                    theme: 'grid',
+                    headStyles: { fillColor: [5, 150, 105], fontSize: 9, halign: 'center' },
+                    footStyles: { fillColor: [240, 253, 244], textColor: [0, 0, 0] },
+                    styles: { fontSize: 8, cellPadding: 3, valign: 'middle' },
+                    columnStyles: {
+                        0: { halign: 'center', cellWidth: 10 },
+                        1: { halign: 'left', cellWidth: 35 },
+                        2: { halign: 'right' },
+                        3: { halign: 'center' },
+                        4: { halign: 'center' },
+                        5: { halign: 'center' },
+                        6: { halign: 'right', fontStyle: 'bold' }
+                    },
+                    showFoot: 'lastPage'
+                });
+            }
+
+            // 8. Arrear Summary Highlights
+            let arrearSumY = doc.lastAutoTable.finalY + 15;
+            if (arrearSumY + 40 > 285) {
+                doc.addPage();
+                arrearSumY = 20;
+            }
+            doc.setFontSize(14);
+            doc.setTextColor(16, 185, 129);
+            doc.setFont("helvetica", "bold");
+            doc.text("Arrear Summary Highlights", 14, arrearSumY);
+
+            const daArrText = document.getElementById('dash-da-arrear')?.textContent.replace('₹', 'Rs. ') || "Rs. 0";
+            const payRevArrText = document.getElementById('dash-pay-rev-arrear')?.textContent.replace('₹', 'Rs. ') || "Rs. 0";
+            const totalArrText = document.getElementById('dash-total-arrear')?.textContent.replace('₹', 'Rs. ') || "Rs. 0";
+
+            doc.autoTable({
+                startY: arrearSumY + 5,
+                head: [['Benefit Component', 'Amount']],
+                body: [
+                    ['DA Arrear Total', daArrText],
+                    ['Pay Revision Arrear Total', payRevArrText],
+                    [{ content: 'GRAND TOTAL ARREAR', styles: { fontStyle: 'bold' } }, { content: totalArrText, styles: { fontStyle: 'bold' } }]
+                ],
+                theme: 'striped',
+                headStyles: { fillColor: [16, 185, 129], halign: 'left' },
+                columnStyles: { 0: { cellWidth: 'auto' }, 1: { halign: 'right', cellWidth: 50 } },
+                styles: { fontSize: 10 },
+                didParseCell: function (data) {
+                    if (data.section === 'head' && data.column.index === 1) {
+                        data.cell.styles.halign = 'right';
+                    }
+                }
+            });
+
+
 
             // 8b. GRAND TOTAL ARREAR (New Section)
             // Parse values to numbers
