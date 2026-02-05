@@ -1838,6 +1838,65 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
+            // 5. Prerevised Pay Stages (Backward History)
+            const historySteps = document.querySelectorAll('#history-tbody > div');
+            if (historySteps && historySteps.length > 0) {
+                let historyY = doc.lastAutoTable.finalY + 15;
+
+                // Check if we need a new page
+                const estimatedHeight = (historySteps.length * 8) + 30;
+                if (historyY + estimatedHeight > 285) {
+                    doc.addPage();
+                    historyY = 20;
+                }
+
+                doc.setFontSize(14);
+                doc.setTextColor(139, 92, 246); // Purple Accent
+                doc.setFont("Outfit", "bold");
+                doc.text("Prerevised Pay Stages (for DA Arrear Calculation)", 14, historyY);
+
+                let historyRows = [];
+                historySteps.forEach(step => {
+                    const spans = step.querySelectorAll('span');
+                    if (spans.length >= 2) {
+                        let fullLabel = spans[0].textContent.replace('• ', '').trim();
+                        let eventType = fullLabel;
+                        let dateText = "-";
+
+                        if (fullLabel.toLowerCase().includes(" on ")) {
+                            const parts = fullLabel.split(/ on /i);
+                            eventType = parts[0].trim();
+                            dateText = parts[1].trim();
+                        }
+
+                        const valText = spans[1].textContent.trim() || "";
+                        historyRows.push([eventType, dateText, valText]);
+                    }
+                });
+
+                doc.autoTable({
+                    startY: historyY + 5,
+                    head: [['Progression Event', 'Date', 'Prerevised Pay Stage']],
+                    body: historyRows,
+                    theme: 'grid',
+                    headStyles: {
+                        fillColor: [139, 92, 246],
+                        halign: 'center',
+                        fontSize: 10
+                    },
+                    columnStyles: {
+                        0: { cellWidth: 'auto' },
+                        1: { halign: 'center', cellWidth: 50 },
+                        2: { halign: 'right', fontStyle: 'bold', cellWidth: 50 }
+                    },
+                    styles: {
+                        fontSize: 9,
+                        cellPadding: 4,
+                        valign: 'middle'
+                    }
+                });
+            }
+
             // 6. Timeline Summary (Moved Up)
             const timelineSteps = document.querySelectorAll('#timeline-steps > div');
             if (timelineSteps && timelineSteps.length > 0) {
