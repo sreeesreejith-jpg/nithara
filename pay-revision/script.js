@@ -1487,11 +1487,11 @@ document.addEventListener('DOMContentLoaded', () => {
             totalEl.textContent = "₹" + grandTotal.toLocaleString('en-IN');
 
             // Auto-scroll to right to show Arrear column on mobile
-            const scrollDiv = container.querySelector('div[style*="overflow-x"]');
+            const scrollDiv = container.querySelector('.table-scroll-container');
             if (scrollDiv) {
                 setTimeout(() => {
                     scrollDiv.scrollLeft = scrollDiv.scrollWidth;
-                }, 100);
+                }, 300);
             }
 
             return grandTotal;
@@ -1668,11 +1668,11 @@ document.addEventListener('DOMContentLoaded', () => {
             arrearContainer.style.flexDirection = 'column';
 
             // Auto-scroll to right to show Arrear column on mobile
-            const scrollDiv = arrearContainer.querySelector('div[style*="overflow-x"]');
+            const scrollDiv = arrearContainer.querySelector('.table-scroll-container');
             if (scrollDiv) {
                 setTimeout(() => {
                     scrollDiv.scrollLeft = scrollDiv.scrollWidth;
-                }, 100);
+                }, 300);
             }
 
 
