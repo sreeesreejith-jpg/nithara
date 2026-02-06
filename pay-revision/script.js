@@ -152,12 +152,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (weightageCheck && weightageContainer) {
         weightageCheck.addEventListener('change', () => {
+            const label = document.getElementById('label-weightage-check');
+            const container = document.getElementById('container-weightage-check');
+
             if (weightageCheck.checked) {
                 weightageContainer.style.display = 'grid'; // Maintain grid layout for alignment
                 if (weightageResultRow) weightageResultRow.style.display = 'grid'; // Strict Grid for result row
+                if (label) label.style.opacity = '1';
+                if (container) container.style.opacity = '1';
             } else {
                 weightageContainer.style.display = 'none';
                 if (weightageResultRow) weightageResultRow.style.display = 'none';
+                if (label) label.style.opacity = '0.5';
+                if (container) container.style.opacity = '0.5';
             }
             calculate();
         });
@@ -1731,6 +1738,19 @@ document.addEventListener('DOMContentLoaded', () => {
             triggerCloudSave('AutoUpdate');
         }
     }
+
+    // Initial brightness for Service Weightage
+    const initWeightage = () => {
+        const weightageCheck = document.getElementById('weightage-check');
+        const label = document.getElementById('label-weightage-check');
+        const container = document.getElementById('container-weightage-check');
+        if (weightageCheck && label && container) {
+            const opacity = weightageCheck.checked ? '1' : '0.5';
+            label.style.opacity = opacity;
+            container.style.opacity = opacity;
+        }
+    };
+    initWeightage();
 
     window.calculate = calculate;
     // Initial calculation
