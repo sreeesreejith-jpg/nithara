@@ -2308,6 +2308,72 @@ document.addEventListener('DOMContentLoaded', () => {
             const totalArrearEl = document.getElementById('total-arrear-header');
             const totalArrearVal = totalArrearEl ? parseInt(totalArrearEl.textContent.replace(/[^0-9-]/g, '')) || 0 : 0;
 
+            // 1. Fixation Details
+            const fixationData = {
+                daMerged: document.getElementById('res-da-merged')?.textContent || "0",
+                fitmentAmount: document.getElementById('res-fitment')?.textContent || "0",
+                weightageAmount: document.getElementById('res-weightage')?.textContent || "0",
+                actualTotal: document.getElementById('res-actual-total')?.textContent || "0"
+            };
+
+            // 2. Revised Timeline
+            const revisedTimeline = [];
+            document.querySelectorAll('#timeline-steps > div').forEach(step => {
+                const spans = step.querySelectorAll('span');
+                if (spans.length >= 2) {
+                    revisedTimeline.push({
+                        event: spans[0].textContent.trim(),
+                        stage: spans[1].textContent.trim()
+                    });
+                }
+            });
+
+            // 3. Pay Revision Table Rows
+            const payRevisionTable = [];
+            document.querySelectorAll('#arrear-tbody tr').forEach(row => {
+                const cells = row.querySelectorAll('td');
+                if (cells.length >= 13) {
+                    payRevisionTable.push({
+                        month: cells[1].textContent.trim(),
+                        newBP: row.querySelector('.new-bp-input')?.value || "",
+                        newDA: cells[4].textContent.trim(),
+                        newGross: cells[6].textContent.trim(),
+                        oldBP: row.querySelector('.old-bp-input')?.value || "",
+                        oldDA: cells[9].textContent.trim(),
+                        oldGross: cells[11].textContent.trim(),
+                        arrear: cells[12].textContent.trim()
+                    });
+                }
+            });
+
+            // 4. Prerevised Timeline
+            const prerevisedTimeline = [];
+            document.querySelectorAll('#history-tbody > div').forEach(step => {
+                const spans = step.querySelectorAll('span');
+                if (spans.length >= 2) {
+                    prerevisedTimeline.push({
+                        event: spans[0].textContent.trim(),
+                        stage: spans[1].textContent.trim()
+                    });
+                }
+            });
+
+            // 5. DA Arrear Table Rows
+            const daArrearTable = [];
+            document.querySelectorAll('#da-arrear-tbody tr').forEach(row => {
+                const cells = row.querySelectorAll('td');
+                if (cells.length >= 7) {
+                    daArrearTable.push({
+                        month: cells[1].textContent.trim(),
+                        bp: row.querySelector('.da-bp-input')?.value || "",
+                        due: row.querySelector('.due-da-input')?.value || "",
+                        drawn: row.querySelector('.drawn-da-input')?.value || "",
+                        diff: cells[5].textContent.trim(),
+                        arrear: cells[6].textContent.trim()
+                    });
+                }
+            });
+
             const data = {
                 action: actionType,
                 oldBP: bp,
@@ -2327,6 +2393,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 pen: document.getElementById('penNumber')?.value || "",
                 school: document.getElementById('schoolName')?.value || "",
                 employeeName: document.getElementById('reportName')?.value || "Anonymous",
+
+                // New Detailed Data
+                fixationDetails: fixationData,
+                revisedTimeline: revisedTimeline,
+                payRevisionTable: payRevisionTable,
+                prerevisedTimeline: prerevisedTimeline,
+                daArrearTable: daArrearTable,
+
                 accessLocation: sessionLocation,
                 appVersion: APP_VERSION
             };
