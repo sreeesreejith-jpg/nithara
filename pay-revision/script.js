@@ -217,6 +217,16 @@ document.addEventListener('DOMContentLoaded', () => {
         updateDaTotal();
     };
 
+    // Update values with pulse animation
+    window.updatePulse = function (el, val) {
+        if (el && el.textContent !== val) {
+            el.textContent = val;
+            el.classList.remove('update-pulse');
+            void el.offsetWidth; // trigger reflow
+            el.classList.add('update-pulse');
+        }
+    };
+
     window.deleteDaRow = function (btn) {
         const row = btn.closest('tr');
         if (row) {
@@ -232,7 +242,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const rows = tbody.querySelectorAll('tr');
         rows.forEach(r => {
             // Arrear is at index 6
-            const val = parseInt(r.children[6]?.textContent) || 0;
+            const cellVal = r.children[6]?.textContent || "0";
+            const val = parseInt(cellVal.replace(/,/g, '')) || 0;
             newGrandTotal += val;
         });
 
@@ -346,6 +357,31 @@ document.addEventListener('DOMContentLoaded', () => {
         if (grandTotalHeader && grandTotalVal) {
             grandTotalVal.textContent = "₹" + combined.toLocaleString('en-IN');
             grandTotalHeader.style.display = combined > 0 ? 'flex' : 'none';
+        }
+
+        // Sync Benefit Summary Dashboard if visible
+        const dashboard = document.getElementById('results-summary-dashboard');
+        if (dashboard) {
+            dashboard.style.display = combined > 0 ? 'flex' : 'none';
+            if (combined > 0) {
+                const elDaArrear = document.getElementById('dash-da-arrear');
+                const elPayRevArrear = document.getElementById('dash-pay-rev-arrear');
+                const elArrear = document.getElementById('dash-total-arrear');
+
+                const newValDaArrear = "₹" + daTotal.toLocaleString('en-IN');
+                const newValPayRevArrear = "₹" + payRevTotal.toLocaleString('en-IN');
+                const newValTotalArrear = "₹" + combined.toLocaleString('en-IN');
+
+                if (window.updatePulse) {
+                    updatePulse(elDaArrear, newValDaArrear);
+                    updatePulse(elPayRevArrear, newValPayRevArrear);
+                    updatePulse(elArrear, newValTotalArrear);
+                } else {
+                    if (elDaArrear) elDaArrear.textContent = newValDaArrear;
+                    if (elPayRevArrear) elPayRevArrear.textContent = newValPayRevArrear;
+                    if (elArrear) elArrear.textContent = newValTotalArrear;
+                }
+            }
         }
     }
 
@@ -1712,15 +1748,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 // Update values with pulse animation only if changed
-                const updatePulse = (el, val) => {
-                    if (el && el.textContent !== val) {
-                        el.textContent = val;
-                        el.classList.remove('update-pulse');
-                        void el.offsetWidth; // trigger reflow
-                        el.classList.add('update-pulse');
-                    }
-                };
-
                 updatePulse(elFixed, newValFixed);
                 updatePulse(elCurrent, newValCurrent);
                 updatePulse(elDaArrear, newValDaArrear);
