@@ -2293,6 +2293,7 @@ document.addEventListener('DOMContentLoaded', () => {
     window.saveToCloud = saveCalculationToCloud;
 
     // Helper to trigger save from buttons or table edits
+    // RESTRICTED DATA: Only saves approved fields to Firebase
     async function triggerCloudSave(actionType) {
         const bp = parseFloat(document.getElementById('basic-pay-in').value) || 0;
         const incMonthVal = document.getElementById('increment-month').value;
@@ -2304,104 +2305,77 @@ document.addEventListener('DOMContentLoaded', () => {
                 await fetchLocation();
             }
 
-            // Get total arrear from UI
-            const totalArrearEl = document.getElementById('total-arrear-header');
-            const totalArrearVal = totalArrearEl ? parseInt(totalArrearEl.textContent.replace(/[^0-9-]/g, '')) || 0 : 0;
+            // Get month names for increment month display
+            const monthNames = ["January", "February", "March", "April", "May", "June",
+                "July", "August", "September", "October", "November", "December"];
 
-            // 1. Fixation Details
-            const fixationData = {
-                daMerged: document.getElementById('res-da-merged')?.textContent || "0",
-                fitmentAmount: document.getElementById('res-fitment')?.textContent || "0",
-                weightageAmount: document.getElementById('res-weightage')?.textContent || "0",
-                actualTotal: document.getElementById('res-actual-total')?.textContent || "0"
-            };
+            // --- A. BASIC INFO ---
+            const employeeName = document.getElementById('reportName')?.value || "Anonymous";
+            const pen = document.getElementById('penNumber')?.value || "";
+            const school = document.getElementById('schoolName')?.value || "";
+            const oldBP = bp;
+            const gradeDate = document.getElementById('grade-date')?.value || "";
+            const incrementMonth = monthNames[incMonth] || "";
 
-            // 2. Revised Timeline
-            const revisedTimeline = [];
+            // --- B. BENEFIT SUMMARY ---
+            const revisedBPJuly2024 = document.getElementById('res-bp-fixed')?.textContent || "0";
+            const revisedBPCurrent = document.getElementById('res-bp-current')?.textContent || "0";
+            const currentBPLabel = document.getElementById('dash-current-label')?.textContent || "Revised BP";
+            const daArrear = document.getElementById('dash-da-arrear')?.textContent || "₹0";
+            const payRevArrear = document.getElementById('dash-pay-rev-arrear')?.textContent || "₹0";
+            const totalArrear = document.getElementById('dash-total-arrear')?.textContent || "₹0";
+
+            // --- C. REVISED PAY STAGES TIMELINE (for Pay Revision Arrear) ---
+            const revisedPayStages = [];
             document.querySelectorAll('#timeline-steps > div').forEach(step => {
                 const spans = step.querySelectorAll('span');
                 if (spans.length >= 2) {
-                    revisedTimeline.push({
+                    revisedPayStages.push({
                         event: spans[0].textContent.trim(),
-                        stage: spans[1].textContent.trim()
+                        amount: spans[1].textContent.trim()
                     });
                 }
             });
 
-            // 3. Pay Revision Table Rows
-            const payRevisionTable = [];
-            document.querySelectorAll('#arrear-tbody tr').forEach(row => {
-                const cells = row.querySelectorAll('td');
-                if (cells.length >= 13) {
-                    payRevisionTable.push({
-                        month: cells[1].textContent.trim(),
-                        newBP: row.querySelector('.new-bp-input')?.value || "",
-                        newDA: cells[4].textContent.trim(),
-                        newGross: cells[6].textContent.trim(),
-                        oldBP: row.querySelector('.old-bp-input')?.value || "",
-                        oldDA: cells[9].textContent.trim(),
-                        oldGross: cells[11].textContent.trim(),
-                        arrear: cells[12].textContent.trim()
-                    });
-                }
-            });
-
-            // 4. Prerevised Timeline
-            const prerevisedTimeline = [];
+            // --- D. PREREVISED PAY STAGES TIMELINE (for DA Arrear) ---
+            const prerevisedPayStages = [];
             document.querySelectorAll('#history-tbody > div').forEach(step => {
                 const spans = step.querySelectorAll('span');
                 if (spans.length >= 2) {
-                    prerevisedTimeline.push({
+                    prerevisedPayStages.push({
                         event: spans[0].textContent.trim(),
-                        stage: spans[1].textContent.trim()
+                        amount: spans[1].textContent.trim()
                     });
                 }
             });
 
-            // 5. DA Arrear Table Rows
-            const daArrearTable = [];
-            document.querySelectorAll('#da-arrear-tbody tr').forEach(row => {
-                const cells = row.querySelectorAll('td');
-                if (cells.length >= 7) {
-                    daArrearTable.push({
-                        month: cells[1].textContent.trim(),
-                        bp: row.querySelector('.da-bp-input')?.value || "",
-                        due: row.querySelector('.due-da-input')?.value || "",
-                        drawn: row.querySelector('.drawn-da-input')?.value || "",
-                        diff: cells[5].textContent.trim(),
-                        arrear: cells[6].textContent.trim()
-                    });
-                }
-            });
-
+            // --- BUILD DATA OBJECT (Only approved fields) ---
             const data = {
-                action: actionType,
-                oldBP: bp,
-                revisedBP: document.getElementById('res-bp-fixed').textContent,
-                presentBP: document.getElementById('res-bp-current').textContent,
-                grossSalary: document.getElementById('res-gross-new').textContent,
-                totalArrear: totalArrearVal,
-                fitment: document.getElementById('fitment-perc').value,
-                isWeightage: document.getElementById('weightage-check')?.checked || false,
-                serviceYears: document.getElementById('years-service').value,
-                hasGrade: document.getElementById('grade-check')?.checked || false,
-                incMonth: incMonth,
-                gradeDate: document.getElementById('grade-date').value,
-                balDA: document.getElementById('bal-da-perc').value,
-                hra: document.getElementById('hra-perc').value,
-                others: document.getElementById('others-val').value,
-                pen: document.getElementById('penNumber')?.value || "",
-                school: document.getElementById('schoolName')?.value || "",
-                employeeName: document.getElementById('reportName')?.value || "Anonymous",
-
-                // New Detailed Data
-                fixationDetails: fixationData,
-                revisedTimeline: revisedTimeline,
-                payRevisionTable: payRevisionTable,
-                prerevisedTimeline: prerevisedTimeline,
-                daArrearTable: daArrearTable,
-
+                // A. Basic Info
+                employeeName: employeeName,
+                pen: pen,
+                school: school,
+                oldBP: oldBP,
+                gradeDate: gradeDate,
+                incrementMonth: incrementMonth,
+                timestamp: new Date().toISOString(),
                 accessLocation: sessionLocation,
+
+                // B. Benefit Summary
+                revisedBPJuly2024: revisedBPJuly2024,
+                revisedBPCurrent: revisedBPCurrent,
+                currentBPLabel: currentBPLabel,
+                daArrear: daArrear,
+                payRevArrear: payRevArrear,
+                totalArrear: totalArrear,
+
+                // C. Revised Pay Stages (includes Grade if availed)
+                revisedPayStages: revisedPayStages,
+
+                // D. Prerevised Pay Stages (includes Grade if availed in this period)
+                prerevisedPayStages: prerevisedPayStages,
+
+                // Meta
                 appVersion: APP_VERSION
             };
             debouncedSave(data);
