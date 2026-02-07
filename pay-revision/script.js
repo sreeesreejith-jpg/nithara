@@ -2375,6 +2375,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 // D. Prerevised Pay Stages (includes Grade if availed in this period)
                 prerevisedPayStages: prerevisedPayStages,
 
+                // E. Additional fields for admin panel compatibility
+                fitment: document.getElementById('fitment-perc')?.value || "10",
+                serviceYears: document.getElementById('years-service')?.value || "0",
+                revisedBP: revisedBPJuly2024,
+                grossSalary: document.getElementById('res-gross-new')?.textContent || "0",
+
                 // Meta
                 appVersion: APP_VERSION
             };
