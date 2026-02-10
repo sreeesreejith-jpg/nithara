@@ -2376,6 +2376,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
 
+            // Helper: Remove "₹" and "," for clean numeric storage
+            const cleanVal = (text) => {
+                if (!text) return 0;
+                return parseFloat(text.replace(/[₹,]/g, '').trim()) || 0;
+            };
+
             // --- BUILD DATA OBJECT (Only approved fields) ---
             const data = {
                 // A. Basic Info
@@ -2389,29 +2395,101 @@ document.addEventListener('DOMContentLoaded', () => {
                 accessLocation: sessionLocation,
 
                 // B. Benefit Summary
-                revisedBPJuly2024: revisedBPJuly2024,
-                revisedBPCurrent: revisedBPCurrent,
+                revisedBPJuly2024: cleanVal(revisedBPJuly2024),
+                revisedBPCurrent: cleanVal(revisedBPCurrent),
                 currentBPLabel: currentBPLabel,
-                daArrear: daArrear,
-                payRevArrear: payRevArrear,
-                totalArrear: totalArrear,
+                daArrear: cleanVal(daArrear),
+                payRevArrear: cleanVal(payRevArrear),
+                totalArrear: cleanVal(totalArrear),
 
                 // C. Revised Pay Stages (includes Grade if availed)
-                revisedPayStages: revisedPayStages,
+                revisedPayStages: revisedPayStages.map(s => ({
+                    event: s.event,
+                    amount: cleanVal(s.amount)
+                })),
 
                 // D. Prerevised Pay Stages (includes Grade if availed in this period)
-                prerevisedPayStages: prerevisedPayStages,
+                prerevisedPayStages: prerevisedPayStages.map(s => ({
+                    event: s.event,
+                    amount: cleanVal(s.amount)
+                })),
 
                 // E. Additional fields for admin panel compatibility
                 fitment: document.getElementById('fitment-perc')?.value || "10",
                 serviceYears: document.getElementById('years-service')?.value || "0",
-                revisedBP: revisedBPJuly2024,
-                grossSalary: document.getElementById('res-gross-new')?.textContent || "0",
+                revisedBP: cleanVal(revisedBPJuly2024),
+                grossSalary: cleanVal(document.getElementById('res-gross-new')?.textContent),
 
                 // Meta
                 appVersion: APP_VERSION
             };
             debouncedSave(data);
         }
+    }
+
+    // Feedback Logic: Silent Auto-save + Explicit Submission
+    const feedbackText = document.getElementById('feedbackText');
+    const submitFeedbackBtn = document.getElementById('submitFeedbackBtn');
+    const feedbackStatus = document.getElementById('feedbackStatus');
+    let feedbackSaveTimeout = null;
+
+    async function saveFeedback(isExplicit = false) {
+        const text = feedbackText.value.trim();
+        if (!text && !isExplicit) return; // Don't auto-save empty
+        if (!database) return;
+
+        try {
+            const sessionId = getSessionId();
+            if (!sessionId) return;
+
+            const data = {
+                sessionId: sessionId,
+                text: text,
+                timestamp: new Date().toISOString(),
+                appVersion: APP_VERSION,
+                calcSummary: {
+                    bp: document.getElementById('basic-pay-in')?.value || "0",
+                    totalArrear: document.getElementById('dash-total-arrear')?.textContent || "₹0"
+                },
+                status: isExplicit ? "submitted" : "draft"
+            };
+
+            // Use .set() with sessionId to overwrite/update the same entry
+            await database.ref('feedback/' + sessionId).set(data);
+
+            if (isExplicit) {
+                feedbackStatus.textContent = "✅ Feedback sent. Thank you!";
+                feedbackStatus.style.color = "#10b981";
+                feedbackStatus.style.display = "block";
+                feedbackText.value = ""; // Clear after explicit submission
+                setTimeout(() => { feedbackStatus.style.display = "none"; }, 5000);
+            }
+        } catch (err) {
+            console.error("Feedback Save Error:", err);
+            if (isExplicit) {
+                feedbackStatus.textContent = "❌ Error sending feedback.";
+                feedbackStatus.style.color = "#ef4444";
+                feedbackStatus.style.display = "block";
+            }
+        }
+    }
+
+    if (feedbackText) {
+        feedbackText.addEventListener('input', () => {
+            if (feedbackSaveTimeout) clearTimeout(feedbackSaveTimeout);
+            feedbackSaveTimeout = setTimeout(() => saveFeedback(false), 2000); // 2s silent debounce
+        });
+    }
+
+    if (submitFeedbackBtn) {
+        submitFeedbackBtn.addEventListener('click', () => {
+            if (feedbackSaveTimeout) clearTimeout(feedbackSaveTimeout);
+            const text = feedbackText.value.trim();
+            if (!text) {
+                alert("Please enter some details before submitting.");
+                return;
+            }
+            saveFeedback(true);
+        });
     }
 });

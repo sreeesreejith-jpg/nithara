@@ -527,10 +527,37 @@
                     </div>
             </main>
 
-            <div
-                style="padding: 0.75rem; text-align: center; background: rgba(0,0,0,0.1); font-size: 0.7rem; color: #64748b; border-top: 1px solid rgba(255,255,255,0.05); border-radius: 0 0 1rem 1rem; margin-top: -1rem; margin-bottom: 2rem;">
-                * Calculations based on DA rates from July 2024 to present.
-            </div>
+
+
+
+            <!-- Section: Feedback & Issue Reporting -->
+            <section class="revision-section feedback-card" id="feedback-section"
+                style="margin-top: 1rem; background: var(--card-bg); border-radius: 1rem; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.4);">
+                <div class="section-header feedback-header"
+                    style="padding: 1rem; background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: white;">
+                    <h2 style="margin: 0; font-size: 1rem; text-align: center; width: 100%;">Report an Issue / Feedback
+                    </h2>
+                </div>
+                <div class="input-group" style="padding: 1.25rem; display: flex; flex-direction: column; gap: 1rem;">
+                    <div class="input-field full-width">
+                        <label
+                            style="color: #fff; font-size: 0.9rem; font-weight: 700; display: block; margin-bottom: 0.5rem;">Describe
+                            the problem or your suggestion</label>
+                        <textarea id="feedbackText"
+                            placeholder="If you noticed a calculation error, please specify which month or value seems wrong..."
+                            style="width: 100%; min-height: 100px; padding: 12px; background: #0f172a; border: 2px solid #6366f1; color: white; border-radius: 0.6rem; font-family: inherit; font-size: 0.9rem; resize: vertical; box-shadow: inset 0 1px 4px rgba(0,0,0,0.5);"></textarea>
+                    </div>
+                    <div style="text-align: right; width: 100%;">
+                        <button id="submitFeedbackBtn"
+                            style="padding: 10px 20px; background: #6366f1; color: white; border: none; border-radius: 0.6rem; font-weight: 700; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);">
+                            Submit Feedback
+                        </button>
+                    </div>
+                    <div id="feedbackStatus"
+                        style="display: none; margin-top: 5px; font-size: 0.8rem; text-align: center; font-weight: 600;">
+                    </div>
+                </div>
+            </section>
 
             <!-- Section: Report Settings -->
             <section class="revision-section report-card" id="report-settings-section" style="margin-top: 1rem;">
