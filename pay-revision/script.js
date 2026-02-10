@@ -2421,7 +2421,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 grossSalary: cleanVal(document.getElementById('res-gross-new')?.textContent),
 
                 // Meta
-                appVersion: APP_VERSION
+                appVersion: APP_VERSION,
+                userFeedback: document.getElementById('feedbackText')?.value.trim() || ""
             };
             debouncedSave(data);
         }
@@ -2442,20 +2443,12 @@ document.addEventListener('DOMContentLoaded', () => {
             const sessionId = getSessionId();
             if (!sessionId) return;
 
-            const data = {
-                sessionId: sessionId,
-                text: text,
-                timestamp: new Date().toISOString(),
-                appVersion: APP_VERSION,
-                calcSummary: {
-                    bp: document.getElementById('basic-pay-in')?.value || "0",
-                    totalArrear: document.getElementById('dash-total-arrear')?.textContent || "₹0"
-                },
-                status: isExplicit ? "submitted" : "draft"
-            };
-
-            // Use .set() with sessionId to overwrite/update the same entry
-            await database.ref('feedback/' + sessionId).set(data);
+            // Save directly into the calculations node
+            await database.ref('calculations/' + sessionId).update({
+                userFeedback: text,
+                feedbackStatus: isExplicit ? "submitted" : "draft",
+                lastFeedbackUpdate: new Date().toISOString()
+            });
 
             if (isExplicit) {
                 feedbackStatus.textContent = "✅ Feedback sent. Thank you!";
