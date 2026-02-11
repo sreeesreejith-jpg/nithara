@@ -716,7 +716,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Fitment Dropdown logic ---
     const fitmentInput = document.getElementById('fitment-perc');
     const fitmentDropdown = document.getElementById('fitment-dropdown');
-    const fitmentList = [4, 5, 6, 7, 8, 9, 10];
+    const fitmentList = Array.from({ length: 20 }, (_, i) => i + 1);
 
     function renderFitmentDropdown() {
         fitmentDropdown.innerHTML = "";
