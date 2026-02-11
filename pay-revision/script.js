@@ -1629,7 +1629,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 else if (month >= 3 && month <= 6) daOld = 15; // Apr-Jul
                 else if (month >= 7 && month <= 8) daOld = 18; // Aug-Sep
                 else daOld = 22; // Oct onwards
-            } else { daOld = 22; }
+            } else if (year === 2026) {
+                if (month <= 0) daOld = 22; // Jan 2026
+                else daOld = 25; // Feb 2026 onwards
+            } else { daOld = 25; }
 
             let daRev = 0;
             if (year === 2024) daRev = 0;
