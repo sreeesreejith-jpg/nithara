@@ -477,6 +477,11 @@ footer {
     .calc-val {
         font-size: 0.85rem;
     }
+
+    /* Refine table cell padding on mobile */
+    table th, table td {
+        padding: 6px 2px !important;
+    }
 }
 
 input,

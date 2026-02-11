@@ -1509,13 +1509,19 @@ document.addEventListener('DOMContentLoaded', () => {
                         <input type="number" class="da-bp-input" value="${currentBp}" oninput="recalcDaRow(this)"
                             style="width: 75px; background: rgba(0,0,0,0.3); border: 1px solid #3b82f6; color: #fff; padding: 4px; border-radius: 4px; text-align: right; font-weight: bold; font-size: 0.75rem;">
                     </td>
-                    <td style="padding: 10px 5px; text-align: center;">
-                        <input type="number" class="due-da-input" value="${dueDA}" step="0.1" oninput="recalcDaRow(this)"
-                            style="width: 45px; background: rgba(0,0,0,0.3); border: 1px solid #3b82f6; color: #fff; padding: 4px; border-radius: 4px; text-align: center; font-size: 0.75rem;">
+                    <td style="padding: 10px 2px; text-align: center;">
+                        <div style="display: flex; align-items: center; justify-content: center; gap: 2px;">
+                            <input type="number" class="due-da-input" value="${dueDA}" step="0.1" oninput="recalcDaRow(this)"
+                                style="width: 42px; background: rgba(0,0,0,0.3); border: 1px solid #3b82f6; color: #fff; padding: 2px; border-radius: 4px; text-align: center; font-size: 0.75rem;">
+                            <span style="font-size: 0.65rem; color: #94a3b8;">%</span>
+                        </div>
                     </td>
-                    <td style="padding: 10px 5px; text-align: center;">
-                        <input type="number" class="drawn-da-input" value="${drawnDA}" step="0.1" oninput="recalcDaRow(this)"
-                            style="width: 45px; background: rgba(0,0,0,0.3); border: 1px solid #64748b; color: #fff; padding: 4px; border-radius: 4px; text-align: center; font-size: 0.75rem;">
+                    <td style="padding: 10px 2px; text-align: center;">
+                        <div style="display: flex; align-items: center; justify-content: center; gap: 2px;">
+                            <input type="number" class="drawn-da-input" value="${drawnDA}" step="0.1" oninput="recalcDaRow(this)"
+                                style="width: 42px; background: rgba(0,0,0,0.3); border: 1px solid #64748b; color: #fff; padding: 2px; border-radius: 4px; text-align: center; font-size: 0.75rem;">
+                            <span style="font-size: 0.65rem; color: #94a3b8;">%</span>
+                        </div>
                     </td>
                     <td style="padding: 10px 5px; text-align: right; font-weight: 700;">${diffDA.toFixed(1)}%</td>
                     <td style="padding: 10px 5px; text-align: right; color: #10b981; font-weight: 800; font-size: 0.8rem;">${arrearAmount.toLocaleString()}</td>
@@ -1667,9 +1673,12 @@ document.addEventListener('DOMContentLoaded', () => {
                            oninput="recalcPayRevRow(this)"
                            style="width: 70px; background: rgba(0,0,0,0.3); border: 1px solid #3b82f6; color: #fff; padding: 4px; border-radius: 4px; text-align: right; font-weight: bold;">
                     </td>
-                    <td style="padding: 8px 5px; text-align: right;">
-                        <input type="number" class="new-da-rate-input" value="${daRev}" step="0.1" oninput="recalcPayRevRow(this)"
-                           style="width: 45px; background: rgba(0,0,0,0.3); border: 1px solid #3b82f6; color: #fff; padding: 4px; border-radius: 4px; text-align: center; font-size: 0.75rem;">%
+                    <td style="padding: 8px 2px; text-align: right;">
+                        <div style="display: flex; align-items: center; justify-content: flex-end; gap: 2px;">
+                            <input type="number" class="new-da-rate-input" value="${daRev}" step="0.1" oninput="recalcPayRevRow(this)"
+                               style="width: 42px; background: rgba(0,0,0,0.3); border: 1px solid #3b82f6; color: #fff; padding: 2px; border-radius: 4px; text-align: center; font-size: 0.75rem;">
+                            <span style="font-size: 0.65rem; color: #94a3b8;">%</span>
+                        </div>
                     </td>
                     <td style="padding: 8px 5px; text-align: right; color: #3b82f6;">${newDAVal.toLocaleString()}</td>
                     <td style="padding: 8px 5px; text-align: right; color: #3b82f6;">${newHRAVal.toLocaleString()}</td>
@@ -1681,9 +1690,12 @@ document.addEventListener('DOMContentLoaded', () => {
                            oninput="recalcPayRevRow(this)"
                            style="width: 70px; background: rgba(0,0,0,0.3); border: 1px solid #94a3b8; color: #fff; padding: 4px; border-radius: 4px; text-align: right; font-size: 0.75rem;" >
                     </td>
-                    <td style="padding: 8px 5px; text-align: right;">
-                        <input type="number" class="old-da-rate-input" value="${daOld}" step="0.1" oninput="recalcPayRevRow(this)"
-                           style="width: 45px; background: rgba(0,0,0,0.3); border: 1px solid #94a3b8; color: #fff; padding: 4px; border-radius: 4px; text-align: center; font-size: 0.75rem;">%
+                    <td style="padding: 8px 2px; text-align: right;">
+                        <div style="display: flex; align-items: center; justify-content: flex-end; gap: 2px;">
+                            <input type="number" class="old-da-rate-input" value="${daOld}" step="0.1" oninput="recalcPayRevRow(this)"
+                               style="width: 42px; background: rgba(0,0,0,0.3); border: 1px solid #94a3b8; color: #fff; padding: 2px; border-radius: 4px; text-align: center; font-size: 0.75rem;">
+                            <span style="font-size: 0.65rem; color: #94a3b8;">%</span>
+                        </div>
                     </td>
                     <td style="padding: 8px 5px; text-align: right; color: #94a3b8;">${oldDAVal.toLocaleString()}</td>
                     <td style="padding: 8px 5px; text-align: right; color: #94a3b8;">${oldHRAVal.toLocaleString()}</td>
