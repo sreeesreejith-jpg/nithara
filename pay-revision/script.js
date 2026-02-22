@@ -1,7 +1,7 @@
 // Pay Revision Script v1.7
 // Firebase Config for Nithara
 const firebaseConfig = {
-    apiKey: "AIzaSyB3D98SMCiI2eAKuz6T-yWOfU-7_PuN75U",
+    apiKey: "AIzaSyCVEMMHwrkRmvsr14Dm2he9D6PVm5CfFzk",
     authDomain: "nithara-e398a.firebaseapp.com",
     databaseURL: "https://nithara-e398a-default-rtdb.firebaseio.com",
     projectId: "nithara-e398a",
